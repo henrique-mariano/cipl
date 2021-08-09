@@ -1,6 +1,6 @@
 %option nounput noinput noyywrap
-
 %{
+    // Autor: Henrique Mendes de Freitas Mariano - 17/0012280
     #include <stdio.h>
     #include <stdlib.h>
 %}
