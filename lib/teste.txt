@@ -1,0 +1,3 @@
+select * 
+fRoM emp 
+WHeRE id = 1;
