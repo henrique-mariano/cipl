@@ -1,0 +1,10 @@
+// main
+int main(){
+    int variavel_auxiliar;
+    variavel_auxiliar = 0;
+    if (variavel_auxiliar > 2){
+        printf("Passou\n");
+    } else {
+        printf("Não passou\n");
+    }
+}

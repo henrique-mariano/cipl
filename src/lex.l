@@ -24,8 +24,8 @@ COMMAND_INPUT_OUTPUT    read|write|writeln
 DELIM                   [ \t]
 WS                      {DELIM}
 LETTER                  [A-Za-z_]
-WORD                    [A-Za-z0-9_]+
-ID                      {LETTER}({LETTER}|{DIGIT})*
+WORD                    [A-Za-z0-9_]
+ID                      {LETTER}({WORD})*
 BRACKET                 [\[\]{}\(\)]
 COMMA                   [,;]
 
@@ -149,6 +149,8 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 
 . {
     error++;
+    printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("Unexpected token: %s || Error count: %d\n", yytext, error);
+    num_col += yyleng;
 }
 %%

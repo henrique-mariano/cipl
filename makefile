@@ -1,0 +1,27 @@
+SRC= ./src
+
+FLEXFILES= $(SRC)/lex.l
+
+CFILES= $(SRC)/lex.yy.c
+
+FLAGS= -lfl
+
+ifeq ($(OS), Windows_NT)
+NAME= cipllex
+else
+NAME= cipllex.out
+endif
+
+all: flex main
+
+flex: $(FLEXFILES)
+	flex $(FLEXFILES)
+
+main: $(OFILES)
+	gcc -o $(NAME) -O $(CFILES) $(FLAGS)
+clean:
+ifeq ($(OS), Windows_NT)
+	rm *.o
+else
+	rm *.o
+endif

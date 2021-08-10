@@ -507,9 +507,9 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "lex.l"
+#line 1 "./src/lex.l"
 #define YY_NO_INPUT 1
-#line 4 "lex.l"
+#line 4 "./src/lex.l"
     // Autor: Henrique Mendes de Freitas Mariano - 17/0012280
     #include <stdio.h>
     #include <stdlib.h>
@@ -731,7 +731,7 @@ YY_DECL
 		}
 
 	{
-#line 34 "lex.l"
+#line 34 "./src/lex.l"
 
 #line 737 "lex.yy.c"
 
@@ -792,7 +792,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 35 "lex.l"
+#line 35 "./src/lex.l"
 {
     num_col += yyleng;
 }
@@ -800,7 +800,7 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 39 "lex.l"
+#line 39 "./src/lex.l"
 {
     num_line += yyleng;
     num_col = 1;
@@ -808,12 +808,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 44 "lex.l"
+#line 44 "./src/lex.l"
 {}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 46 "lex.l"
+#line 46 "./src/lex.l"
 {
     printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("Type: %s\n", yytext);
@@ -822,7 +822,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 52 "lex.l"
+#line 52 "./src/lex.l"
 {
     printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("Constant integer: %s\n", yytext);
@@ -831,7 +831,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 58 "lex.l"
+#line 58 "./src/lex.l"
 {
     printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("Constant real: %s\n", yytext);
@@ -840,7 +840,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 64 "lex.l"
+#line 64 "./src/lex.l"
 {
     printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("String: %s\n", yytext);
@@ -849,7 +849,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 70 "lex.l"
+#line 70 "./src/lex.l"
 {
     printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("Arithmetic operation: %s\n", yytext);
@@ -858,7 +858,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 76 "lex.l"
+#line 76 "./src/lex.l"
 {
     printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("Logic operation: %s\n", yytext);
@@ -867,7 +867,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 82 "lex.l"
+#line 82 "./src/lex.l"
 {
     printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("Relational operation: %s\n", yytext);
@@ -876,7 +876,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 88 "lex.l"
+#line 88 "./src/lex.l"
 {
     printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("Flow control command: %s\n", yytext);
@@ -885,7 +885,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 94 "lex.l"
+#line 94 "./src/lex.l"
 {
     printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("IN/OUT operation: %s\n", yytext);
@@ -894,7 +894,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 100 "lex.l"
+#line 100 "./src/lex.l"
 {
     printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("ID: %s\n", yytext);
@@ -903,7 +903,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 106 "lex.l"
+#line 106 "./src/lex.l"
 {
     switch(yytext[0]){
         case '[':
@@ -929,7 +929,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 129 "lex.l"
+#line 129 "./src/lex.l"
 {
     switch(yytext[0]){
         case ',':
@@ -947,7 +947,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 144 "lex.l"
+#line 144 "./src/lex.l"
 {
     printf("Line: %d || Column: %d || ", num_line, num_col);
     printf("Equal: %s\n", yytext);
@@ -956,7 +956,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 150 "lex.l"
+#line 150 "./src/lex.l"
 {
     error++;
     printf("Line: %d || Column: %d || ", num_line, num_col);
@@ -966,7 +966,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 156 "lex.l"
+#line 156 "./src/lex.l"
 ECHO;
 	YY_BREAK
 #line 973 "lex.yy.c"
@@ -1937,6 +1937,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 156 "lex.l"
+#line 156 "./src/lex.l"
 
 
