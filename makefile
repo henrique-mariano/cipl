@@ -2,7 +2,7 @@ SRC= ./src
 
 FLEXFILES= $(SRC)/lex.l
 
-CFILES= $(SRC)/lex.yy.c
+CFILES= lex.yy.c
 
 FLAGS= -lfl
 
@@ -21,7 +21,7 @@ main: $(OFILES)
 	gcc -o $(NAME) -O $(CFILES) $(FLAGS)
 clean:
 ifeq ($(OS), Windows_NT)
-	rm *.o
+	rm *.yy.c
 else
-	rm *.o
+	rm *.yy.c
 endif
