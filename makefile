@@ -4,7 +4,7 @@ FLEXFILES= $(SRC)/lex.l
 
 CFILES= lex.yy.c
 
-FLAGS= -lfl
+FLAGS= -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
 
 ifeq ($(OS), Windows_NT)
 NAME= cipllex

@@ -12,7 +12,7 @@ TYPES                   "int"|"float"|"int list"|"float list"
 
 DIGIT                   [0-9]
 CONSTANT_INTEGER        -?([1-9]{DIGIT}*|0)
-CONSTANT_REAL           {CONSTANT_INTEGER}+(\.{DIGIT}+)?(E[+-]?{DIGIT}+)?
+CONSTANT_REAL           {CONSTANT_INTEGER}+(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?
 STRING                  \"([^\n"\\]|(\\.))*\"
 
 OP_BINARY_ARITHMETIC    "+"|"-"|"*"|"/"
@@ -21,7 +21,7 @@ OP_BINARY_RELATIONAL    "<"|"<="|">"|">="|"=="|"!="
 COMMAND_FLOW_CONTROL    if|else|for|return
 COMMAND_INPUT_OUTPUT    read|write|writeln
 
-DELIM                   [ \t]
+DELIM                   [ \t\r]
 WS                      {DELIM}
 LETTER                  [A-Za-z_]
 WORD                    [A-Za-z0-9_]
@@ -154,3 +154,23 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
 }
 %%
+
+int main(int argc, char **argv){
+    if(argc < 2){
+        printf("Error: É necessário informar o caminho do arquivo.\n");
+        return 0;
+    }
+
+    FILE *fp = fopen(argv[1], "r");
+    if(!fp){
+        printf("Error: Não foi possível abrir o arquivo\n");
+        return 0;
+    }
+
+    yyin = fp;
+    yylex();
+    fclose(yyin);
+    yylex_destroy();
+    
+    return 0;
+}
