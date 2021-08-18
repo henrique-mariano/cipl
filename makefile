@@ -7,9 +7,9 @@ CFILES= lex.yy.c
 FLAGS= -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
 
 ifeq ($(OS), Windows_NT)
-NAME= cipllex
+NAME= tradutor
 else
-NAME= cipllex.out
+NAME= tradutor
 endif
 
 all: flex main

@@ -1932,13 +1932,13 @@ void yyfree (void * ptr )
 
 int main(int argc, char **argv){
     if(argc < 2){
-        printf("Error: É necessário informar o caminho do arquivo.\n");
+        printf("Error: It is necessary to inform the file path\n");
         return 0;
     }
 
     FILE *fp = fopen(argv[1], "r");
     if(!fp){
-        printf("Error: Não foi possível abrir o arquivo\n");
+        printf("Error: Unable to open file\n");
         return 0;
     }
 
