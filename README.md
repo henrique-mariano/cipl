@@ -10,4 +10,4 @@ Foi disponibilizado um arquivo makefile para a compilação, mas caso seja neces
 
 Para a execução:
 
-> ./tradutor <<arquivo-teste>>
+> ./tradutor arquivo-teste
