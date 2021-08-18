@@ -6,14 +6,8 @@ Foi disponibilizado um arquivo makefile para a compilação, mas caso seja neces
 
 > $ flex ./src/lex.l
 >
-> $ gcc -o cipllex.out -O lex.yy.c -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
+> $ gcc -o tradutor -O lex.yy.c -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
 
 Para a execução:
 
-> ./cipllex.out tests/teste\_correto.txt
->
-> ./cipllex.out tests/teste\_correto2.txt
->
-> ./cipllex.out tests/teste\_incorreto.txt
->
-> ./cipllex.out tests/teste\_incorreto2.txt
+> ./tradutor <<arquivo-teste>>
