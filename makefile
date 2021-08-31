@@ -2,7 +2,9 @@ SRC= ./src
 
 FLEXFILES= $(SRC)/lex.l
 
-CFILES= lex.yy.c
+BISONFILES= $(SRC)/bison.y
+
+CFILES= bison.tab.c lex.yy.c
 
 FLAGS= -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
 
@@ -12,7 +14,11 @@ else
 NAME= tradutor
 endif
 
-all: flex main
+all: bison flex main
+
+bison: $(BISONFILES)
+	bison $(BISONFILES) --defines="lib/bison.h"
+
 
 flex: $(FLEXFILES)
 	flex $(FLEXFILES)
@@ -24,4 +30,5 @@ ifeq ($(OS), Windows_NT)
 	rm *.yy.c
 else
 	rm *.yy.c
+	rm *.tab.c
 endif
