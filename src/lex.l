@@ -10,7 +10,7 @@
     
     #include "lib/bison.h"
 
-    int num_line = 1, num_col = 1, error = 0;
+    int num_line = 1, num_col = 1, error = 0, scope = 0;
 
     void print_token(char *type);
 %}
@@ -25,9 +25,13 @@ CONSTANT_REAL           {CONSTANT_INTEGER}+(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?
 STRING                  \"([^\n"\\]|(\\.))*\"
 
 OP_BINARY_ARITHMETIC    "+"|"-"|"*"|"/"
-OP_LOGIC                "!"|"||"|"&&"
+OP_LOGIC                "||"|"&&"
 OP_BINARY_RELATIONAL    "<"|"<="|">"|">="|"=="|"!="
-OP_UNARY_LIST           "!"|"?"|"%"
+
+OP_BINARY               {OP_BINARY_ARITHMETIC}|{OP_BINARY_RELATIONAL}|{OP_LOGIC}|{OP_BINARY_LIST}
+
+OP_UNARY                "!"|"?"|"%"|"+"|"-"
+
 OP_BINARY_LIST          "<<"|">>"|":"
 COMMAND_FLOW_CONTROL    if|else|for|return|NIL
 COMMAND_INPUT_OUTPUT    read|write|writeln
@@ -59,7 +63,6 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            printf("kkteste\n");
             yylval.name = strdup(yytext);
             return INT_TOKEN;
         case 'f':
@@ -116,8 +119,6 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     if(DEBUG_LEX == 1) print_token("Logic operation");
     num_col += yyleng;
     switch(yytext[0]){
-        case '!':
-            return NEQUAL_TOKEN;
         case '|':
             return OR_TOKEN;
         case '&':
@@ -128,72 +129,115 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 {OP_BINARY_RELATIONAL} {
     if(DEBUG_LEX == 1) print_token("Relational operation");
     num_col += yyleng;
-    return OP_BINARY_RELATIONAL_TOKEN;
+    switch(yytext[0]){
+        case '<':
+        case '>':
+            return LE_GR_TOKEN;
+        case '=':
+        case '!':
+            return EQ_EXC_TOKEN;
+    }
 }
 
-{OP_UNARY_LIST} {
+{OP_UNARY} {
     if(DEBUG_LEX == 1) print_token("Unary operation list");
     num_col += yyleng;
-    return OP_UNARY_LIST_TOKEN;
+    switch(yytext[0]){
+        case '!':
+            return EXCLAMATION_TOKEN;
+        case '?':
+            return QUESTION_TOKEN;
+        case '%':
+            return PERCENTAGE_TOKEN;
+        case '+':
+        case '-':
+            return ADD_MIN_TOKEN;
+    }
 }
 
 {OP_BINARY_LIST} {
     if(DEBUG_LEX == 1) print_token("Binary operation list");
     num_col += yyleng;
-    return OP_BINARY_LIST_TOKEN
+    switch(yytext[0]){
+        case '>':
+            return MAP_TOKEN;
+        case '<':
+            return FILTER_TOKEN;
+        case ':':
+            return CONSTRUCTOR_LIST_TOKEN;
+    }
 }
 
 {COMMAND_FLOW_CONTROL} {
     if(DEBUG_LEX == 1) print_token("Flow control command");
     num_col += yyleng;
+    switch(yytext[0]){
+        case 'i':
+            return IF_TOKEN;
+        case 'e':
+            return ELSE_TOKEN;
+        case 'f':
+            return FOR_TOKEN;
+        case 'r':
+            return RETURN_TOKEN;
+        case 'N':
+            return NIL_TOKEN;
+    }
 }
 
 {COMMAND_INPUT_OUTPUT} {
     if(DEBUG_LEX == 1) print_token("IN/OUT operation");
     num_col += yyleng;
+    switch(yytext[0]){
+        case 'r':
+            return READ_TOKEN;
+        case 'w':
+            return WRITE_TOKEN;
+    }
 }
 
 {ID} {
     if(DEBUG_LEX == 1) print_token("ID");
     num_col += yyleng;
+    return ID_TOKEN;
 }
 
 {BRACKET} {
+    num_col += yyleng;
     switch(yytext[0]){
         case '[':
         case ']':
             if(DEBUG_LEX == 1) print_token("Square bracket");
-            num_col += yyleng;
             break;
         case '{':
+            scope++;
+            break;
         case '}':
             if(DEBUG_LEX == 1) print_token("Curly bracket");
-            num_col += yyleng;
             break;
         case '(':
         case ')':
             if(DEBUG_LEX == 1) print_token("Parenthesis");
-            num_col += yyleng;
             break;
     }
 }
 
 {COMMA} {
+    num_col += yyleng;
     switch(yytext[0]){
         case ',':
             if(DEBUG_LEX == 1) print_token("Comma");
-            num_col += yyleng;
             break;
         case ';':
             if(DEBUG_LEX == 1) print_token("Semicolon");
-            num_col += yyleng;
             break;
     }
 }
 
 = {
-    if(DEBUG_LEX == 1) print_token("Equal");
+    if(DEBUG_LEX == 1) print_token("Assign");
     num_col += yyleng;
+    return ASSIGN_TOKEN
 }
 
 . {
