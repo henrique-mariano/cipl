@@ -147,13 +147,6 @@ compoundStatement:
     }
 ;
 
-codeBlock:
-    statement
-    | variableDeclare {
-        $$ = $1;
-    }
-;
-
 optListCodeBlock:
     %empty {
         $$ = NULL;
@@ -172,6 +165,13 @@ listCodeBlock:
     | codeBlock {
         $$ = create_astnode_context(AST_STATE_FLOW, "code block");
         insert_kid($1, $$);
+    }
+;
+
+codeBlock:
+    statement
+    | variableDeclare {
+        $$ = $1;
     }
 ;
 
@@ -204,6 +204,12 @@ interationExpression:
 returnExpression:
     RETURN_TOKEN
     | RETURN_TOKEN expression
+    | RETURN_TOKEN id
+;
+
+optExpression:
+    %empty
+    | expression
 ;
 
 expression:
@@ -213,17 +219,12 @@ expression:
     | constant
 ;
 
-optExpression:
-    %empty
-    | expression
-;
-
 binArith:
     expression ASSIGN_TOKEN expression
     | expression OR_TOKEN expression
     | expression AND_TOKEN expression
-    | expression LE_GR_TOKEN expression
     | expression EQ_EXC_TOKEN expression
+    | expression LE_GR_TOKEN expression
     | expression ADD_MIN_TOKEN expression
     | expression MUL_DIV_TOKEN expression
 ;

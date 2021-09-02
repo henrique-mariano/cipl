@@ -16,7 +16,7 @@ else
 NAME= tradutor
 endif
 
-all: bison flex main
+all: flex bison main
 
 bison: $(BISONFILES)
 	bison $(BISONFILES) --defines="lib/bison.h" -Wcounterexamples

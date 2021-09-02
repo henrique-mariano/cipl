@@ -6,7 +6,9 @@ Foi disponibilizado um arquivo makefile para a compilação, mas caso seja neces
 
 > $ flex ./src/lex.l
 >
-> $ gcc -o tradutor -O lex.yy.c -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
+> bison ./src/bison.y --defines="lib/bison.h"  -Wcounterexamples
+>
+> $ gcc -o tradutor -O bison.tab.c lex.yy.c src/tree.c src/astcontext.c -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
 
 Para a execução:
 
@@ -14,6 +16,7 @@ Para a execução:
 
 ## TODO
 
+- [] Completar gramática
 - [X] Estrutura de nó
 - [] Árvore sintática abstrata
 - [] Lidar com contextos na árvore
