@@ -95,7 +95,7 @@ functionDeclare:
     type id '(' optListParams ')' compoundStatement {
         /* Lidar com contextos */
         $$ = create_astnode_context(AST_FUNC_DECLARE, "func declare");
-        printf("FUNC DECLARE\n");
+        // printf("FUNC DECLARE\n");
         insert_kid($1, $$);
         insert_kid($2, $$);
 
@@ -111,7 +111,7 @@ optListParams:
         $$ = NULL;
     }
     | listParams {
-        printf("Lista de params\n");
+        // printf("Lista de params\n");
         $$ = create_astnode_context(AST_PARAM, "listParam");
         /* Retira os elementos da lista auxiliar 
         e depois adiciona como filhos ao no listParam */
@@ -140,7 +140,7 @@ param:
 
 compoundStatement:
     '{' optListCodeBlock '}' {
-        printf("CompoundStatement\n");
+        // printf("CompoundStatement\n");
         $$ = create_astnode_context(AST_STATE_FLOW, "compound statement");
         if($2)
             insert_kid($2, $$);
@@ -161,10 +161,13 @@ listCodeBlock:
         $$ = create_astnode_context(AST_STATE_FLOW, "code block");
         insert_kid($1, $$);
         insert_kid($2, $$);
+        // insert_kid(pop_element_list(node_aux), $$);
+        // insert_kid(pop_element_list(node_aux), $$);
     }
     | codeBlock {
         $$ = create_astnode_context(AST_STATE_FLOW, "code block");
         insert_kid($1, $$);
+        // insert_kid(pop_element_list(node_aux), $$);
     }
 ;
 
@@ -178,10 +181,12 @@ codeBlock:
 statement:
     flowExpression {
         $$ = create_astnode_context(AST_STATE_FLOW, "statement flow");
+        // insert_list_element(node_aux, $$);
     }
     | compoundStatement {
         // printf("Compound Statement\n");
         $$ = create_astnode_context(AST_STATE_COMPOUND, "statement compound");
+        // insert_list_element(node_aux, $$);
     }
     | expression ';'
 ;
@@ -201,10 +206,8 @@ interationExpression:
     FOR_TOKEN '(' optExpression ';' optExpression ';' optExpression ')' statement
 ;
 
-returnExpression:
-    RETURN_TOKEN
-    | RETURN_TOKEN expression
-    | RETURN_TOKEN id
+returnExpression: 
+    RETURN_TOKEN expression
 ;
 
 optExpression:
@@ -217,6 +220,9 @@ expression:
     | listArith
     | unaArith
     | constant
+    | funcCall
+    | id
+    | '(' expression ')'
 ;
 
 binArith:
@@ -250,14 +256,14 @@ constant:
 
 constantInteger:
     CONSTANT_INTEGER_TOKEN {
-        printf("CONSTANT_INTEGER_TOKEN\n");
+        // printf("CONSTANT_INTEGER_TOKEN\n");
         // insert_kid($1, root);
     }
 ;
 
 constantReal:
     CONSTANT_REAL_TOKEN {
-        printf("CONSTANT_REAL_TOKEN\n");
+        // printf("CONSTANT_REAL_TOKEN\n");
         // insert_kid($1, root);
     }
 ;
@@ -268,9 +274,13 @@ constantNIL:
     }
 ;
 
+funcCall:
+    id '(' optExpression ')'
+;
+
 id:
     ID_TOKEN {
-        printf("ID_TOKEN\n");
+        // printf("ID_TOKEN\n");
         // insert_kid($1, root);
     }
     | READ_TOKEN {
@@ -283,20 +293,20 @@ id:
 
 type:
     INT_TOKEN {
-        printf("INT_TOKEN\n");
+        // printf("INT_TOKEN\n");
         // printf("contexto: %s\n", $$->context->name);
         // insert_kid($1, root);
     }
     | FLOAT_TOKEN {
-        printf("FLOAT_TOKEN\n");
+        // printf("FLOAT_TOKEN\n");
         // insert_kid($1, root);
     }
     | INT_LIST_TOKEN {
-        printf("INT_LIST_TOKEN\n");
+        // printf("INT_LIST_TOKEN\n");
         // insert_kid($1, root);
     }
     | FLOAT_LIST_TOKEN {
-        printf("INT_LIST_TOKEN\n");
+        // printf("INT_LIST_TOKEN\n");
         // insert_kid($1, root);
     }
 ;

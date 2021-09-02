@@ -1,8 +1,7 @@
+@
+
+int x;
+
 int main(){
-    int variavel_auxiliar;
-    variavel_auxiliar = 0;
-    if (variavel_auxiliar > 2){
-        $variavel_auxiliar = "aaaaa";
-    }
-    @ #
+    return;
 }

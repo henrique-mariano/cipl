@@ -12,7 +12,7 @@ typedef enum TypeSimbol{
 
 typedef struct Symbol{
     int id;
-    char name[255];
+    char *name;
     double value;
     int line;
     int column;

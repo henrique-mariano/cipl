@@ -16,7 +16,7 @@ Para a execução:
 
 ## TODO
 
-- [] Completar gramática
+- [X] Completar gramática
 - [X] Estrutura de nó
 - [] Árvore sintática abstrata
 - [] Lidar com contextos na árvore

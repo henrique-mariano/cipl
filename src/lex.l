@@ -228,7 +228,7 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 . {
     error++;
     printf("Line: %d || Column: %d || ", num_line, num_col);
-    printf("Unexpected token: %s || Error count: %d\n", yytext, error);
+    printf("Unexpected character: %s || Error count: %d\n", yytext, error);
     num_col += yyleng;
 }
 %%

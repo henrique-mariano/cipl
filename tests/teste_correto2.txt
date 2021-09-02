@@ -1,10 +1,13 @@
 // main
+int list a;
+
 int main(){
     int variavel_auxiliar;
-    variavel_auxiliar = 0;
+    int x;
+    x = 2;
     if (variavel_auxiliar > 2){
-        printf("Passou\n");
+        a = 2 : a;
     } else {
-        printf("Não passou\n");
+        x = x + 2;
     }
 }
