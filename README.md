@@ -11,3 +11,9 @@ Foi disponibilizado um arquivo makefile para a compilação, mas caso seja neces
 Para a execução:
 
 > ./tradutor arquivo-teste
+
+## TODO
+
+- [] Árvore de contexto
+- [] Lidar com contextos na árvore
+- [] Tabela de símbolos

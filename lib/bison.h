@@ -57,23 +57,38 @@ extern int yydebug;
     INT_TOKEN = 258,               /* INT_TOKEN  */
     FLOAT_TOKEN = 259,             /* FLOAT_TOKEN  */
     INT_LIST_TOKEN = 260,          /* INT_LIST_TOKEN  */
-    FLOAT_LIST_TOKEN = 261         /* FLOAT_LIST_TOKEN  */
+    FLOAT_LIST_TOKEN = 261,        /* FLOAT_LIST_TOKEN  */
+    ID_TOKEN = 262,                /* ID_TOKEN  */
+    READ_TOKEN = 263,              /* READ_TOKEN  */
+    WRITE_TOKEN = 264,             /* WRITE_TOKEN  */
+    NIL_TOKEN = 265,               /* NIL_TOKEN  */
+    CONSTANT_REAL_TOKEN = 266,     /* CONSTANT_REAL_TOKEN  */
+    CONSTANT_INTEGER_TOKEN = 267,  /* CONSTANT_INTEGER_TOKEN  */
+    MUL_DIV_TOKEN = 268,           /* MUL_DIV_TOKEN  */
+    EXCLAMATION_TOKEN = 269,       /* EXCLAMATION_TOKEN  */
+    QUESTION_TOKEN = 270,          /* QUESTION_TOKEN  */
+    PERCENTAGE_TOKEN = 271,        /* PERCENTAGE_TOKEN  */
+    MAP_TOKEN = 272,               /* MAP_TOKEN  */
+    FILTER_TOKEN = 273,            /* FILTER_TOKEN  */
+    CONSTRUCTOR_LIST_TOKEN = 274,  /* CONSTRUCTOR_LIST_TOKEN  */
+    ADD_MIN_TOKEN = 275,           /* ADD_MIN_TOKEN  */
+    ASSIGN_TOKEN = 276,            /* ASSIGN_TOKEN  */
+    OR_TOKEN = 277,                /* OR_TOKEN  */
+    AND_TOKEN = 278,               /* AND_TOKEN  */
+    EQ_EXC_TOKEN = 279,            /* EQ_EXC_TOKEN  */
+    LE_GR_TOKEN = 280,             /* LE_GR_TOKEN  */
+    IF_TOKEN = 281,                /* IF_TOKEN  */
+    ELSE_TOKEN = 282,              /* ELSE_TOKEN  */
+    FOR_TOKEN = 283,               /* FOR_TOKEN  */
+    RETURN_TOKEN = 284,            /* RETURN_TOKEN  */
+    STRING_TOKEN = 285             /* STRING_TOKEN  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
-{
-#line 20 "./src/bison.y"
-
-    char *name;
-
-#line 74 "lib/bison.h"
-
-};
-typedef union YYSTYPE YYSTYPE;
+typedef struct AstNode* YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

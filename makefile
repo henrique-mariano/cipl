@@ -6,7 +6,7 @@ FLEXFILES= $(SRC)/lex.l
 
 BISONFILES= $(SRC)/bison.y
 
-CFILES= bison.tab.c lex.yy.c
+CFILES= bison.tab.c lex.yy.c src/tree.c src/astcontext.c
 
 FLAGS= -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
 

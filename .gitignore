@@ -52,3 +52,8 @@ Mkfile.old
 dkms.conf
 
 tradutor
+teste_ed.c
+
+# .vscode
+
+.vscode/

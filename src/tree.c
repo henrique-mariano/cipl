@@ -1,4 +1,5 @@
 #include "../lib/tree.h"
+#include "../lib/astcontext.h"
 
 Element* create_element(void *value){
     Element *elemento = (Element *) malloc(sizeof(Element));
@@ -8,14 +9,47 @@ Element* create_element(void *value){
     return elemento;
 }
 
-void free_element(Element *elemento){
-    free(elemento->value);
+void free_element(Element *elemento, void (*callback)(Element *)){
+    if(callback){
+        callback(elemento);
+    } else {
+        free(elemento->value);
+        elemento = NULL;
+    }
     free(elemento);
-    elemento = NULL;
 }
 
-void print_element(Element *elemento){
-    printf("%d ->", *((int *) elemento->value) );
+void* pop_element_list(List *lista){
+    Element *first = lista->first;
+    Element *past = first;
+
+    void *value;
+
+    if(lista->size == 1){
+        lista->first = NULL;
+    } else {
+
+        while(first->next){
+            past = first;
+            first = first->next;
+        }
+
+        past->next = NULL;
+    }
+    
+    lista->size--;
+    value = first->value;
+    free(first);
+    
+    return value;
+}
+
+void print_element(AstNode *elemento){
+    printf("%s ->", elemento->context->name);
+}
+
+void delete_list_astnode(Element *elemento){
+    delete_astnode(elemento->value);
 }
 
 List* create_list(){
@@ -50,24 +84,24 @@ void print_list(List *lista){
     }
 
     while(aux != NULL){
-        print_element(aux);
+        print_element((AstNode *) aux->value);
         aux = aux->next;
     }
     printf("\n");
 }
 
-void delete_list(List *lista){
+void delete_list(List *lista, void (*callback)(Element *)){
     Element *current = lista->first;
     Element *next;
     while(current != NULL){
         next = current->next;
-        free_element(current);
+        free_element(current, callback);
         current = next;
     }
     free(lista);
 }
 
-AstNode* create_AstNode(AstContext *context){
+AstNode* create_astnode(AstContext *context){
     AstNode *no = (AstNode *) malloc(sizeof(AstNode));
 
     no->context = context;
@@ -82,17 +116,11 @@ void insert_kid(AstNode *kid, AstNode *no){
     insert_list_element(no->kids, kid);
 }
 
-void delete_AstNode(AstNode *no){
-    Element *first_son = no->kids->first;
-    Element *post;
-    while(first_son != NULL){
-        delete_AstNode(first_son->value);
-        post = first_son;
-        first_son = first_son->next;
-        free(post);
-    }
-    free(no->kids);
-    free(no->context); // Adaptar funcao para liberar o contexto
+void delete_astnode(AstNode *no){
+    if(!no)
+        return;
+    free_astcontext(no->context);
+    delete_list(no->kids, delete_list_astnode);
     free(no);
 }
 

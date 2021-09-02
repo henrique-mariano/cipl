@@ -9,6 +9,8 @@
     #include <string.h>
     
     #include "lib/bison.h"
+    #include "lib/tree.h"
+    #include "lib/astcontext.h"
 
     int num_line = 1, num_col = 1, error = 0, scope = 0;
 
@@ -63,10 +65,10 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval.name = strdup(yytext);
+            yylval = create_astnode_context(AST_TYPE, yytext);
             return INT_TOKEN;
         case 'f':
-            yylval.name = strdup(yytext);
+            yylval = create_astnode_context(AST_TYPE, yytext);
             return FLOAT_TOKEN;
     }
 }
@@ -76,10 +78,10 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval.name = strdup(yytext);
+            yylval = create_astnode_context(AST_TYPE, yytext);
             return INT_LIST_TOKEN;
         case 'f':
-            yylval.name = strdup(yytext);
+            yylval = create_astnode_context(AST_TYPE, yytext);
             return FLOAT_LIST_TOKEN;
     }
 }
@@ -87,12 +89,14 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 {CONSTANT_INTEGER} {
     if(DEBUG_LEX == 1) print_token("Constant integer");
     num_col += yyleng;
+    yylval = create_astnode_context(AST_CONSTANT, yytext);
     return CONSTANT_INTEGER_TOKEN;
 }
 
 {CONSTANT_REAL} {
     if(DEBUG_LEX == 1) print_token("Constant real");
     num_col += yyleng;
+    yylval = create_astnode_context(AST_CONSTANT, yytext);
     return CONSTANT_REAL_TOKEN;
 }
 
@@ -199,45 +203,26 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 {ID} {
     if(DEBUG_LEX == 1) print_token("ID");
     num_col += yyleng;
+    yylval = create_astnode_context(AST_ID, yytext);
     return ID_TOKEN;
 }
 
 {BRACKET} {
     num_col += yyleng;
-    switch(yytext[0]){
-        case '[':
-        case ']':
-            if(DEBUG_LEX == 1) print_token("Square bracket");
-            break;
-        case '{':
-            scope++;
-            break;
-        case '}':
-            if(DEBUG_LEX == 1) print_token("Curly bracket");
-            break;
-        case '(':
-        case ')':
-            if(DEBUG_LEX == 1) print_token("Parenthesis");
-            break;
-    }
+    if(DEBUG_LEX == 1) print_token("Bracket");
+    return yytext[0];
 }
 
 {COMMA} {
     num_col += yyleng;
-    switch(yytext[0]){
-        case ',':
-            if(DEBUG_LEX == 1) print_token("Comma");
-            break;
-        case ';':
-            if(DEBUG_LEX == 1) print_token("Semicolon");
-            break;
-    }
+    if(DEBUG_LEX == 1) print_token("Comma");
+    return yytext[0];
 }
 
 = {
     if(DEBUG_LEX == 1) print_token("Assign");
     num_col += yyleng;
-    return ASSIGN_TOKEN
+    return ASSIGN_TOKEN;
 }
 
 . {
