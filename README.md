@@ -14,6 +14,7 @@ Para a execução:
 
 ## TODO
 
-- [] Árvore de contexto
+- [X] Estrutura de nó
+- [] Árvore sintática abstrata
 - [] Lidar com contextos na árvore
 - [] Tabela de símbolos
