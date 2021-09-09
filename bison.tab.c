@@ -566,13 +566,13 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    73,    73,    76,    82,    83,    87,    95,   110,   113,
-     124,   125,   129,   142,   151,   154,   160,   167,   175,   176,
-     182,   186,   191,   195,   196,   197,   201,   202,   206,   210,
-     214,   215,   219,   220,   221,   222,   223,   224,   225,   229,
-     230,   231,   232,   233,   234,   235,   239,   240,   241,   245,
-     246,   247,   248,   252,   253,   254,   258,   265,   272,   278,
-     282,   286,   289,   295,   300,   304,   308
+       0,    73,    73,    76,    82,    83,    87,    96,   111,   114,
+     126,   127,   131,   144,   153,   156,   165,   166,   170,   176,
+     184,   188,   193,   200,   201,   202,   206,   207,   211,   215,
+     219,   220,   224,   225,   226,   227,   228,   229,   230,   234,
+     235,   236,   237,   238,   239,   240,   244,   245,   246,   250,
+     251,   252,   253,   257,   258,   259,   263,   270,   277,   283,
+     287,   291,   294,   300,   305,   309,   313
 };
 #endif
 
@@ -2056,15 +2056,16 @@ yyreduce:
   case 6: /* variableDeclare: type id ';'  */
 #line 87 "./src/bison.y"
                 {
+        printf("variable delcare\n");
         yyval = create_astnode_context(AST_VAR_DECLARE, "variable declare");
         insert_kid(yyvsp[-2], yyval);
         insert_kid(yyvsp[-1], yyval);
     }
-#line 2064 "bison.tab.c"
+#line 2065 "bison.tab.c"
     break;
 
   case 7: /* functionDeclare: type id '(' optListParams ')' compoundStatement  */
-#line 95 "./src/bison.y"
+#line 96 "./src/bison.y"
                                                     {
         /* Lidar com contextos */
         yyval = create_astnode_context(AST_FUNC_DECLARE, "func declare");
@@ -2072,37 +2073,38 @@ yyreduce:
         insert_kid(yyvsp[-5], yyval);
         insert_kid(yyvsp[-4], yyval);
 
-        if(yyvsp[-2])
+        if(yyvsp[-2]) /* Se existir parametros insira */
             insert_kid(yyvsp[-2], yyval);
         insert_kid(yyvsp[0], yyval);
         // delete_context_ast(node_aux);
     }
-#line 2081 "bison.tab.c"
+#line 2082 "bison.tab.c"
     break;
 
   case 8: /* optListParams: %empty  */
-#line 110 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
         yyval = NULL;
     }
-#line 2089 "bison.tab.c"
+#line 2090 "bison.tab.c"
     break;
 
   case 9: /* optListParams: listParams  */
-#line 113 "./src/bison.y"
+#line 114 "./src/bison.y"
                  {
         // printf("Lista de params\n");
         yyval = create_astnode_context(AST_PARAM, "listParam");
         /* Retira os elementos da lista auxiliar 
         e depois adiciona como filhos ao no listParam */
-        insert_kid(pop_element_list(node_aux), yyval);
-        insert_kid(pop_element_list(node_aux), yyval);
+        do{
+            insert_kid(pop_element_list(node_aux), yyval);
+        } while(node_aux->size >= 1);
     }
-#line 2102 "bison.tab.c"
+#line 2104 "bison.tab.c"
     break;
 
   case 12: /* param: type id  */
-#line 129 "./src/bison.y"
+#line 131 "./src/bison.y"
             {
         yyval = create_astnode_context(AST_PARAM, "param");
         insert_kid(yyvsp[-1], yyval);
@@ -2112,175 +2114,178 @@ yyreduce:
 
         insert_list_element(node_aux, yyval);
     }
-#line 2116 "bison.tab.c"
+#line 2118 "bison.tab.c"
     break;
 
   case 13: /* compoundStatement: '{' optListCodeBlock '}'  */
-#line 142 "./src/bison.y"
+#line 144 "./src/bison.y"
                              {
         // printf("CompoundStatement\n");
         yyval = create_astnode_context(AST_STATE_FLOW, "compound statement");
         if(yyvsp[-1])
             insert_kid(yyvsp[-1], yyval);
     }
-#line 2127 "bison.tab.c"
+#line 2129 "bison.tab.c"
     break;
 
   case 14: /* optListCodeBlock: %empty  */
-#line 151 "./src/bison.y"
+#line 153 "./src/bison.y"
            {
         yyval = NULL;
     }
-#line 2135 "bison.tab.c"
+#line 2137 "bison.tab.c"
     break;
 
   case 15: /* optListCodeBlock: listCodeBlock  */
-#line 154 "./src/bison.y"
+#line 156 "./src/bison.y"
                    {
-        yyval = yyvsp[0];
+        yyval = create_astnode_context(AST_STATE_FLOW, "listCodeBlock");
+        do{
+            insert_kid(pop_element_list(node_aux), yyval);
+        } while(node_aux->size >= 1);
     }
-#line 2143 "bison.tab.c"
+#line 2148 "bison.tab.c"
     break;
 
-  case 16: /* listCodeBlock: listCodeBlock codeBlock  */
-#line 160 "./src/bison.y"
-                            {
-        yyval = create_astnode_context(AST_STATE_FLOW, "code block");
-        insert_kid(yyvsp[-1], yyval);
-        insert_kid(yyvsp[0], yyval);
-        // insert_kid(pop_element_list(node_aux), $$);
-        // insert_kid(pop_element_list(node_aux), $$);
-    }
-#line 2155 "bison.tab.c"
-    break;
-
-  case 17: /* listCodeBlock: codeBlock  */
-#line 167 "./src/bison.y"
-                {
+  case 18: /* codeBlock: statement  */
+#line 170 "./src/bison.y"
+              {
+        // printf("code block\n");
         yyval = create_astnode_context(AST_STATE_FLOW, "code block");
         insert_kid(yyvsp[0], yyval);
-        // insert_kid(pop_element_list(node_aux), $$);
+        insert_list_element(node_aux, yyval);
     }
-#line 2165 "bison.tab.c"
+#line 2159 "bison.tab.c"
     break;
 
   case 19: /* codeBlock: variableDeclare  */
 #line 176 "./src/bison.y"
                       {
-        yyval = yyvsp[0];
+        yyval = create_astnode_context(AST_STATE_FLOW, "code block");
+        insert_kid(yyvsp[0], yyval);
+        insert_list_element(node_aux, yyval);
     }
-#line 2173 "bison.tab.c"
+#line 2169 "bison.tab.c"
     break;
 
   case 20: /* statement: flowExpression  */
-#line 182 "./src/bison.y"
+#line 184 "./src/bison.y"
                    {
-        yyval = create_astnode_context(AST_STATE_FLOW, "statement flow");
+        yyval = create_astnode_context(AST_STATE_FLOW, "statement");
         // insert_list_element(node_aux, $$);
     }
-#line 2182 "bison.tab.c"
+#line 2178 "bison.tab.c"
     break;
 
   case 21: /* statement: compoundStatement  */
-#line 186 "./src/bison.y"
+#line 188 "./src/bison.y"
                         {
-        // printf("Compound Statement\n");
-        yyval = create_astnode_context(AST_STATE_COMPOUND, "statement compound");
+        yyval = create_astnode_context(AST_STATE_FLOW, "statement");
+        insert_kid(yyvsp[0], yyval);
         // insert_list_element(node_aux, $$);
     }
-#line 2192 "bison.tab.c"
+#line 2188 "bison.tab.c"
+    break;
+
+  case 22: /* statement: expression ';'  */
+#line 193 "./src/bison.y"
+                     {
+        yyval = create_astnode_context(AST_STATE_EXPRESSION, "statement");
+        // insert_list_element(node_aux, $$);
+    }
+#line 2197 "bison.tab.c"
     break;
 
   case 56: /* constantInteger: CONSTANT_INTEGER_TOKEN  */
-#line 258 "./src/bison.y"
+#line 263 "./src/bison.y"
                            {
         // printf("CONSTANT_INTEGER_TOKEN\n");
         // insert_kid($1, root);
     }
-#line 2201 "bison.tab.c"
+#line 2206 "bison.tab.c"
     break;
 
   case 57: /* constantReal: CONSTANT_REAL_TOKEN  */
-#line 265 "./src/bison.y"
+#line 270 "./src/bison.y"
                         {
         // printf("CONSTANT_REAL_TOKEN\n");
         // insert_kid($1, root);
     }
-#line 2210 "bison.tab.c"
+#line 2215 "bison.tab.c"
     break;
 
   case 58: /* constantNIL: NIL_TOKEN  */
-#line 272 "./src/bison.y"
+#line 277 "./src/bison.y"
               {
         ;
     }
-#line 2218 "bison.tab.c"
+#line 2223 "bison.tab.c"
     break;
 
   case 60: /* id: ID_TOKEN  */
-#line 282 "./src/bison.y"
+#line 287 "./src/bison.y"
              {
         // printf("ID_TOKEN\n");
         // insert_kid($1, root);
     }
-#line 2227 "bison.tab.c"
+#line 2232 "bison.tab.c"
     break;
 
   case 61: /* id: READ_TOKEN  */
-#line 286 "./src/bison.y"
+#line 291 "./src/bison.y"
                  {
         ;
     }
-#line 2235 "bison.tab.c"
+#line 2240 "bison.tab.c"
     break;
 
   case 62: /* id: WRITE_TOKEN  */
-#line 289 "./src/bison.y"
+#line 294 "./src/bison.y"
                   {
         ;
     }
-#line 2243 "bison.tab.c"
+#line 2248 "bison.tab.c"
     break;
 
   case 63: /* type: INT_TOKEN  */
-#line 295 "./src/bison.y"
+#line 300 "./src/bison.y"
               {
         // printf("INT_TOKEN\n");
         // printf("contexto: %s\n", $$->context->name);
         // insert_kid($1, root);
     }
-#line 2253 "bison.tab.c"
+#line 2258 "bison.tab.c"
     break;
 
   case 64: /* type: FLOAT_TOKEN  */
-#line 300 "./src/bison.y"
+#line 305 "./src/bison.y"
                   {
         // printf("FLOAT_TOKEN\n");
         // insert_kid($1, root);
     }
-#line 2262 "bison.tab.c"
+#line 2267 "bison.tab.c"
     break;
 
   case 65: /* type: INT_LIST_TOKEN  */
-#line 304 "./src/bison.y"
+#line 309 "./src/bison.y"
                      {
         // printf("INT_LIST_TOKEN\n");
         // insert_kid($1, root);
     }
-#line 2271 "bison.tab.c"
+#line 2276 "bison.tab.c"
     break;
 
   case 66: /* type: FLOAT_LIST_TOKEN  */
-#line 308 "./src/bison.y"
+#line 313 "./src/bison.y"
                        {
         // printf("INT_LIST_TOKEN\n");
         // insert_kid($1, root);
     }
-#line 2280 "bison.tab.c"
+#line 2285 "bison.tab.c"
     break;
 
 
-#line 2284 "bison.tab.c"
+#line 2289 "bison.tab.c"
 
       default: break;
     }
@@ -2505,7 +2510,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 314 "./src/bison.y"
+#line 319 "./src/bison.y"
 
 
 void yyerror(const char *error_msg){
@@ -2532,7 +2537,7 @@ int main(int argc, char **argv){
     yyparse();
     print_tree(root, 0);
     // print_list(node_aux);
-    // printf("%d\n", node_aux->size);
+    printf("Tamanho lista: %d\n", node_aux->size);
     delete_astnode(root);
     delete_list(node_aux, delete_list_astnode);
     fclose(yyin);

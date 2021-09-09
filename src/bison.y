@@ -85,6 +85,7 @@ declaration:
 
 variableDeclare:
     type id ';' {
+        printf("variable delcare\n");
         $$ = create_astnode_context(AST_VAR_DECLARE, "variable declare");
         insert_kid($1, $$);
         insert_kid($2, $$);
@@ -99,7 +100,7 @@ functionDeclare:
         insert_kid($1, $$);
         insert_kid($2, $$);
 
-        if($4)
+        if($4) /* Se existir parametros insira */
             insert_kid($4, $$);
         insert_kid($6, $$);
         // delete_context_ast(node_aux);
@@ -115,8 +116,9 @@ optListParams:
         $$ = create_astnode_context(AST_PARAM, "listParam");
         /* Retira os elementos da lista auxiliar 
         e depois adiciona como filhos ao no listParam */
-        insert_kid(pop_element_list(node_aux), $$);
-        insert_kid(pop_element_list(node_aux), $$);
+        do{
+            insert_kid(pop_element_list(node_aux), $$);
+        } while(node_aux->size >= 1);
     }
 ;
 
@@ -152,43 +154,46 @@ optListCodeBlock:
         $$ = NULL;
     }
     | listCodeBlock{
-        $$ = $1;
+        $$ = create_astnode_context(AST_STATE_FLOW, "listCodeBlock");
+        do{
+            insert_kid(pop_element_list(node_aux), $$);
+        } while(node_aux->size >= 1);
     }
 ;
 
 listCodeBlock:
-    listCodeBlock codeBlock {
-        $$ = create_astnode_context(AST_STATE_FLOW, "code block");
-        insert_kid($1, $$);
-        insert_kid($2, $$);
-        // insert_kid(pop_element_list(node_aux), $$);
-        // insert_kid(pop_element_list(node_aux), $$);
-    }
-    | codeBlock {
-        $$ = create_astnode_context(AST_STATE_FLOW, "code block");
-        insert_kid($1, $$);
-        // insert_kid(pop_element_list(node_aux), $$);
-    }
+    listCodeBlock codeBlock
+    | codeBlock
 ;
 
 codeBlock:
-    statement
+    statement {
+        // printf("code block\n");
+        $$ = create_astnode_context(AST_STATE_FLOW, "code block");
+        insert_kid($1, $$);
+        insert_list_element(node_aux, $$);
+    }
     | variableDeclare {
-        $$ = $1;
+        $$ = create_astnode_context(AST_STATE_FLOW, "code block");
+        insert_kid($1, $$);
+        insert_list_element(node_aux, $$);
     }
 ;
 
 statement:
     flowExpression {
-        $$ = create_astnode_context(AST_STATE_FLOW, "statement flow");
+        $$ = create_astnode_context(AST_STATE_FLOW, "statement");
         // insert_list_element(node_aux, $$);
     }
     | compoundStatement {
-        // printf("Compound Statement\n");
-        $$ = create_astnode_context(AST_STATE_COMPOUND, "statement compound");
+        $$ = create_astnode_context(AST_STATE_FLOW, "statement");
+        insert_kid($1, $$);
         // insert_list_element(node_aux, $$);
     }
-    | expression ';'
+    | expression ';' {
+        $$ = create_astnode_context(AST_STATE_EXPRESSION, "statement");
+        // insert_list_element(node_aux, $$);
+    }
 ;
 
 flowExpression:
@@ -337,7 +342,7 @@ int main(int argc, char **argv){
     yyparse();
     print_tree(root, 0);
     // print_list(node_aux);
-    // printf("%d\n", node_aux->size);
+    printf("Tamanho lista: %d\n", node_aux->size);
     delete_astnode(root);
     delete_list(node_aux, delete_list_astnode);
     fclose(yyin);
