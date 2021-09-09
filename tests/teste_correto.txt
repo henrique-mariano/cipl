@@ -1,6 +1,6 @@
 int x;
 
-int main(){
+int main(int agrc, float argv, int m, int k){
     int x;
     for (x; x < 5 ; x = x + 1){
     }
