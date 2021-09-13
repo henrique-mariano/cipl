@@ -64,8 +64,8 @@
 %precedence ELSE_TOKEN
 
 // %destructor{
-//     free($$);
-// }<astnode>
+//     delete_astnode($$);
+// }<>
 
 %%
 
@@ -79,13 +79,16 @@ startProgram:
 ;
 
 declaration:
-    variableDeclare
-    | functionDeclare
+    variableDeclare {
+        $$ = $1;
+    }
+    | functionDeclare {
+        $$ = $1;
+    }
 ;
 
 variableDeclare:
     type id ';' {
-        printf("variable delcare\n");
         $$ = create_astnode_context(AST_VAR_DECLARE, "variable declare");
         insert_kid($1, $$);
         insert_kid($2, $$);
@@ -96,14 +99,12 @@ functionDeclare:
     type id '(' optListParams ')' compoundStatement {
         /* Lidar com contextos */
         $$ = create_astnode_context(AST_FUNC_DECLARE, "func declare");
-        // printf("FUNC DECLARE\n");
         insert_kid($1, $$);
         insert_kid($2, $$);
 
         if($4) /* Se existir parametros insira */
             insert_kid($4, $$);
         insert_kid($6, $$);
-        // delete_context_ast(node_aux);
     }
 ;
 
@@ -113,11 +114,11 @@ optListParams:
     }
     | listParams {
         // printf("Lista de params\n");
-        $$ = create_astnode_context(AST_PARAM, "listParam");
+        $$ = create_astnode_context(AST_LIST_PARAM, "params");
         /* Retira os elementos da lista auxiliar 
         e depois adiciona como filhos ao no listParam */
         do{
-            insert_kid(pop_element_list(node_aux), $$);
+            insert_kid(remove_first_element_list(node_aux), $$);
         } while(node_aux->size >= 1);
     }
 ;
@@ -143,7 +144,7 @@ param:
 compoundStatement:
     '{' optListCodeBlock '}' {
         // printf("CompoundStatement\n");
-        $$ = create_astnode_context(AST_STATE_FLOW, "compound statement");
+        $$ = create_astnode_context(AST_STATE_COMPOUND, "compound statement");
         if($2)
             insert_kid($2, $$);
     }
@@ -154,9 +155,9 @@ optListCodeBlock:
         $$ = NULL;
     }
     | listCodeBlock{
-        $$ = create_astnode_context(AST_STATE_FLOW, "listCodeBlock");
+        $$ = create_astnode_context(AST_LIST_CODEBLOCK, "code block");
         do{
-            insert_kid(pop_element_list(node_aux), $$);
+            insert_kid(remove_first_element_list(node_aux), $$);
         } while(node_aux->size >= 1);
     }
 ;
@@ -168,13 +169,12 @@ listCodeBlock:
 
 codeBlock:
     statement {
-        // printf("code block\n");
-        $$ = create_astnode_context(AST_STATE_FLOW, "code block");
+        $$ = create_astnode_context(AST_CODE_BLOCK, "");
         insert_kid($1, $$);
         insert_list_element(node_aux, $$);
     }
     | variableDeclare {
-        $$ = create_astnode_context(AST_STATE_FLOW, "code block");
+        $$ = create_astnode_context(AST_CODE_BLOCK, "");
         insert_kid($1, $$);
         insert_list_element(node_aux, $$);
     }
@@ -182,137 +182,252 @@ codeBlock:
 
 statement:
     flowExpression {
-        $$ = create_astnode_context(AST_STATE_FLOW, "statement");
-        // insert_list_element(node_aux, $$);
+        $$ = create_astnode_context(AST_STATEMENT, "");
+        insert_kid($1, $$);
     }
     | compoundStatement {
-        $$ = create_astnode_context(AST_STATE_FLOW, "statement");
+        $$ = create_astnode_context(AST_STATEMENT, "");
         insert_kid($1, $$);
-        // insert_list_element(node_aux, $$);
     }
     | expression ';' {
-        $$ = create_astnode_context(AST_STATE_EXPRESSION, "statement");
-        // insert_list_element(node_aux, $$);
+        $$ = create_astnode_context(AST_STATEMENT, "");
+        insert_kid($1, $$);
     }
 ;
 
 flowExpression:
-    condExpression
-    | interationExpression
-    | returnExpression ';'
+    condExpression {
+        $$ = $1;
+    }
+    | interationExpression {
+        $$ = $1;
+    }
+    | returnExpression ';' {
+        $$ = $1;
+    }
 ;
 
 condExpression:
-    IF_TOKEN '(' expression ')' statement %prec IF_TOKEN
-    | IF_TOKEN '(' expression ')' statement ELSE_TOKEN statement
+    IF_TOKEN '(' expression ')' statement %prec IF_TOKEN {
+        $$ = create_astnode_context(AST_EXPR_COND, "cond expression");
+        insert_kid($3, $$);
+        insert_kid($5, $$);
+    }
+    | IF_TOKEN '(' expression ')' statement ELSE_TOKEN statement {
+        $$ = create_astnode_context(AST_EXPR_COND, "cond expression");
+        insert_kid($3, $$);
+        insert_kid($5, $$);
+        insert_kid($7, $$);
+    }
 ;
 
 interationExpression:
-    FOR_TOKEN '(' optExpression ';' optExpression ';' optExpression ')' statement
+    FOR_TOKEN '(' optExpression ';' optExpression ';' optExpression ')' statement {
+        $$ = create_astnode_context(AST_EXPR_ITERATION, "interation expression");
+        if($3)
+            insert_kid($3, $$);
+        if($5)
+            insert_kid($5, $$);
+        if($7)
+            insert_kid($7, $$);
+        insert_kid($9, $$);
+    }
 ;
 
 returnExpression: 
-    RETURN_TOKEN expression
+    RETURN_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_RETURN, "return expression");
+        insert_kid($2, $$);
+    }
 ;
 
 optExpression:
-    %empty
-    | expression
+    %empty {
+        $$ = NULL;
+    }
+    | expression {
+        $$ = $1;
+    }
 ;
 
 expression:
-    binArith
-    | listArith
-    | unaArith
-    | constant
-    | funcCall
-    | id
-    | '(' expression ')'
+    id ASSIGN_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_ASSIGN, "assign");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | binArith {
+        $$ = create_astnode_context(AST_EXPRESSION, "");
+        insert_kid($1, $$);
+    }
+    | listArith {
+        $$ = create_astnode_context(AST_EXPRESSION, "");
+        insert_kid($1, $$);
+    }
+    | unaArith {
+        $$ = create_astnode_context(AST_EXPRESSION, "");
+        insert_kid($1, $$);
+    }
+    | constant {
+        $$ = create_astnode_context(AST_EXPRESSION, "");
+        insert_kid($1, $$);
+    }
+    | funcCall {
+        $$ = create_astnode_context(AST_EXPRESSION, "");
+        insert_kid($1, $$);
+    }
+    | id {
+        $$ = create_astnode_context(AST_EXPRESSION, "");
+        insert_kid($1, $$);
+    }
+    | '(' expression ')' {
+        $$ = create_astnode_context(AST_EXPRESSION, "");
+        insert_kid($2, $$);
+    }
 ;
 
 binArith:
-    expression ASSIGN_TOKEN expression
-    | expression OR_TOKEN expression
-    | expression AND_TOKEN expression
-    | expression EQ_EXC_TOKEN expression
-    | expression LE_GR_TOKEN expression
-    | expression ADD_MIN_TOKEN expression
-    | expression MUL_DIV_TOKEN expression
+    expression OR_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria or");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression AND_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria and");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression EQ_EXC_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria ==!");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression LE_GR_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria <>");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression ADD_MIN_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria +-");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression MUL_DIV_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria */");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
 ;
 
 listArith:
-    expression MAP_TOKEN expression
-    | expression FILTER_TOKEN expression
-    | expression CONSTRUCTOR_LIST_TOKEN expression
+    expression MAP_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_LIST_ARITH, "aritmetica binaria de lista map");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression FILTER_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_LIST_ARITH, "aritmetica binaria de lista filter");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression CONSTRUCTOR_LIST_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_LIST_ARITH, "aritmetica binaria de lista constructor");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
 ;
 
 unaArith:
-    EXCLAMATION_TOKEN expression
-    | QUESTION_TOKEN expression 
-    | PERCENTAGE_TOKEN expression
-    | ADD_MIN_TOKEN expression
+    EXCLAMATION_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "aritmetica unaria !");
+        insert_kid($2, $$);
+    }
+    | QUESTION_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "aritmetica unaria ?");
+        insert_kid($2, $$);
+    }
+    | PERCENTAGE_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "aritmetica unaria %");
+        insert_kid($2, $$);
+    }
+    | ADD_MIN_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "aritmetica unaria +-");
+        insert_kid($2, $$);
+    }
 ;
 
 constant:
-    constantInteger
-    | constantReal
-    | constantNIL
+    constantInteger {
+        $$ = create_astnode_context(AST_CONSTANT, "constant int");
+        insert_kid($1, $$);
+    }
+    | constantReal {
+        $$ = create_astnode_context(AST_CONSTANT, "constant real");
+        insert_kid($1, $$);
+    }
+    | constantNIL {
+        $$ = create_astnode_context(AST_CONSTANT, "constant nil");
+        insert_kid($1, $$);
+    }
 ;
 
 constantInteger:
     CONSTANT_INTEGER_TOKEN {
-        // printf("CONSTANT_INTEGER_TOKEN\n");
-        // insert_kid($1, root);
+        $$ = $1;
     }
 ;
 
 constantReal:
     CONSTANT_REAL_TOKEN {
-        // printf("CONSTANT_REAL_TOKEN\n");
-        // insert_kid($1, root);
+        $$ = $1;
     }
 ;
 
 constantNIL:
     NIL_TOKEN {
-        ;
+        $$ = $1;
     }
 ;
 
 funcCall:
-    id '(' optExpression ')'
+    id '(' optExpression ')' {
+        $$ = create_astnode_context(AST_FUNC_CALL, "func call");
+        insert_kid($1, $$);
+        if($3)
+            insert_kid($3, $$);
+    }
+    | READ_TOKEN '(' optExpression ')' {
+        $$ = create_astnode_context(AST_FUNC_CALL, "func call");
+        insert_kid($1, $$);
+        if($3)
+            insert_kid($3, $$);
+    }
+    | WRITE_TOKEN '(' optExpression ')' {
+        $$ = create_astnode_context(AST_FUNC_CALL, "func call");
+        insert_kid($1, $$);
+        if($3)
+            insert_kid($3, $$);
+    }
 ;
 
 id:
     ID_TOKEN {
-        // printf("ID_TOKEN\n");
-        // insert_kid($1, root);
-    }
-    | READ_TOKEN {
-        ;
-    }
-    | WRITE_TOKEN {
-        ;
+        $$ = $1;
     }
 ;
 
 type:
     INT_TOKEN {
-        // printf("INT_TOKEN\n");
-        // printf("contexto: %s\n", $$->context->name);
-        // insert_kid($1, root);
+        $$ = $1;
     }
     | FLOAT_TOKEN {
-        // printf("FLOAT_TOKEN\n");
-        // insert_kid($1, root);
+        $$ = $1;
     }
     | INT_LIST_TOKEN {
-        // printf("INT_LIST_TOKEN\n");
-        // insert_kid($1, root);
+        $$ = $1;
     }
     | FLOAT_LIST_TOKEN {
-        // printf("INT_LIST_TOKEN\n");
-        // insert_kid($1, root);
+        $$ = $1;
     }
 ;
 
