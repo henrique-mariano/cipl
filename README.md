@@ -18,6 +18,6 @@ Para a execução:
 
 - [X] Completar gramática
 - [X] Estrutura de nó
-- [] Árvore sintática abstrata
-- [] Lidar com contextos na árvore
+- [X] Árvore sintática abstrata
 - [] Tabela de símbolos
+- [] Lidar com contextos na árvore
