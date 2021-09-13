@@ -22,8 +22,8 @@ LIST_TYPES              int{WS}+list|float{WS}+list
 TYPES                   {SIMPLE_TYPES}|{LIST_TYPES}
 
 DIGIT                   [0-9]
-CONSTANT_INTEGER        -?([1-9]{DIGIT}*|0)
-CONSTANT_REAL           {CONSTANT_INTEGER}+(\.{DIGIT}+)?([Ee][+-]?{DIGIT}+)?
+CONSTANT_INTEGER        ([1-9]{DIGIT}*|0)
+CONSTANT_REAL           ({DIGIT}*\.)?{DIGIT}+([Ee][+-]?{DIGIT}+)?
 STRING                  \"([^\n"\\]|(\\.))*\"
 
 OP_BINARY_ARITHMETIC    "+"|"-"|"*"|"/"
@@ -89,14 +89,14 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 {CONSTANT_INTEGER} {
     if(DEBUG_LEX == 1) print_token("Constant integer");
     num_col += yyleng;
-    yylval = create_astnode_context(AST_CONSTANT, yytext);
+    yylval = create_astnode_context(AST_CONSTANT_INT, yytext);
     return CONSTANT_INTEGER_TOKEN;
 }
 
 {CONSTANT_REAL} {
     if(DEBUG_LEX == 1) print_token("Constant real");
     num_col += yyleng;
-    yylval = create_astnode_context(AST_CONSTANT, yytext);
+    yylval = create_astnode_context(AST_CONSTANT_REAL, yytext);
     return CONSTANT_REAL_TOKEN;
 }
 
@@ -185,6 +185,7 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
         case 'r':
             return RETURN_TOKEN;
         case 'N':
+            yylval = create_astnode_context(AST_CONSTANT_NIL, yytext);
             return NIL_TOKEN;
     }
 }
