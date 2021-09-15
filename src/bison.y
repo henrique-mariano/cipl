@@ -1,12 +1,13 @@
 %define lr.type canonical-lr
-%define parse.error verbose
+%define parse.error detailed
 %define api.header.include {"lib/bison.h"}
-%define api.value.type {struct AstNode*}
+// %define api.value.type {struct AstNode*}
 %{
     // Autor: Henrique Mendes de Freitas Mariano - 17/0012280
     #include <stdio.h>
     #include "lib/tree.h"
     #include "lib/astcontext.h"
+    #include "lib/symbol.h"
 
     extern int error, num_line, num_col;
     
@@ -23,18 +24,33 @@
     /* Lista para ajudar na criacao da arvore */
     List *node_aux;
 
+    /* Tabela de simbolos */
+    SymbolTable *symbol_table;
+
 %}
 
-// %union{
-//     struct AstNode *astnode;
-// }
+%union{
+    struct AstNode *astnode;
+    struct Symbol *symbol;
+    struct List *list;
+}
 
 /* Declaração de tipos e tokens */
 /* Tipação da regra */
-//%type<astnode> declaration variableDeclare type id
-//%type<astnode> functionDeclare param optListParams listParams
-//%type<astnode> statement listCodeBlock codeBlock expression
-//%type<astnode> binArith listArith 
+%type<astnode> declaration variableDeclare type id
+%type<astnode> functionDeclare param
+%type<astnode> statement codeBlock expression
+%type<astnode> binArith listArith compoundStatement
+%type<astnode> flowExpression condExpression interationExpression
+%type<astnode> optExpression returnExpression unaArith constant
+%type<astnode> constantInteger constantReal constantNIL funcCall
+%type<astnode> constantString
+%type<astnode> FLOAT_LIST_TOKEN INT_LIST_TOKEN FLOAT_TOKEN INT_TOKEN
+%type<astnode> ID_TOKEN READ_TOKEN WRITE_TOKEN STRING_TOKEN
+%type<astnode> CONSTANT_INTEGER_TOKEN CONSTANT_REAL_TOKEN NIL_TOKEN
+
+%type<list> optListParams listParams optListCodeBlock listCodeBlock
+%type<list> listExpression optListExpression
 
 %token INT_TOKEN FLOAT_TOKEN INT_LIST_TOKEN FLOAT_LIST_TOKEN /* Tipos */
 %token ID_TOKEN READ_TOKEN WRITE_TOKEN /* IDs */
@@ -63,9 +79,9 @@
 %precedence IF_TOKEN
 %precedence ELSE_TOKEN
 
-// %destructor{
-//     delete_astnode($$);
-// }<>
+%destructor{
+    delete_astnode($$);
+}<astnode>
 
 %%
 
@@ -101,9 +117,18 @@ functionDeclare:
         $$ = create_astnode_context(AST_FUNC_DECLARE, "func declare");
         insert_kid($1, $$);
         insert_kid($2, $$);
+        if($4){ /* Se existir parametros insira */
+            // Cria um noh que recebe os parametros
+            AstNode *params = create_astnode_context(AST_LIST_PARAM, "params");
 
-        if($4) /* Se existir parametros insira */
-            insert_kid($4, $$);
+            // Percorre a lista de parametros inserindo os parametros no noh params
+            while($4->size) {
+                AstNode *aux = remove_first_element_list($4);
+                insert_kid(aux, params);
+            }
+            delete_list($4, delete_list_astnode);
+            insert_kid(params, $$);
+        }
         insert_kid($6, $$);
     }
 ;
@@ -112,20 +137,18 @@ optListParams:
     %empty {
         $$ = NULL;
     }
-    | listParams {
-        // printf("Lista de params\n");
-        $$ = create_astnode_context(AST_LIST_PARAM, "params");
-        /* Retira os elementos da lista auxiliar 
-        e depois adiciona como filhos ao no listParam */
-        do{
-            insert_kid(remove_first_element_list(node_aux), $$);
-        } while(node_aux->size >= 1);
-    }
+    | listParams
 ;
 
 listParams:
-    listParams ',' param
-    | param
+    listParams ',' param {
+        insert_list_element($1, $3);
+        $$ = $1;
+    }
+    | param {
+        $$ = create_list();
+        insert_list_element($$, $1);
+    }
 ;
 
 param:
@@ -133,10 +156,6 @@ param:
         $$ = create_astnode_context(AST_PARAM, "param");
         insert_kid($1, $$);
         insert_kid($2, $$);
-
-        /* Adiciona os parametros na lista auxiliar */
-
-        insert_list_element(node_aux, $$);
     }
 ;
 
@@ -145,8 +164,18 @@ compoundStatement:
     '{' optListCodeBlock '}' {
         // printf("CompoundStatement\n");
         $$ = create_astnode_context(AST_STATE_COMPOUND, "compound statement");
-        if($2)
-            insert_kid($2, $$);
+        if($2){ /* Se existir code block insira */
+            // Cria um noh que recebe os code blocks
+            AstNode *codeblocks = create_astnode_context(AST_CODE_BLOCK, "code block");
+
+            // Percorre a lista de code blocks inserindo os code blocks no noh code blocks
+            while($2->size) {
+                AstNode *aux = remove_first_element_list($2);
+                insert_kid(aux, codeblocks);
+            }
+            delete_list($2, delete_list_astnode);
+            insert_kid(codeblocks, $$);
+        }
     }
 ;
 
@@ -154,29 +183,28 @@ optListCodeBlock:
     %empty {
         $$ = NULL;
     }
-    | listCodeBlock{
-        $$ = create_astnode_context(AST_LIST_CODEBLOCK, "code block");
-        do{
-            insert_kid(remove_first_element_list(node_aux), $$);
-        } while(node_aux->size >= 1);
-    }
+    | listCodeBlock
 ;
 
 listCodeBlock:
-    listCodeBlock codeBlock
-    | codeBlock
+    listCodeBlock codeBlock {
+        insert_list_element($1, $2);
+        $$ = $1;
+    }
+    | codeBlock {
+        $$ = create_list();
+        insert_list_element($$, $1);
+    }
 ;
 
 codeBlock:
     statement {
         $$ = create_astnode_context(AST_CODE_BLOCK, "");
         insert_kid($1, $$);
-        insert_list_element(node_aux, $$);
     }
     | variableDeclare {
         $$ = create_astnode_context(AST_CODE_BLOCK, "");
         insert_kid($1, $$);
-        insert_list_element(node_aux, $$);
     }
 ;
 
@@ -369,6 +397,10 @@ constant:
         $$ = create_astnode_context(AST_CONSTANT, "constant nil");
         insert_kid($1, $$);
     }
+    | constantString {
+        $$ = create_astnode_context(AST_CONSTANT, "constant string");
+        insert_kid($1, $$);
+    }
 ;
 
 constantInteger:
@@ -389,12 +421,26 @@ constantNIL:
     }
 ;
 
+constantString:
+    STRING_TOKEN {
+        $$ = $1;
+    }
+;
+
 funcCall:
-    id '(' optExpression ')' {
+    id '(' optListExpression ')' {
         $$ = create_astnode_context(AST_FUNC_CALL, "func call");
         insert_kid($1, $$);
-        if($3)
-            insert_kid($3, $$);
+        if($3){
+            AstNode *arguments = create_astnode_context(AST_CODE_BLOCK, "arguments");
+
+            while($3->size) {
+                AstNode *aux = remove_first_element_list($3);
+                insert_kid(aux, arguments);
+            }
+            delete_list($3, delete_list_astnode);
+            insert_kid(arguments, $$);
+        }
     }
     | READ_TOKEN '(' optExpression ')' {
         $$ = create_astnode_context(AST_FUNC_CALL, "func call");
@@ -407,6 +453,24 @@ funcCall:
         insert_kid($1, $$);
         if($3)
             insert_kid($3, $$);
+    }
+;
+
+optListExpression:
+    %empty {
+        $$ = NULL;
+    }
+    | listExpression
+;
+
+listExpression:
+    listExpression ',' expression {
+        insert_list_element($1, $3);
+        $$ = $1;
+    }
+    | expression {
+        $$ = create_list();
+        insert_list_element($$, $1);
     }
 ;
 

@@ -65,10 +65,10 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
             return INT_TOKEN;
         case 'f':
-            yylval = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
             return FLOAT_TOKEN;
     }
 }
@@ -78,10 +78,10 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
             return INT_LIST_TOKEN;
         case 'f':
-            yylval = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
             return FLOAT_LIST_TOKEN;
     }
 }
@@ -89,20 +89,21 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 {CONSTANT_INTEGER} {
     if(DEBUG_LEX == 1) print_token("Constant integer");
     num_col += yyleng;
-    yylval = create_astnode_context(AST_CONSTANT_INT, yytext);
+    yylval.astnode = create_astnode_context(AST_CONSTANT_INT, yytext);
     return CONSTANT_INTEGER_TOKEN;
 }
 
 {CONSTANT_REAL} {
     if(DEBUG_LEX == 1) print_token("Constant real");
     num_col += yyleng;
-    yylval = create_astnode_context(AST_CONSTANT_REAL, yytext);
+    yylval.astnode = create_astnode_context(AST_CONSTANT_REAL, yytext);
     return CONSTANT_REAL_TOKEN;
 }
 
 {STRING} {
     if(DEBUG_LEX == 1) print_token("String");
     num_col += yyleng;
+    yylval.astnode = create_astnode_context(AST_CONSTANT_STRING, yytext);
     return STRING_TOKEN;
 }
 
@@ -185,7 +186,7 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
         case 'r':
             return RETURN_TOKEN;
         case 'N':
-            yylval = create_astnode_context(AST_CONSTANT_NIL, yytext);
+            yylval.astnode = create_astnode_context(AST_CONSTANT_NIL, yytext);
             return NIL_TOKEN;
     }
 }
@@ -204,7 +205,7 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 {ID} {
     if(DEBUG_LEX == 1) print_token("ID");
     num_col += yyleng;
-    yylval = create_astnode_context(AST_ID, yytext);
+    yylval.astnode = create_astnode_context(AST_ID, yytext);
     return ID_TOKEN;
 }
 
@@ -229,7 +230,7 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 . {
     error++;
     printf("Line: %d || Column: %d || ", num_line, num_col);
-    printf("Unexpected character: %s || Error count: %d\n", yytext, error);
+    printf("Lexic Error: Unexpected character: %s || Error count: %d\n", yytext, error);
     num_col += yyleng;
 }
 %%

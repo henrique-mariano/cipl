@@ -6,13 +6,13 @@ Foi disponibilizado um arquivo makefile para a compilação, mas caso seja neces
 
 > $ flex ./src/lex.l
 >
-> $ bison ./src/bison.y --defines="lib/bison.h"  -Wcounterexamples
+> $ bison ./src/bison.y --defines="lib/bison.h" -Wcounterexamples -Wother
 >
-> $ gcc -o tradutor -O bison.tab.c lex.yy.c src/tree.c src/astcontext.c -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
+> $ gcc -o tradutor -O src/list.c src/astcontext.c src/tree.c bison.tab.c lex.yy.c -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
 
 Para a execução:
 
-> ./tradutor arquivo-teste
+> ./tradutor tests/teste_correto.cipl
 
 ## TODO
 

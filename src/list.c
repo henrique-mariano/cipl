@@ -12,7 +12,8 @@ Element* create_element(void *value){
 
 void free_element(Element *elemento, void (*callback)(Element *)){
     if(callback){
-        callback(elemento);
+        if(elemento->value)
+            callback(elemento);
     } else {
         free(elemento->value);
         elemento = NULL;

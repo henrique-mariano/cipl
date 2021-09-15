@@ -88,7 +88,18 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef struct AstNode* YYSTYPE;
+union YYSTYPE
+{
+#line 32 "./src/bison.y"
+
+    struct AstNode *astnode;
+    struct Symbol *symbol;
+    struct List *list;
+
+#line 100 "lib/bison.h"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

@@ -823,10 +823,10 @@ YY_RULE_SETUP
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
             return INT_TOKEN;
         case 'f':
-            yylval = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
             return FLOAT_TOKEN;
     }
 }
@@ -839,10 +839,10 @@ YY_RULE_SETUP
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
             return INT_LIST_TOKEN;
         case 'f':
-            yylval = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
             return FLOAT_LIST_TOKEN;
     }
 }
@@ -853,7 +853,7 @@ YY_RULE_SETUP
 {
     if(DEBUG_LEX == 1) print_token("Constant integer");
     num_col += yyleng;
-    yylval = create_astnode_context(AST_CONSTANT_INT, yytext);
+    yylval.astnode = create_astnode_context(AST_CONSTANT_INT, yytext);
     return CONSTANT_INTEGER_TOKEN;
 }
 	YY_BREAK
@@ -863,7 +863,7 @@ YY_RULE_SETUP
 {
     if(DEBUG_LEX == 1) print_token("Constant real");
     num_col += yyleng;
-    yylval = create_astnode_context(AST_CONSTANT_REAL, yytext);
+    yylval.astnode = create_astnode_context(AST_CONSTANT_REAL, yytext);
     return CONSTANT_REAL_TOKEN;
 }
 	YY_BREAK
@@ -873,12 +873,13 @@ YY_RULE_SETUP
 {
     if(DEBUG_LEX == 1) print_token("String");
     num_col += yyleng;
+    yylval.astnode = create_astnode_context(AST_CONSTANT_STRING, yytext);
     return STRING_TOKEN;
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 109 "./src/lex.l"
+#line 110 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Arithmetic operation");
     num_col += yyleng;
@@ -894,7 +895,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 122 "./src/lex.l"
+#line 123 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Logic operation");
     num_col += yyleng;
@@ -908,7 +909,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 133 "./src/lex.l"
+#line 134 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Relational operation");
     num_col += yyleng;
@@ -924,7 +925,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 146 "./src/lex.l"
+#line 147 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Unary operation list");
     num_col += yyleng;
@@ -943,7 +944,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 162 "./src/lex.l"
+#line 163 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Binary operation list");
     num_col += yyleng;
@@ -959,7 +960,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 175 "./src/lex.l"
+#line 176 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Flow control command");
     num_col += yyleng;
@@ -973,14 +974,14 @@ YY_RULE_SETUP
         case 'r':
             return RETURN_TOKEN;
         case 'N':
-            yylval = create_astnode_context(AST_CONSTANT_NIL, yytext);
+            yylval.astnode = create_astnode_context(AST_CONSTANT_NIL, yytext);
             return NIL_TOKEN;
     }
 }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 193 "./src/lex.l"
+#line 194 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("IN/OUT operation");
     num_col += yyleng;
@@ -994,17 +995,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 204 "./src/lex.l"
+#line 205 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("ID");
     num_col += yyleng;
-    yylval = create_astnode_context(AST_ID, yytext);
+    yylval.astnode = create_astnode_context(AST_ID, yytext);
     return ID_TOKEN;
 }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 211 "./src/lex.l"
+#line 212 "./src/lex.l"
 {
     num_col += yyleng;
     if(DEBUG_LEX == 1) print_token("Bracket");
@@ -1013,7 +1014,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 217 "./src/lex.l"
+#line 218 "./src/lex.l"
 {
     num_col += yyleng;
     if(DEBUG_LEX == 1) print_token("Comma");
@@ -1022,7 +1023,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 223 "./src/lex.l"
+#line 224 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Assign");
     num_col += yyleng;
@@ -1031,20 +1032,20 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 229 "./src/lex.l"
+#line 230 "./src/lex.l"
 {
     error++;
     printf("Line: %d || Column: %d || ", num_line, num_col);
-    printf("Unexpected character: %s || Error count: %d\n", yytext, error);
+    printf("Lexic Error: Unexpected character: %s || Error count: %d\n", yytext, error);
     num_col += yyleng;
 }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 235 "./src/lex.l"
+#line 236 "./src/lex.l"
 ECHO;
 	YY_BREAK
-#line 1048 "lex.yy.c"
+#line 1049 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2012,7 +2013,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 235 "./src/lex.l"
+#line 236 "./src/lex.l"
 
 
 void print_token(char *type){

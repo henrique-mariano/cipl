@@ -26,6 +26,7 @@ void delete_astnode(AstNode *no){
     free_astcontext(no->context);
     delete_list(no->kids, delete_list_astnode);
     free(no);
+    no = NULL;
 }
 
 void print_tree(AstNode *root, int tab){
