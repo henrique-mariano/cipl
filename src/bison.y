@@ -520,19 +520,10 @@ funcCall:
             insert_kid(arguments, $$);
         }
     }
-    | READ_TOKEN '(' optListExpression ')' {
+    | READ_TOKEN '(' id ')' {
         $$ = create_astnode_context(AST_FUNC_CALL, "func call");
         insert_kid($1, $$);
-        if($3){
-            AstNode *arguments = create_astnode_context(AST_CODE_BLOCK, "arguments");
-
-            while($3->size) {
-                AstNode *aux = remove_first_element_list($3);
-                insert_kid(aux, arguments);
-            }
-            delete_list($3, delete_list_astnode);
-            insert_kid(arguments, $$);
-        }
+        insert_kid($3, $$);
     }
     | WRITE_TOKEN '(' optListExpression ')' {
         $$ = create_astnode_context(AST_FUNC_CALL, "func call");
@@ -613,7 +604,7 @@ int main(int argc, char **argv){
     root = create_astnode_context(AST_ROOT, "root");
     node_aux = create_list();
     symbol_table = create_symbol_table();
-    
+
     yyparse();
 
     if(root->kids->size > 0) {
