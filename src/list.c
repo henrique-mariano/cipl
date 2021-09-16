@@ -105,10 +105,9 @@ void print_list(List *lista, void (*callback)(Element *)){
     }
 
     while(aux != NULL){
-        print_element(aux->value, callback);
+        print_element(aux, callback);
         aux = aux->next;
     }
-    printf("\n");
 }
 
 void delete_list(List *lista, void (*callback)(Element *)){

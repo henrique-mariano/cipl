@@ -1,7 +1,7 @@
 %define lr.type canonical-lr
 %define parse.error detailed
 %define api.header.include {"lib/bison.h"}
-// %define api.value.type {struct AstNode*}
+
 %{
     // Autor: Henrique Mendes de Freitas Mariano - 17/0012280
     #include <stdio.h>
@@ -9,7 +9,7 @@
     #include "lib/astcontext.h"
     #include "lib/symbol.h"
 
-    extern int error, num_line, num_col;
+    extern int error, num_line, num_col, symbol_id, scope;
     
     extern int yyparse();
     extern int yylex();
@@ -58,6 +58,12 @@
 %token MUL_DIV_TOKEN EXCLAMATION_TOKEN QUESTION_TOKEN PERCENTAGE_TOKEN/* Operadores */
 %token MAP_TOKEN FILTER_TOKEN CONSTRUCTOR_LIST_TOKEN ADD_MIN_TOKEN /* */
 %token ASSIGN_TOKEN OR_TOKEN AND_TOKEN EQ_EXC_TOKEN LE_GR_TOKEN /* */
+%token ADD_UNARY_TOKEN MIN_UNARY_TOKEN
+%token EQUAL_TOKEN DIFF_EQ_TOKEN
+%token LESS_TOKEN LE_EQ_TOKEN GREAT_TOKEN GR_EQ_TOKEN
+%token ADD_TOKEN MIN_TOKEN
+%token MUL_TOKEN DIV_TOKEN
+%token UNI_OP
 
 %token IF_TOKEN ELSE_TOKEN FOR_TOKEN RETURN_TOKEN STRING_TOKEN
 
@@ -65,16 +71,17 @@
 %right ASSIGN_TOKEN
 %left OR_TOKEN
 %left AND_TOKEN
-%left EQ_EXC_TOKEN
-%left LE_GR_TOKEN
+%left EQUAL_TOKEN DIFF_EQ_TOKEN
+%left LESS_TOKEN LE_EQ_TOKEN GREAT_TOKEN GR_EQ_TOKEN
 %left MAP_TOKEN
 %left FILTER_TOKEN
 %left CONSTRUCTOR_LIST_TOKEN
-%left ADD_MIN_TOKEN
-%left MUL_DIV_TOKEN
+%left '+' '-'
+%left '*' '/'
 %right EXCLAMATION_TOKEN
 %right QUESTION_TOKEN
 %right PERCENTAGE_TOKEN
+%right UNI_OP
 
 %precedence IF_TOKEN
 %precedence ELSE_TOKEN
@@ -108,6 +115,25 @@ variableDeclare:
         $$ = create_astnode_context(AST_VAR_DECLARE, "variable declare");
         insert_kid($1, $$);
         insert_kid($2, $$);
+        switch($1->context->type){
+            case AST_TYPE_INT:
+            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, INT_SYMBOL_CONST, 0));
+            break;
+
+            case AST_TYPE_FLOAT:
+            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, FLOAT_SYMBOL_CONST, 0));
+            break;
+
+            case AST_TYPE_INT_LIST:
+            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, INT_LIST_SYMBOL_CONST, 0));
+            break;
+
+            case AST_TYPE_FLOAT_LIST:
+            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, FLOAT_LIST_SYMBOL_CONST, 0));
+            break;
+
+        }
+        symbol_id++;
     }
 ;
 
@@ -117,6 +143,25 @@ functionDeclare:
         $$ = create_astnode_context(AST_FUNC_DECLARE, "func declare");
         insert_kid($1, $$);
         insert_kid($2, $$);
+        switch($1->context->type){
+            case AST_TYPE_INT:
+            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, INT_SYMBOL_CONST, 1));
+            break;
+
+            case AST_TYPE_FLOAT:
+            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, FLOAT_SYMBOL_CONST, 1));
+            break;
+
+            case AST_TYPE_INT_LIST:
+            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, INT_LIST_SYMBOL_CONST, 1));
+            break;
+
+            case AST_TYPE_FLOAT_LIST:
+            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, FLOAT_LIST_SYMBOL_CONST, 1));
+            break;
+
+        }
+        symbol_id++;
         if($4){ /* Se existir parametros insira */
             // Cria um noh que recebe os parametros
             AstNode *params = create_astnode_context(AST_LIST_PARAM, "params");
@@ -162,7 +207,6 @@ param:
 
 compoundStatement:
     '{' optListCodeBlock '}' {
-        // printf("CompoundStatement\n");
         $$ = create_astnode_context(AST_STATE_COMPOUND, "compound statement");
         if($2){ /* Se existir code block insira */
             // Cria um noh que recebe os code blocks
@@ -316,32 +360,62 @@ expression:
 
 binArith:
     expression OR_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria or");
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {or}");
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
     | expression AND_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria and");
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {and}");
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
-    | expression EQ_EXC_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria ==!");
+    | expression EQUAL_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {==}");
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
-    | expression LE_GR_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria <>");
+    | expression DIFF_EQ_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {!=}");
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
-    | expression ADD_MIN_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria +-");
+    | expression LESS_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {<}");
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
-    | expression MUL_DIV_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "aritmetica binaria */");
+    | expression LE_EQ_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {<=}");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression GREAT_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {>}");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression GR_EQ_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {>=}");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression '+' expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {+}");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression '-' expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {-}");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression '*' expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {*}");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
+    }
+    | expression '/' expression {
+        $$ = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {/}");
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
@@ -349,17 +423,17 @@ binArith:
 
 listArith:
     expression MAP_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_LIST_ARITH, "aritmetica binaria de lista map");
+        $$ = create_astnode_context(AST_EXPR_LIST_ARITH, "operation {list map}");
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
     | expression FILTER_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_LIST_ARITH, "aritmetica binaria de lista filter");
+        $$ = create_astnode_context(AST_EXPR_LIST_ARITH, "operation {list filter}");
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
     | expression CONSTRUCTOR_LIST_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_LIST_ARITH, "aritmetica binaria de lista constructor");
+        $$ = create_astnode_context(AST_EXPR_LIST_ARITH, "operation {list constructor}");
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
@@ -367,19 +441,23 @@ listArith:
 
 unaArith:
     EXCLAMATION_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "aritmetica unaria !");
+        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {!}");
         insert_kid($2, $$);
     }
     | QUESTION_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "aritmetica unaria ?");
+        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {?}");
         insert_kid($2, $$);
     }
     | PERCENTAGE_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "aritmetica unaria %");
+        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {%}");
         insert_kid($2, $$);
     }
-    | ADD_MIN_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "aritmetica unaria +-");
+    | '+' expression %prec UNI_OP {
+        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {+}");
+        insert_kid($2, $$);
+    }
+    | '-' expression %prec UNI_OP {
+        $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {-}");
         insert_kid($2, $$);
     }
 ;
@@ -442,17 +520,33 @@ funcCall:
             insert_kid(arguments, $$);
         }
     }
-    | READ_TOKEN '(' optExpression ')' {
+    | READ_TOKEN '(' optListExpression ')' {
         $$ = create_astnode_context(AST_FUNC_CALL, "func call");
         insert_kid($1, $$);
-        if($3)
-            insert_kid($3, $$);
+        if($3){
+            AstNode *arguments = create_astnode_context(AST_CODE_BLOCK, "arguments");
+
+            while($3->size) {
+                AstNode *aux = remove_first_element_list($3);
+                insert_kid(aux, arguments);
+            }
+            delete_list($3, delete_list_astnode);
+            insert_kid(arguments, $$);
+        }
     }
-    | WRITE_TOKEN '(' optExpression ')' {
+    | WRITE_TOKEN '(' optListExpression ')' {
         $$ = create_astnode_context(AST_FUNC_CALL, "func call");
         insert_kid($1, $$);
-        if($3)
-            insert_kid($3, $$);
+        if($3){
+            AstNode *arguments = create_astnode_context(AST_CODE_BLOCK, "arguments");
+
+            while($3->size) {
+                AstNode *aux = remove_first_element_list($3);
+                insert_kid(aux, arguments);
+            }
+            delete_list($3, delete_list_astnode);
+            insert_kid(arguments, $$);
+        }
     }
 ;
 
@@ -518,12 +612,29 @@ int main(int argc, char **argv){
     yyin = fp;
     root = create_astnode_context(AST_ROOT, "root");
     node_aux = create_list();
+    symbol_table = create_symbol_table();
+    
     yyparse();
-    print_tree(root, 0);
-    // print_list(node_aux);
-    printf("Tamanho lista: %d\n", node_aux->size);
+
+    if(root->kids->size > 0) {
+        printf("##################### %s #####################\n", "Abstract Syntax Tree");
+        print_tree(root, 0);
+        printf("\n");
+    } else {
+        printf("Unable to print AST\n");
+    }
+    if(symbol_table->symbols->size > 0) {
+        printf("########################## %s #########################\n", "Symbol Table");
+        printf("# %-14s || %11s || %-10s || %4s || %6s #\n", "Type", "Symbol Kind", "ID", "Line", "Column");
+        print_list(symbol_table->symbols, print_symbol_list);
+        printf("#################################################################\n");
+    } else {
+        printf("Unable to print Symbol Table\n");
+    }
+
     delete_astnode(root);
     delete_list(node_aux, delete_list_astnode);
+    delete_symbol_table(symbol_table, delete_list_symbol_table);
     fclose(yyin);
     yylex_destroy();
     

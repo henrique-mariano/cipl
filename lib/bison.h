@@ -77,11 +77,24 @@ extern int yydebug;
     AND_TOKEN = 278,               /* AND_TOKEN  */
     EQ_EXC_TOKEN = 279,            /* EQ_EXC_TOKEN  */
     LE_GR_TOKEN = 280,             /* LE_GR_TOKEN  */
-    IF_TOKEN = 281,                /* IF_TOKEN  */
-    ELSE_TOKEN = 282,              /* ELSE_TOKEN  */
-    FOR_TOKEN = 283,               /* FOR_TOKEN  */
-    RETURN_TOKEN = 284,            /* RETURN_TOKEN  */
-    STRING_TOKEN = 285             /* STRING_TOKEN  */
+    ADD_UNARY_TOKEN = 281,         /* ADD_UNARY_TOKEN  */
+    MIN_UNARY_TOKEN = 282,         /* MIN_UNARY_TOKEN  */
+    EQUAL_TOKEN = 283,             /* EQUAL_TOKEN  */
+    DIFF_EQ_TOKEN = 284,           /* DIFF_EQ_TOKEN  */
+    LESS_TOKEN = 285,              /* LESS_TOKEN  */
+    LE_EQ_TOKEN = 286,             /* LE_EQ_TOKEN  */
+    GREAT_TOKEN = 287,             /* GREAT_TOKEN  */
+    GR_EQ_TOKEN = 288,             /* GR_EQ_TOKEN  */
+    ADD_TOKEN = 289,               /* ADD_TOKEN  */
+    MIN_TOKEN = 290,               /* MIN_TOKEN  */
+    MUL_TOKEN = 291,               /* MUL_TOKEN  */
+    DIV_TOKEN = 292,               /* DIV_TOKEN  */
+    UNI_OP = 293,                  /* UNI_OP  */
+    IF_TOKEN = 294,                /* IF_TOKEN  */
+    ELSE_TOKEN = 295,              /* ELSE_TOKEN  */
+    FOR_TOKEN = 296,               /* FOR_TOKEN  */
+    RETURN_TOKEN = 297,            /* RETURN_TOKEN  */
+    STRING_TOKEN = 298             /* STRING_TOKEN  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -96,7 +109,7 @@ union YYSTYPE
     struct Symbol *symbol;
     struct List *list;
 
-#line 100 "lib/bison.h"
+#line 113 "lib/bison.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -104,9 +117,23 @@ typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
+/* Location type.  */
+#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
+typedef struct YYLTYPE YYLTYPE;
+struct YYLTYPE
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+};
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
+#endif
+
 
 extern YYSTYPE yylval;
-
+extern YYLTYPE yylloc;
 int yyparse (void);
 
 #endif /* !YY_YY_LIB_BISON_H_INCLUDED  */

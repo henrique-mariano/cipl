@@ -1,7 +1,21 @@
-%option nounput noinput noyywrap
+%option nounput noinput noyywrap yylineno
 
 %{
     // Autor: Henrique Mendes de Freitas Mariano - 17/0012280
+
+    int yycolumn = 1;
+
+    #define YY_USER_ACTION                                       \
+    yylloc.first_line = yylloc.last_line = yylineno;             \
+    yylloc.first_column = yycolumn;                              \
+    if (yytext[0] == '\n') {                                     \
+        yycolumn =  1;                                           \
+    } else {                                                     \
+        yycolumn += yyleng;                                      \
+    }                                                            \
+    yylloc.last_column = yycolumn - 1;
+
+
     #define DEBUG_LEX 0
 
     #include <stdio.h>
@@ -12,7 +26,7 @@
     #include "lib/tree.h"
     #include "lib/astcontext.h"
 
-    int num_line = 1, num_col = 1, error = 0, scope = 0;
+    int num_line = 1, num_col = 1, error = 0, scope = 0, symbol_id = 0;
 
     void print_token(char *type);
 %}
@@ -65,10 +79,10 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE_INT, yytext);
             return INT_TOKEN;
         case 'f':
-            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE_FLOAT, yytext);
             return FLOAT_TOKEN;
     }
 }
@@ -78,10 +92,10 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE_INT_LIST, yytext);
             return INT_LIST_TOKEN;
         case 'f':
-            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE_FLOAT_LIST, yytext);
             return FLOAT_LIST_TOKEN;
     }
 }
@@ -112,11 +126,13 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case '+':
+            return yytext[0];
         case '-':
-            return ADD_MIN_TOKEN;
+            return yytext[0];
         case '*':
+            return yytext[0];
         case '/':
-            return MUL_DIV_TOKEN;
+            return yytext[0];
     }
 }
 
@@ -136,11 +152,19 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case '<':
+            if(yytext[1] == '=')
+                return LE_EQ_TOKEN;
+            else
+                return LESS_TOKEN;
         case '>':
-            return LE_GR_TOKEN;
+            if(yytext[1] == '=')
+                return GR_EQ_TOKEN;
+            else
+                return GREAT_TOKEN;
         case '=':
+            return EQUAL_TOKEN;
         case '!':
-            return EQ_EXC_TOKEN;
+            return DIFF_EQ_TOKEN;
     }
 }
 
@@ -156,7 +180,7 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
             return PERCENTAGE_TOKEN;
         case '+':
         case '-':
-            return ADD_MIN_TOKEN;
+            return yytext[0];
     }
 }
 
@@ -196,8 +220,10 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case 'r':
+            yylval.astnode = create_astnode_context(AST_FUNC_CALL, yytext);
             return READ_TOKEN;
         case 'w':
+            yylval.astnode = create_astnode_context(AST_FUNC_CALL, yytext);
             return WRITE_TOKEN;
     }
 }

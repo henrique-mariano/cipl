@@ -2,10 +2,13 @@ int x;
 
 int main(int agrc, float argv, int m, int k){
     int k;
-    if(i + 2){
-        for(i; i + 2; i){
-            int l;
-            mama("kkkkkk", i, 1, NIL);
+    float list j;
+
+    if(k > j){
+        for(i; i < n; i){
+            return 1;
         }
+    } else {
+        return 2;
     }
 }

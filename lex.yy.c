@@ -162,8 +162,27 @@ extern FILE *yyin, *yyout;
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
     
-    #define YY_LESS_LINENO(n)
-    #define YY_LINENO_REWIND_TO(ptr)
+    /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
+     *       access to the local variable yy_act. Since yyless() is a macro, it would break
+     *       existing scanners that call yyless() from OUTSIDE yylex.
+     *       One obvious solution it to make yy_act a global. I tried that, and saw
+     *       a 5% performance hit in a non-yylineno scanner, because yy_act is
+     *       normally declared as a register variable-- so it is not worth it.
+     */
+    #define  YY_LESS_LINENO(n) \
+            do { \
+                int yyl;\
+                for ( yyl = n; yyl < yyleng; ++yyl )\
+                    if ( yytext[yyl] == '\n' )\
+                        --yylineno;\
+            }while(0)
+    #define YY_LINENO_REWIND_TO(dst) \
+            do {\
+                const char *p;\
+                for ( p = yy_cp-1; p >= (dst); --p)\
+                    if ( *p == '\n' )\
+                        --yylineno;\
+            }while(0)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -488,6 +507,12 @@ static const flex_int16_t yy_chk[178] =
        78,   78,   78,   78,   78,   78,   78
     } ;
 
+/* Table of booleans, true if rule could match eol. */
+static const flex_int32_t yy_rule_can_match_eol[22] =
+    {   0,
+0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0,     };
+
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
 
@@ -506,6 +531,20 @@ char *yytext;
 #define YY_NO_INPUT 1
 #line 4 "./src/lex.l"
     // Autor: Henrique Mendes de Freitas Mariano - 17/0012280
+
+    int yycolumn = 1;
+
+    #define YY_USER_ACTION                                       \
+    yylloc.first_line = yylloc.last_line = yylineno;             \
+    yylloc.first_column = yycolumn;                              \
+    if (yytext[0] == '\n') {                                     \
+        yycolumn =  1;                                           \
+    } else {                                                     \
+        yycolumn += yyleng;                                      \
+    }                                                            \
+    yylloc.last_column = yycolumn - 1;
+
+
     #define DEBUG_LEX 0
 
     #include <stdio.h>
@@ -516,11 +555,11 @@ char *yytext;
     #include "lib/tree.h"
     #include "lib/astcontext.h"
 
-    int num_line = 1, num_col = 1, error = 0, scope = 0;
+    int num_line = 1, num_col = 1, error = 0, scope = 0, symbol_id = 0;
 
     void print_token(char *type);
-#line 523 "lex.yy.c"
-#line 524 "lex.yy.c"
+#line 562 "lex.yy.c"
+#line 563 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -735,9 +774,9 @@ YY_DECL
 		}
 
 	{
-#line 51 "./src/lex.l"
+#line 65 "./src/lex.l"
 
-#line 741 "lex.yy.c"
+#line 780 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -783,6 +822,16 @@ yy_find_action:
 
 		YY_DO_BEFORE_ACTION;
 
+		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
+			{
+			int yyl;
+			for ( yyl = 0; yyl < yyleng; ++yyl )
+				if ( yytext[yyl] == '\n' )
+					
+    yylineno++;
+;
+			}
+
 do_action:	/* This label is used only to access EOF actions. */
 
 		switch ( yy_act )
@@ -796,7 +845,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 52 "./src/lex.l"
+#line 66 "./src/lex.l"
 {
     num_col += yyleng;
 }
@@ -804,7 +853,7 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 56 "./src/lex.l"
+#line 70 "./src/lex.l"
 {
     num_line += yyleng;
     num_col = 1;
@@ -812,44 +861,44 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 61 "./src/lex.l"
+#line 75 "./src/lex.l"
 {}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 63 "./src/lex.l"
+#line 77 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("SIMPLE_TYPE");
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE_INT, yytext);
             return INT_TOKEN;
         case 'f':
-            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE_FLOAT, yytext);
             return FLOAT_TOKEN;
     }
 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 76 "./src/lex.l"
+#line 90 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("LIST_TYPES");
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE_INT_LIST, yytext);
             return INT_LIST_TOKEN;
         case 'f':
-            yylval.astnode = create_astnode_context(AST_TYPE, yytext);
+            yylval.astnode = create_astnode_context(AST_TYPE_FLOAT_LIST, yytext);
             return FLOAT_LIST_TOKEN;
     }
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 89 "./src/lex.l"
+#line 103 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Constant integer");
     num_col += yyleng;
@@ -859,7 +908,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 96 "./src/lex.l"
+#line 110 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Constant real");
     num_col += yyleng;
@@ -869,7 +918,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 103 "./src/lex.l"
+#line 117 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("String");
     num_col += yyleng;
@@ -879,23 +928,25 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 110 "./src/lex.l"
+#line 124 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Arithmetic operation");
     num_col += yyleng;
     switch(yytext[0]){
         case '+':
+            return yytext[0];
         case '-':
-            return ADD_MIN_TOKEN;
+            return yytext[0];
         case '*':
+            return yytext[0];
         case '/':
-            return MUL_DIV_TOKEN;
+            return yytext[0];
     }
 }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 123 "./src/lex.l"
+#line 139 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Logic operation");
     num_col += yyleng;
@@ -909,23 +960,31 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 134 "./src/lex.l"
+#line 150 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Relational operation");
     num_col += yyleng;
     switch(yytext[0]){
         case '<':
+            if(yytext[1] == '=')
+                return LE_EQ_TOKEN;
+            else
+                return LESS_TOKEN;
         case '>':
-            return LE_GR_TOKEN;
+            if(yytext[1] == '=')
+                return GR_EQ_TOKEN;
+            else
+                return GREAT_TOKEN;
         case '=':
+            return EQUAL_TOKEN;
         case '!':
-            return EQ_EXC_TOKEN;
+            return DIFF_EQ_TOKEN;
     }
 }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 147 "./src/lex.l"
+#line 171 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Unary operation list");
     num_col += yyleng;
@@ -938,13 +997,13 @@ YY_RULE_SETUP
             return PERCENTAGE_TOKEN;
         case '+':
         case '-':
-            return ADD_MIN_TOKEN;
+            return yytext[0];
     }
 }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 163 "./src/lex.l"
+#line 187 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Binary operation list");
     num_col += yyleng;
@@ -960,7 +1019,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 176 "./src/lex.l"
+#line 200 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Flow control command");
     num_col += yyleng;
@@ -981,21 +1040,23 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 194 "./src/lex.l"
+#line 218 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("IN/OUT operation");
     num_col += yyleng;
     switch(yytext[0]){
         case 'r':
+            yylval.astnode = create_astnode_context(AST_FUNC_CALL, yytext);
             return READ_TOKEN;
         case 'w':
+            yylval.astnode = create_astnode_context(AST_FUNC_CALL, yytext);
             return WRITE_TOKEN;
     }
 }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 205 "./src/lex.l"
+#line 231 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("ID");
     num_col += yyleng;
@@ -1005,7 +1066,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 212 "./src/lex.l"
+#line 238 "./src/lex.l"
 {
     num_col += yyleng;
     if(DEBUG_LEX == 1) print_token("Bracket");
@@ -1014,7 +1075,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 218 "./src/lex.l"
+#line 244 "./src/lex.l"
 {
     num_col += yyleng;
     if(DEBUG_LEX == 1) print_token("Comma");
@@ -1023,7 +1084,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 224 "./src/lex.l"
+#line 250 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Assign");
     num_col += yyleng;
@@ -1032,7 +1093,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 230 "./src/lex.l"
+#line 256 "./src/lex.l"
 {
     error++;
     printf("Line: %d || Column: %d || ", num_line, num_col);
@@ -1042,10 +1103,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 236 "./src/lex.l"
+#line 262 "./src/lex.l"
 ECHO;
 	YY_BREAK
-#line 1049 "lex.yy.c"
+#line 1110 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1452,6 +1513,11 @@ static int yy_get_next_buffer (void)
 	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
 	*(yy_c_buf_p) = '\0';	/* preserve yytext */
 	(yy_hold_char) = *++(yy_c_buf_p);
+
+	if ( c == '\n' )
+		
+    yylineno++;
+;
 
 	return c;
 }
@@ -1919,6 +1985,9 @@ static int yy_init_globals (void)
      * This function is called from yylex_destroy(), so don't allocate here.
      */
 
+    /* We do not touch yylineno unless the option is enabled. */
+    yylineno =  1;
+    
     (yy_buffer_stack) = NULL;
     (yy_buffer_stack_top) = 0;
     (yy_buffer_stack_max) = 0;
@@ -2013,7 +2082,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 236 "./src/lex.l"
+#line 262 "./src/lex.l"
 
 
 void print_token(char *type){
