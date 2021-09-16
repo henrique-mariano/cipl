@@ -1,13 +1,14 @@
-// main
 int list a;
 
+// main
 int main(){
-    int variavel_auxiliar;
+    int aux;
     int x;
     x = 2;
-    if (variavel_auxiliar > 2){
+    if (aux > 2){
         a = 2 : a;
     } else {
         x = x + 2;
     }
+    write("string");
 }
