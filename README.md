@@ -19,5 +19,7 @@ Para a execução:
 - [X] Completar gramática
 - [X] Estrutura de nó
 - [X] Árvore sintática abstrata
-- [] Tabela de símbolos
+- [X] Tabela de símbolos
+- [] Tratamento de erros
+- [] Escopos
 - [] Lidar com contextos na árvore
