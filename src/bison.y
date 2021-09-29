@@ -8,8 +8,17 @@
     #include "lib/tree.h"
     #include "lib/astcontext.h"
     #include "lib/symbol.h"
+    #include "lib/context.h"
+    #include "lib/treenode.h"
 
-    extern int error, num_line, num_col, symbol_id, scope;
+    #define FUNCTION 1
+    #define VARIABLE 0
+
+    extern int error, num_line, num_col;
+
+    // static int symbol_id;
+
+    unsigned int current_scope;
     
     extern int yyparse();
     extern int yylex();
@@ -21,11 +30,22 @@
     /* No raiz da arvore sintatica abstrata */
     AstNode *root;
 
+    /* Contexto atual e arvore de contextos */
+    List *list_context;
+    TreeNode *current_context;
+    TreeNode *last_context;
+    TreeNode *global_context;
+    int isFunctionContext;
+
     /* Lista para ajudar na criacao da arvore */
     List *node_aux;
 
     /* Tabela de simbolos */
-    SymbolTable *symbol_table;
+    // SymbolTable *symbol_table;
+
+    void delete_single_node(Element *node);
+    void delete_list_treenode(Element *elem);
+    void delete_tree_symbol_table(void *sym);
 
 %}
 
@@ -112,69 +132,64 @@ declaration:
 
 variableDeclare:
     type id ';' {
-        $$ = create_astnode_context(AST_VAR_DECLARE, "variable declare");
-        insert_kid($1, $$);
-        insert_kid($2, $$);
-        switch($1->context->type){
-            case AST_TYPE_INT:
-            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, INT_SYMBOL_CONST, 0));
-            break;
-
-            case AST_TYPE_FLOAT:
-            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, FLOAT_SYMBOL_CONST, 0));
-            break;
-
-            case AST_TYPE_INT_LIST:
-            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, INT_LIST_SYMBOL_CONST, 0));
-            break;
-
-            case AST_TYPE_FLOAT_LIST:
-            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, FLOAT_LIST_SYMBOL_CONST, 0));
-            break;
-
+        printf("current_context_var: %p || name: %s\n", current_context->value, $2->context->name);
+        Symbol *sym_declared = lookup_symbol($2->context->name, current_context);
+        if(sym_declared != NULL){
+            printf("Semantic Error: Variable redeclaration || Value: %s\n", sym_declared->name);
+            $$ = NULL;
+            delete_astnode($1);
+            delete_astnode($2);
+        } else {
+            list_symbol_insert($1->context->type, ((SymbolTable *)current_context->value)->symbols, $2->context->name, 0, @2.first_line, @2.first_column, VARIABLE);
+            $$ = create_astnode_context(AST_VAR_DECLARE, "variable declare");
+            insert_kid($1, $$);
+            insert_kid($2, $$);
         }
-        symbol_id++;
     }
 ;
 
 functionDeclare: 
-    type id '(' optListParams ')' compoundStatement {
-        /* Lidar com contextos */
-        $$ = create_astnode_context(AST_FUNC_DECLARE, "func declare");
-        insert_kid($1, $$);
-        insert_kid($2, $$);
-        switch($1->context->type){
-            case AST_TYPE_INT:
-            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, INT_SYMBOL_CONST, 1));
-            break;
+    type id '(' <astnode>{
+        $$ = $2;
+        last_context = current_context;
 
-            case AST_TYPE_FLOAT:
-            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, FLOAT_SYMBOL_CONST, 1));
-            break;
+        Symbol *sym_declared = lookup_symbol($2->context->name, last_context);
 
-            case AST_TYPE_INT_LIST:
-            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, INT_LIST_SYMBOL_CONST, 1));
-            break;
+        if(sym_declared != NULL){
+            printf("Semantic Error: Function redeclaration || Value: %s\n", sym_declared->name);
+        } else {
+            list_symbol_insert($1->context->type, ((SymbolTable *)current_context->value)->symbols, $2->context->name, 0, @2.first_line, @2.first_column, FUNCTION);
+            isFunctionContext = 1;
+            insert_list_element(list_context, create_node(create_symbol_table()));
+            Element *iterator;
 
-            case AST_TYPE_FLOAT_LIST:
-            insert_symbol(symbol_table, create_symbol(symbol_id, strdup($2->context->name), 0, @2.first_line, @2.first_column, scope, FLOAT_LIST_SYMBOL_CONST, 1));
-            break;
-
+            for(iterator = list_context->first; iterator != NULL; iterator = iterator->next){
+                current_context = iterator->value;
+            }
+            insert_children(current_context, last_context);
         }
-        symbol_id++;
-        if($4){ /* Se existir parametros insira */
+    } optListParams ')' compoundStatement {
+        current_context = last_context;
+        $$ = create_astnode_context(AST_FUNC_DECLARE, "func declare");
+        
+        if($1)
+            insert_kid($1, $$);
+        if($4){
+            insert_kid($4, $$);
+        }
+        if($5){ /* Se existir parametros insira */
             // Cria um noh que recebe os parametros
             AstNode *params = create_astnode_context(AST_LIST_PARAM, "params");
 
             // Percorre a lista de parametros inserindo os parametros no noh params
-            while($4->size) {
-                AstNode *aux = remove_first_element_list($4);
+            while($5->size) {
+                AstNode *aux = remove_first_element_list($5);
                 insert_kid(aux, params);
             }
-            delete_list($4, delete_list_astnode);
+            delete_list($5, delete_list_astnode);
             insert_kid(params, $$);
         }
-        insert_kid($6, $$);
+        insert_kid($7, $$);
     }
 ;
 
@@ -206,20 +221,33 @@ param:
 
 
 compoundStatement:
-    '{' optListCodeBlock '}' {
+    '{' {
+        if(!isFunctionContext){
+            last_context = current_context;
+            insert_list_element(list_context, create_node(create_symbol_table()));
+            Element *iterator;
+
+            for(iterator = list_context->first; iterator != NULL; iterator = iterator->next){
+                current_context = iterator->value;
+            }
+            insert_children(current_context, last_context);
+        }
+        isFunctionContext = 0;
+    } optListCodeBlock '}' {
         $$ = create_astnode_context(AST_STATE_COMPOUND, "compound statement");
-        if($2){ /* Se existir code block insira */
+        if($3){ /* Se existir code block insira */
             // Cria um noh que recebe os code blocks
             AstNode *codeblocks = create_astnode_context(AST_CODE_BLOCK, "code block");
 
             // Percorre a lista de code blocks inserindo os code blocks no noh code blocks
-            while($2->size) {
-                AstNode *aux = remove_first_element_list($2);
+            while($3->size) {
+                AstNode *aux = remove_first_element_list($3);
                 insert_kid(aux, codeblocks);
             }
-            delete_list($2, delete_list_astnode);
+            delete_list($3, delete_list_astnode);
             insert_kid(codeblocks, $$);
         }
+        current_context = last_context;
     }
 ;
 
@@ -588,6 +616,29 @@ void yyerror(const char *error_msg){
     printf("Error: %s || Error count: %d \n", error_msg, error);
 }
 
+void delete_single_node(Element *node){
+    if(!node)
+        return;
+
+    Element *current = ((TreeNode *) node->value)->children->first;
+    Element *next;
+    while(current != NULL){
+        next = current->next;
+        free_element(current, delete_single_node);
+        current = next;
+    }
+}
+
+void delete_tree_symbol_table(void *sym){
+    SymbolTable *table = sym;
+    delete_symbol_table(table, delete_list_symbol_table);
+}
+
+void delete_list_treenode(Element *elem){
+    TreeNode *node = elem->value;
+    delete_node(node, delete_single_node, delete_tree_symbol_table);
+}
+
 int main(int argc, char **argv){
     if(argc < 2){
         printf("Error: It is necessary to inform the file path\n");
@@ -603,7 +654,12 @@ int main(int argc, char **argv){
     yyin = fp;
     root = create_astnode_context(AST_ROOT, "root");
     node_aux = create_list();
-    symbol_table = create_symbol_table();
+
+    list_context = create_list();
+    // global_context = create_node(create_symbol_table());
+    insert_list_element(list_context, create_node(create_symbol_table()));
+    global_context = list_context->first->value;
+    current_context = global_context;
 
     yyparse();
 
@@ -614,18 +670,25 @@ int main(int argc, char **argv){
     } else {
         printf("Unable to print AST\n");
     }
-    if(symbol_table->symbols->size > 0) {
-        printf("########################## %s #########################\n", "Symbol Table");
-        printf("# %-14s || %11s || %-10s || %4s || %6s #\n", "Type", "Symbol Kind", "ID", "Line", "Column");
-        print_list(symbol_table->symbols, print_symbol_list);
-        printf("#################################################################\n");
+
+    Element *iterator;
+    // int i = 0;
+    if(((SymbolTable *)((TreeNode *) list_context->first->value)->value)->symbols->size > 0){
+        for(iterator = list_context->first; iterator != NULL; iterator = iterator->next){
+            printf("########################## %s #########################\n", "Symbol Table");
+            printf("# %-14s || %11s || %-10s || %4s || %6s #\n", "Type", "Symbol Kind", "ID", "Line", "Column");
+            if(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols->size > 0) {
+                print_list(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols, print_symbol_list);
+            }
+            printf("#################################################################\n");
+        }
     } else {
         printf("Unable to print Symbol Table\n");
     }
-
     delete_astnode(root);
     delete_list(node_aux, delete_list_astnode);
-    delete_symbol_table(symbol_table, delete_list_symbol_table);
+    // delete_symbol_table(symbol_table, delete_list_symbol_table);
+    delete_list(list_context, delete_list_treenode);
     fclose(yyin);
     yylex_destroy();
     

@@ -115,7 +115,10 @@ void delete_list(List *lista, void (*callback)(Element *)){
     Element *next;
     while(current != NULL){
         next = current->next;
-        free_element(current, callback);
+        if(callback)
+            free_element(current, callback);
+        else
+            free(current->value);
         current = next;
     }
     free(lista);

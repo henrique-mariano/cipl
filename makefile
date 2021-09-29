@@ -6,7 +6,7 @@ FLEXFILES= $(SRC)/lex.l
 
 BISONFILES= $(SRC)/bison.y
 
-CFILES= src/list.c src/tree.c src/astcontext.c src/symbol.c lex.yy.c bison.tab.c
+CFILES= src/list.c src/tree.c src/astcontext.c src/symbol.c src/treenode.c src/context.c lex.yy.c bison.tab.c
 
 FLAGS= -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
 
@@ -46,5 +46,5 @@ else
 	rm *.tab.c
 endif
 
-valgrind: $(VAL)
+valgrind: all $(VAL)
 	valgrind -v --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file="logfile.out" ./tradutor $(VAL)
