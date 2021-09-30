@@ -29,3 +29,14 @@ Symbol* lookup_symbol(char *name, TreeNode *node){
     }
     return NULL;
 }
+
+Symbol* lookup_symbol_context(char *name, TreeNode *node){
+    SymbolTable *sym_it;
+    sym_it = node->value;
+    for(Element *elm_it = sym_it->symbols->first; elm_it != NULL; elm_it = elm_it->next){
+        if(!strcmp(name, ((Symbol *)elm_it->value)->name)){
+            return elm_it->value;
+        }
+    }
+    return NULL;
+}

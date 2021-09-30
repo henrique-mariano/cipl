@@ -133,7 +133,7 @@ declaration:
 variableDeclare:
     type id ';' {
         printf("current_context_var: %p || name: %s\n", current_context->value, $2->context->name);
-        Symbol *sym_declared = lookup_symbol($2->context->name, current_context);
+        Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
         if(sym_declared != NULL){
             printf("Semantic Error: Variable redeclaration || Value: %s\n", sym_declared->name);
             $$ = NULL;
@@ -151,9 +151,10 @@ variableDeclare:
 functionDeclare: 
     type id '(' <astnode>{
         $$ = $2;
+        printf("current_context_func: %p || name: %s\n", current_context->value, $2->context->name);
         last_context = current_context;
 
-        Symbol *sym_declared = lookup_symbol($2->context->name, last_context);
+        Symbol *sym_declared = lookup_symbol_context($2->context->name, last_context);
 
         if(sym_declared != NULL){
             printf("Semantic Error: Function redeclaration || Value: %s\n", sym_declared->name);
@@ -218,7 +219,6 @@ param:
         insert_kid($2, $$);
     }
 ;
-
 
 compoundStatement:
     '{' {
