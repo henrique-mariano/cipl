@@ -20,6 +20,8 @@ Para a execução:
 - [X] Estrutura de nó
 - [X] Árvore sintática abstrata
 - [X] Tabela de símbolos
-- [] Tratamento de erros
-- [] Escopos
 - [] Lidar com contextos na árvore
+- [] Escopos
+- [] Verificar existência de variáveis e funções
+- [] Verificar os tipos das variáveis e funções
+- [] Tratamento de erros

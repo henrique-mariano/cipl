@@ -12,6 +12,8 @@ AstNode* create_astnode(AstContext *context){
 }
 
 void insert_kid(AstNode *kid, AstNode *no){
+    if(!kid)
+        return;
     kid->father = no;
     insert_list_element(no->kids, kid);
 }
@@ -30,6 +32,8 @@ void delete_astnode(AstNode *no){
 }
 
 void print_tree(AstNode *root, int tab){
+    if(!root)
+        return;
     Element *first_son = root->kids->first;
     printf("%s%s", root->context->name, *root->context->name ? "\n" : "");
     while (first_son != NULL){

@@ -2,6 +2,7 @@
 #define ___SYMBOL_H___
 
 #include "list.h"
+#include "astcontext.h"
 
 typedef enum TypeSimbol{
     INT_SYMBOL_CONST = 1,
@@ -13,13 +14,11 @@ typedef enum TypeSimbol{
 extern char* nome_tipos[FLOAT_LIST_SYMBOL_CONST+1];
 
 typedef struct Symbol{
-    int id;
     char *name;
     double value;
     int line;
     int column;
-    int scope;
-    int function;
+    unsigned int isfunction;
     TypeSimbol type_simbol;
 } Symbol;
 
@@ -27,11 +26,13 @@ typedef struct SymbolTable{
     List *symbols;
 } SymbolTable;
 
-Symbol* create_symbol(int id, char *name, double value, int line, int column, int scope, unsigned int type_symbol, int function);
+Symbol* create_symbol(char *name, double value, int line, int column, unsigned int type_symbol, unsigned int function);
 
 SymbolTable* create_symbol_table();
 
 void insert_symbol(SymbolTable* symbol_table, Symbol *symbol);
+
+void list_symbol_insert(unsigned int type, List *symbol_list, char *name, double value, int line, int column, unsigned int isfunction);
 
 void delete_symbol(Symbol *symbol);
 
