@@ -132,7 +132,8 @@ declaration:
 
 variableDeclare:
     type id ';' {
-        printf("current_context_var: %p || name: %s\n", current_context->value, $2->context->name);
+        // current_context = current_context;
+        // printf("current_context_var: %p || name: %s\n", (void *) current_context, $2->context->name);
         Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
         if(sym_declared != NULL){
             printf("Semantic Error: Variable redeclaration || Value: %s\n", sym_declared->name);
@@ -151,7 +152,7 @@ variableDeclare:
 functionDeclare: 
     type id '(' <astnode>{
         $$ = $2;
-        printf("current_context_func: %p || name: %s\n", current_context->value, $2->context->name);
+        // printf("current_context_func: %p || name: %s\n", (void *) current_context, $2->context->name);
         last_context = current_context;
 
         Symbol *sym_declared = lookup_symbol_context($2->context->name, last_context);
@@ -170,7 +171,6 @@ functionDeclare:
             insert_children(current_context, last_context);
         }
     } optListParams ')' compoundStatement {
-        current_context = last_context;
         $$ = create_astnode_context(AST_FUNC_DECLARE, "func declare");
         
         if($1)
@@ -214,14 +214,24 @@ listParams:
 
 param:
     type id {
-        $$ = create_astnode_context(AST_PARAM, "param");
-        insert_kid($1, $$);
-        insert_kid($2, $$);
+        Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
+        if(sym_declared != NULL){
+            printf("Semantic Error: Param redeclaration || Value: %s\n", sym_declared->name);
+            $$ = NULL;
+            delete_astnode($1);
+            delete_astnode($2);
+        } else {
+            list_symbol_insert($1->context->type, ((SymbolTable *)current_context->value)->symbols, $2->context->name, 0, @2.first_line, @2.first_column, VARIABLE);
+            $$ = create_astnode_context(AST_PARAM, "param");
+            insert_kid($1, $$);
+            insert_kid($2, $$);
+        }
     }
 ;
 
 compoundStatement:
     '{' {
+        // printf("current_context_compound: %p\n", (void *) current_context);
         if(!isFunctionContext){
             last_context = current_context;
             insert_list_element(list_context, create_node(create_symbol_table()));
@@ -230,6 +240,7 @@ compoundStatement:
             for(iterator = list_context->first; iterator != NULL; iterator = iterator->next){
                 current_context = iterator->value;
             }
+            // printf("current_context: %p || last_context: %p\n", (void *) current_context, (void *) last_context);
             insert_children(current_context, last_context);
         }
         isFunctionContext = 0;
@@ -247,7 +258,9 @@ compoundStatement:
             delete_list($3, delete_list_astnode);
             insert_kid(codeblocks, $$);
         }
-        current_context = last_context;
+        // printf("Atualizando current_context: %p || pai: %p\n", (void *) current_context, (void *) current_context->father);
+        current_context = current_context->father;
+        // printf("Depois current_context: %p || pai: %p\n", (void *) current_context, (void *) current_context->father);
     }
 ;
 
@@ -620,13 +633,14 @@ void delete_single_node(Element *node){
     if(!node)
         return;
 
-    Element *current = ((TreeNode *) node->value)->children->first;
-    Element *next;
-    while(current != NULL){
-        next = current->next;
-        free_element(current, delete_single_node);
-        current = next;
-    }
+    // Element *current = ((TreeNode *) node->value)->children->first;
+    // free(((TreeNode *) node->value));
+    // Element *next;
+    // while(current != NULL){
+    //     next = current->next;
+    //     free_element(current, delete_single_node);
+    //     current = next;
+    // }
 }
 
 void delete_tree_symbol_table(void *sym){
