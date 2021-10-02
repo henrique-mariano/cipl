@@ -14,7 +14,12 @@
     #define FUNCTION 1
     #define VARIABLE 0
 
+    #define RED "\033[1;31m"
+    #define RESET "\033[0m"
+
     extern int error, num_line, num_col;
+
+    int semantic_error = 0;
 
     // static int symbol_id;
 
@@ -132,11 +137,11 @@ declaration:
 
 variableDeclare:
     type id ';' {
-        // current_context = current_context;
         // printf("current_context_var: %p || name: %s\n", (void *) current_context, $2->context->name);
         Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
         if(sym_declared != NULL){
-            printf("Semantic Error: Variable redeclaration || Value: %s\n", sym_declared->name);
+            printf(RED"Semantic error: variable redeclaration of '%s'\n"RESET, sym_declared->name);
+            semantic_error = 1;
             $$ = NULL;
             delete_astnode($1);
             delete_astnode($2);
@@ -158,7 +163,8 @@ functionDeclare:
         Symbol *sym_declared = lookup_symbol_context($2->context->name, last_context);
 
         if(sym_declared != NULL){
-            printf("Semantic Error: Function redeclaration || Value: %s\n", sym_declared->name);
+            printf(RED"Semantic error: function redeclaration of '%s'\n"RESET, sym_declared->name);
+            semantic_error = 1;
         } else {
             list_symbol_insert($1->context->type, ((SymbolTable *)current_context->value)->symbols, $2->context->name, 0, @2.first_line, @2.first_column, FUNCTION);
             isFunctionContext = 1;
@@ -216,7 +222,8 @@ param:
     type id {
         Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
         if(sym_declared != NULL){
-            printf("Semantic Error: Param redeclaration || Value: %s\n", sym_declared->name);
+            printf(RED"Semantic error: param redeclaration of '%s'\n"RESET, sym_declared->name);
+            semantic_error = 1;
             $$ = NULL;
             delete_astnode($1);
             delete_astnode($2);
@@ -364,10 +371,16 @@ optExpression:
 ;
 
 expression:
-    id ASSIGN_TOKEN expression {
+    id {
+        Symbol *has_sym = lookup_symbol($1->context->name, current_context);
+        if(has_sym == NULL){
+            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, $1->context->name);
+            semantic_error = 1;
+        }
+    } ASSIGN_TOKEN expression {
         $$ = create_astnode_context(AST_EXPR_ASSIGN, "assign");
         insert_kid($1, $$);
-        insert_kid($3, $$);
+        insert_kid($4, $$);
     }
     | binArith {
         $$ = create_astnode_context(AST_EXPRESSION, "");
@@ -390,8 +403,14 @@ expression:
         insert_kid($1, $$);
     }
     | id {
-        $$ = create_astnode_context(AST_EXPRESSION, "");
-        insert_kid($1, $$);
+        Symbol *has_sym = lookup_symbol($1->context->name, current_context);
+        if(has_sym == NULL){
+            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, $1->context->name);
+            semantic_error = 1;
+        } else {
+            $$ = create_astnode_context(AST_EXPRESSION, "");
+            insert_kid($1, $$);
+        }
     }
     | '(' expression ')' {
         $$ = create_astnode_context(AST_EXPRESSION, "");
@@ -547,21 +566,33 @@ constantString:
 ;
 
 funcCall:
-    id '(' optListExpression ')' {
+    id {
+       Symbol *has_sym = lookup_symbol($1->context->name, current_context);
+        if(has_sym == NULL){
+            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, $1->context->name);
+            semantic_error = 1;
+        } 
+    } '(' optListExpression ')' {
         $$ = create_astnode_context(AST_FUNC_CALL, "func call");
         insert_kid($1, $$);
-        if($3){
+        if($4){
             AstNode *arguments = create_astnode_context(AST_CODE_BLOCK, "arguments");
 
-            while($3->size) {
-                AstNode *aux = remove_first_element_list($3);
+            while($4->size) {
+                AstNode *aux = remove_first_element_list($4);
                 insert_kid(aux, arguments);
             }
-            delete_list($3, delete_list_astnode);
+            delete_list($4, delete_list_astnode);
             insert_kid(arguments, $$);
         }
     }
-    | READ_TOKEN '(' id ')' {
+    | READ_TOKEN '(' id {
+        Symbol *has_sym = lookup_symbol($3->context->name, current_context);
+        if(has_sym == NULL){
+            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, $3->context->name);
+            semantic_error = 1;
+        }
+    } ')' {
         $$ = create_astnode_context(AST_FUNC_CALL, "func call");
         insert_kid($1, $$);
         insert_kid($3, $$);
@@ -625,22 +656,17 @@ type:
 
 void yyerror(const char *error_msg){
     error++;
-    printf("Line: %d || Column: %d || ", num_line, num_col);
-    printf("Error: %s || Error count: %d \n", error_msg, error);
+    printf(RED"Line: %d || Column: %d || "RESET, num_line, num_col);
+    printf(RED"Error: %s || Error count: %d \n"RESET, error_msg, error);
 }
 
+/* 
+*   O primeiro node ja deleta os nodes subsequentes 
+*   e portanto nao precisamos deletar na lista. 
+*/
 void delete_single_node(Element *node){
     if(!node)
         return;
-
-    // Element *current = ((TreeNode *) node->value)->children->first;
-    // free(((TreeNode *) node->value));
-    // Element *next;
-    // while(current != NULL){
-    //     next = current->next;
-    //     free_element(current, delete_single_node);
-    //     current = next;
-    // }
 }
 
 void delete_tree_symbol_table(void *sym){
@@ -655,13 +681,13 @@ void delete_list_treenode(Element *elem){
 
 int main(int argc, char **argv){
     if(argc < 2){
-        printf("Error: It is necessary to inform the file path\n");
+        printf(RED"Error: It is necessary to inform the file path\n"RESET);
         return 0;
     }
 
     FILE *fp = fopen(argv[1], "r");
     if(!fp){
-        printf("Error: Unable to open file\n");
+        printf(RED"Error: Unable to open file\n"RESET);
         return 0;
     }
 
@@ -670,38 +696,40 @@ int main(int argc, char **argv){
     node_aux = create_list();
 
     list_context = create_list();
-    // global_context = create_node(create_symbol_table());
     insert_list_element(list_context, create_node(create_symbol_table()));
     global_context = list_context->first->value;
     current_context = global_context;
 
     yyparse();
-
-    if(root->kids->size > 0) {
-        printf("##################### %s #####################\n", "Abstract Syntax Tree");
-        print_tree(root, 0);
-        printf("\n");
-    } else {
-        printf("Unable to print AST\n");
+    if(!semantic_error){
+        if(root->kids->size > 0) {
+            printf("##################### %s #####################\n", "Abstract Syntax Tree");
+            print_tree(root, 0);
+            printf("\n");
+        } else {
+            printf(RED"Unable to print AST\n"RESET);
+        }
     }
 
     Element *iterator;
-    // int i = 0;
-    if(((SymbolTable *)((TreeNode *) list_context->first->value)->value)->symbols->size > 0){
-        for(iterator = list_context->first; iterator != NULL; iterator = iterator->next){
-            printf("########################## %s #########################\n", "Symbol Table");
-            printf("# %-14s || %11s || %-10s || %4s || %6s #\n", "Type", "Symbol Kind", "ID", "Line", "Column");
-            if(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols->size > 0) {
-                print_list(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols, print_symbol_list);
+    if(!semantic_error){
+        // TODO: Arrumar if
+        if(((SymbolTable *)((TreeNode *) list_context->first->value)->value)->symbols->size > 0){
+            for(iterator = list_context->first; iterator != NULL; iterator = iterator->next){
+                printf("########################## %s #########################\n", "Symbol Table");
+                printf("# %-14s || %11s || %-10s || %4s || %6s #\n", "Type", "Symbol Kind", "ID", "Line", "Column");
+                if(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols->size > 0) {
+                    print_list(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols, print_symbol_list);
+                }
+                printf("#################################################################\n");
             }
-            printf("#################################################################\n");
+        } else {
+            printf(RED"Unable to print Symbol Table\n"RESET);
         }
-    } else {
-        printf("Unable to print Symbol Table\n");
     }
+
     delete_astnode(root);
     delete_list(node_aux, delete_list_astnode);
-    // delete_symbol_table(symbol_table, delete_list_symbol_table);
     delete_list(list_context, delete_list_treenode);
     fclose(yyin);
     yylex_destroy();
