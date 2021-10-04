@@ -3334,7 +3334,7 @@ yyreduce:
         // printf("current_context_var: %p || name: %s\n", (void *) current_context, $2->context->name);
         Symbol *sym_declared = lookup_symbol_context((yyvsp[-1].astnode)->context->name, current_context);
         if(sym_declared != NULL){
-            printf(RED"Semantic error: variable redeclaration of '%s'\n"RESET, sym_declared->name);
+            printf(RED"Semantic error: variable redeclaration of '%s' || line: %d, column: %d\n"RESET, sym_declared->name, (yylsp[-1]).first_line, (yylsp[-1]).first_column);
             semantic_error = 1;
             (yyval.astnode) = NULL;
             delete_astnode((yyvsp[-2].astnode));
@@ -3359,7 +3359,7 @@ yyreduce:
         Symbol *sym_declared = lookup_symbol_context((yyvsp[-1].astnode)->context->name, last_context);
 
         if(sym_declared != NULL){
-            printf(RED"Semantic error: function redeclaration of '%s'\n"RESET, sym_declared->name);
+            printf(RED"Semantic error: function redeclaration of '%s' || line: %d, column: %d\n"RESET, sym_declared->name, (yylsp[-1]).first_line, (yylsp[-1]).first_column);
             semantic_error = 1;
         } else {
             list_symbol_insert((yyvsp[-2].astnode)->context->type, ((SymbolTable *)current_context->value)->symbols, (yyvsp[-1].astnode)->context->name, 0, (yylsp[-1]).first_line, (yylsp[-1]).first_column, FUNCTION);
@@ -3434,7 +3434,7 @@ yyreduce:
             {
         Symbol *sym_declared = lookup_symbol_context((yyvsp[0].astnode)->context->name, current_context);
         if(sym_declared != NULL){
-            printf(RED"Semantic error: param redeclaration of '%s'\n"RESET, sym_declared->name);
+            printf(RED"Semantic error: param redeclaration of '%s' || line: %d, column: %d\n"RESET, sym_declared->name, (yylsp[0]).first_line, (yylsp[0]).first_column);
             semantic_error = 1;
             (yyval.astnode) = NULL;
             delete_astnode((yyvsp[-1].astnode));
@@ -3653,7 +3653,7 @@ yyreduce:
        {
         Symbol *has_sym = lookup_symbol((yyvsp[0].astnode)->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, (yyvsp[0].astnode)->context->name);
+            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, (yyvsp[0].astnode)->context->name, (yylsp[0]).first_line, (yylsp[0]).first_column);
             semantic_error = 1;
         }
     }
@@ -3720,7 +3720,7 @@ yyreduce:
          {
         Symbol *has_sym = lookup_symbol((yyvsp[0].astnode)->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, (yyvsp[0].astnode)->context->name);
+            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, (yyvsp[0].astnode)->context->name, (yylsp[0]).first_line, (yylsp[0]).first_column);
             semantic_error = 1;
         } else {
             (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "");
@@ -4007,7 +4007,7 @@ yyreduce:
        {
        Symbol *has_sym = lookup_symbol((yyvsp[0].astnode)->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, (yyvsp[0].astnode)->context->name);
+            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, (yyvsp[0].astnode)->context->name, (yylsp[0]).first_line, (yylsp[0]).first_column);
             semantic_error = 1;
         } 
     }
@@ -4038,7 +4038,7 @@ yyreduce:
                         {
         Symbol *has_sym = lookup_symbol((yyvsp[0].astnode)->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, (yyvsp[0].astnode)->context->name);
+            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, (yyvsp[0].astnode)->context->name, (yylsp[0]).first_line, (yylsp[0]).first_column);
             semantic_error = 1;
         }
     }
@@ -4385,8 +4385,8 @@ void yyerror(const char *error_msg){
 *   e portanto nao precisamos deletar na lista. 
 */
 void delete_single_node(Element *node){
-    if(!node)
-        return;
+  if(!node)
+    return;
 }
 
 void delete_tree_symbol_table(void *sym){
@@ -4421,14 +4421,22 @@ int main(int argc, char **argv){
     current_context = global_context;
 
     yyparse();
+
+    Symbol *sym_main = lookup_symbol("main", current_context);
+
+    if(sym_main){
+        if(!sym_main->isfunction) 
+            printf(RED"Semantic error: Undefined reference to function main\n"RESET);
+    } else 
+        printf(RED"Semantic error: Undefined reference to function main\n"RESET);
+
     if(!semantic_error){
         if(root->kids->size > 0) {
             printf("##################### %s #####################\n", "Abstract Syntax Tree");
             print_tree(root, 0);
             printf("\n");
-        } else {
+        } else 
             printf(RED"Unable to print AST\n"RESET);
-        }
     }
 
     Element *iterator;
@@ -4436,16 +4444,15 @@ int main(int argc, char **argv){
         // TODO: Arrumar if
         if(((SymbolTable *)((TreeNode *) list_context->first->value)->value)->symbols->size > 0){
             for(iterator = list_context->first; iterator != NULL; iterator = iterator->next){
-                printf("########################## %s #########################\n", "Symbol Table");
-                printf("# %-14s || %11s || %-10s || %4s || %6s #\n", "Type", "Symbol Kind", "ID", "Line", "Column");
                 if(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols->size > 0) {
+                    printf("########################## %s #########################\n", "Symbol Table");
+                    printf("# %-14s || %11s || %-10s || %4s || %6s #\n", "Type", "Symbol Kind", "ID", "Line", "Column");
                     print_list(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols, print_symbol_list);
+                    printf("#################################################################\n");
                 }
-                printf("#################################################################\n");
             }
-        } else {
+        } else 
             printf(RED"Unable to print Symbol Table\n"RESET);
-        }
     }
 
     delete_astnode(root);

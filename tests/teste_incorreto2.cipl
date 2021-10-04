@@ -1,6 +1,5 @@
 int x;
+int  main;
 
-int main(){
-    return;
-    if()
-}
+
+float main;

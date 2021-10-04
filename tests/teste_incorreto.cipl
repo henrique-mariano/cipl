@@ -1,6 +1,18 @@
-int ;
-int a, int list b;
-
-int main(){
-    int
+int main(int a){
+    int b;
+    int m;
+    int m;
+    {
+        {
+            int b;
+            m = 2;
+        }
+        int b;
+    }
+    int x;
+    l = 1;
 }
+
+int x;
+
+// int main;

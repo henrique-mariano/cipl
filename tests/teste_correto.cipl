@@ -1,9 +1,9 @@
 int x;
 
 int main(int agrc, float argv, int m, int k){
-    int k;
     float list j;
-
+    int i;
+    int n;
     if(k > j){
         for(i; i < n; i){
             return 1;

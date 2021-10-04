@@ -140,7 +140,7 @@ variableDeclare:
         // printf("current_context_var: %p || name: %s\n", (void *) current_context, $2->context->name);
         Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
         if(sym_declared != NULL){
-            printf(RED"Semantic error: variable redeclaration of '%s'\n"RESET, sym_declared->name);
+            printf(RED"Semantic error: variable redeclaration of '%s' || line: %d, column: %d\n"RESET, sym_declared->name, @2.first_line, @2.first_column);
             semantic_error = 1;
             $$ = NULL;
             delete_astnode($1);
@@ -163,7 +163,7 @@ functionDeclare:
         Symbol *sym_declared = lookup_symbol_context($2->context->name, last_context);
 
         if(sym_declared != NULL){
-            printf(RED"Semantic error: function redeclaration of '%s'\n"RESET, sym_declared->name);
+            printf(RED"Semantic error: function redeclaration of '%s' || line: %d, column: %d\n"RESET, sym_declared->name, @2.first_line, @2.first_column);
             semantic_error = 1;
         } else {
             list_symbol_insert($1->context->type, ((SymbolTable *)current_context->value)->symbols, $2->context->name, 0, @2.first_line, @2.first_column, FUNCTION);
@@ -222,7 +222,7 @@ param:
     type id {
         Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
         if(sym_declared != NULL){
-            printf(RED"Semantic error: param redeclaration of '%s'\n"RESET, sym_declared->name);
+            printf(RED"Semantic error: param redeclaration of '%s' || line: %d, column: %d\n"RESET, sym_declared->name, @2.first_line, @2.first_column);
             semantic_error = 1;
             $$ = NULL;
             delete_astnode($1);
@@ -374,7 +374,7 @@ expression:
     id {
         Symbol *has_sym = lookup_symbol($1->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, $1->context->name);
+            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, $1->context->name, @1.first_line, @1.first_column);
             semantic_error = 1;
         }
     } ASSIGN_TOKEN expression {
@@ -405,7 +405,7 @@ expression:
     | id {
         Symbol *has_sym = lookup_symbol($1->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, $1->context->name);
+            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, $1->context->name, @1.first_line, @1.first_column);
             semantic_error = 1;
         } else {
             $$ = create_astnode_context(AST_EXPRESSION, "");
@@ -569,7 +569,7 @@ funcCall:
     id {
        Symbol *has_sym = lookup_symbol($1->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, $1->context->name);
+            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, $1->context->name, @1.first_line, @1.first_column);
             semantic_error = 1;
         } 
     } '(' optListExpression ')' {
@@ -589,7 +589,7 @@ funcCall:
     | READ_TOKEN '(' id {
         Symbol *has_sym = lookup_symbol($3->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared\n"RESET, $3->context->name);
+            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, $3->context->name, @3.first_line, @3.first_column);
             semantic_error = 1;
         }
     } ')' {
@@ -701,14 +701,22 @@ int main(int argc, char **argv){
     current_context = global_context;
 
     yyparse();
+
+    Symbol *sym_main = lookup_symbol("main", current_context);
+
+    if(sym_main){
+        if(!sym_main->isfunction) 
+            printf(RED"Semantic error: Undefined reference to function main\n"RESET);
+    } else 
+        printf(RED"Semantic error: Undefined reference to function main\n"RESET);
+
     if(!semantic_error){
         if(root->kids->size > 0) {
             printf("##################### %s #####################\n", "Abstract Syntax Tree");
             print_tree(root, 0);
             printf("\n");
-        } else {
+        } else 
             printf(RED"Unable to print AST\n"RESET);
-        }
     }
 
     Element *iterator;
@@ -716,16 +724,15 @@ int main(int argc, char **argv){
         // TODO: Arrumar if
         if(((SymbolTable *)((TreeNode *) list_context->first->value)->value)->symbols->size > 0){
             for(iterator = list_context->first; iterator != NULL; iterator = iterator->next){
-                printf("########################## %s #########################\n", "Symbol Table");
-                printf("# %-14s || %11s || %-10s || %4s || %6s #\n", "Type", "Symbol Kind", "ID", "Line", "Column");
                 if(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols->size > 0) {
+                    printf("########################## %s #########################\n", "Symbol Table");
+                    printf("# %-14s || %11s || %-10s || %4s || %6s #\n", "Type", "Symbol Kind", "ID", "Line", "Column");
                     print_list(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols, print_symbol_list);
+                    printf("#################################################################\n");
                 }
-                printf("#################################################################\n");
             }
-        } else {
+        } else 
             printf(RED"Unable to print Symbol Table\n"RESET);
-        }
     }
 
     delete_astnode(root);

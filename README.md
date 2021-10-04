@@ -8,7 +8,7 @@ Foi disponibilizado um arquivo makefile para a compilação, mas caso seja neces
 >
 > $ bison ./src/bison.y --defines="lib/bison.h" -Wcounterexamples -Wother
 >
-> $ gcc -o tradutor -O src/list.c src/astcontext.c src/tree.c bison.tab.c lex.yy.c -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
+> $ gcc -o tradutor -O src/list.c src/tree.c src/astcontext.c src/symbol.c src/treenode.c src/context.c lex.yy.c bison.tab.c -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
 
 Para a execução:
 
@@ -24,6 +24,7 @@ Para a execução:
 - [X] Escopos
 - [X] Redeclaração de variáveis
 - [X] Redeclaração de função
-- [] Verificar existência de variáveis e funções
+- [X] Verificar existência de variáveis e funções
 - [] Verificar os tipos das variáveis e funções
+- [] Verificar tipo de retorno da função
 - [] Tratamento de erros
