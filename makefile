@@ -8,7 +8,7 @@ BISONFILES= $(SRC)/bison.y
 
 CFILES= src/list.c src/tree.c src/astcontext.c src/symbol.c src/treenode.c src/context.c lex.yy.c bison.tab.c
 
-FLAGS= -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
+FLAGS= -Wall -pedantic -Wpedantic -Werror -lm -lfl -g -std=gnu11
 
 NAME= tradutor
 

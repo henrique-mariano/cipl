@@ -56,45 +56,44 @@ extern int yydebug;
     YYUNDEF = 257,                 /* "invalid token"  */
     INT_TOKEN = 258,               /* INT_TOKEN  */
     FLOAT_TOKEN = 259,             /* FLOAT_TOKEN  */
-    INT_LIST_TOKEN = 260,          /* INT_LIST_TOKEN  */
-    FLOAT_LIST_TOKEN = 261,        /* FLOAT_LIST_TOKEN  */
-    ID_TOKEN = 262,                /* ID_TOKEN  */
-    READ_TOKEN = 263,              /* READ_TOKEN  */
-    WRITE_TOKEN = 264,             /* WRITE_TOKEN  */
-    NIL_TOKEN = 265,               /* NIL_TOKEN  */
-    CONSTANT_REAL_TOKEN = 266,     /* CONSTANT_REAL_TOKEN  */
-    CONSTANT_INTEGER_TOKEN = 267,  /* CONSTANT_INTEGER_TOKEN  */
-    MUL_DIV_TOKEN = 268,           /* MUL_DIV_TOKEN  */
-    EXCLAMATION_TOKEN = 269,       /* EXCLAMATION_TOKEN  */
-    QUESTION_TOKEN = 270,          /* QUESTION_TOKEN  */
-    PERCENTAGE_TOKEN = 271,        /* PERCENTAGE_TOKEN  */
-    MAP_TOKEN = 272,               /* MAP_TOKEN  */
-    FILTER_TOKEN = 273,            /* FILTER_TOKEN  */
-    CONSTRUCTOR_LIST_TOKEN = 274,  /* CONSTRUCTOR_LIST_TOKEN  */
-    ADD_MIN_TOKEN = 275,           /* ADD_MIN_TOKEN  */
-    ASSIGN_TOKEN = 276,            /* ASSIGN_TOKEN  */
-    OR_TOKEN = 277,                /* OR_TOKEN  */
-    AND_TOKEN = 278,               /* AND_TOKEN  */
-    EQ_EXC_TOKEN = 279,            /* EQ_EXC_TOKEN  */
-    LE_GR_TOKEN = 280,             /* LE_GR_TOKEN  */
-    ADD_UNARY_TOKEN = 281,         /* ADD_UNARY_TOKEN  */
-    MIN_UNARY_TOKEN = 282,         /* MIN_UNARY_TOKEN  */
-    EQUAL_TOKEN = 283,             /* EQUAL_TOKEN  */
-    DIFF_EQ_TOKEN = 284,           /* DIFF_EQ_TOKEN  */
-    LESS_TOKEN = 285,              /* LESS_TOKEN  */
-    LE_EQ_TOKEN = 286,             /* LE_EQ_TOKEN  */
-    GREAT_TOKEN = 287,             /* GREAT_TOKEN  */
-    GR_EQ_TOKEN = 288,             /* GR_EQ_TOKEN  */
-    ADD_TOKEN = 289,               /* ADD_TOKEN  */
-    MIN_TOKEN = 290,               /* MIN_TOKEN  */
-    MUL_TOKEN = 291,               /* MUL_TOKEN  */
-    DIV_TOKEN = 292,               /* DIV_TOKEN  */
-    UNI_OP = 293,                  /* UNI_OP  */
-    IF_TOKEN = 294,                /* IF_TOKEN  */
-    ELSE_TOKEN = 295,              /* ELSE_TOKEN  */
-    FOR_TOKEN = 296,               /* FOR_TOKEN  */
-    RETURN_TOKEN = 297,            /* RETURN_TOKEN  */
-    STRING_TOKEN = 298             /* STRING_TOKEN  */
+    LIST_TOKEN = 260,              /* LIST_TOKEN  */
+    ID_TOKEN = 261,                /* ID_TOKEN  */
+    READ_TOKEN = 262,              /* READ_TOKEN  */
+    WRITE_TOKEN = 263,             /* WRITE_TOKEN  */
+    NIL_TOKEN = 264,               /* NIL_TOKEN  */
+    CONSTANT_REAL_TOKEN = 265,     /* CONSTANT_REAL_TOKEN  */
+    CONSTANT_INTEGER_TOKEN = 266,  /* CONSTANT_INTEGER_TOKEN  */
+    MUL_DIV_TOKEN = 267,           /* MUL_DIV_TOKEN  */
+    EXCLAMATION_TOKEN = 268,       /* EXCLAMATION_TOKEN  */
+    QUESTION_TOKEN = 269,          /* QUESTION_TOKEN  */
+    PERCENTAGE_TOKEN = 270,        /* PERCENTAGE_TOKEN  */
+    MAP_TOKEN = 271,               /* MAP_TOKEN  */
+    FILTER_TOKEN = 272,            /* FILTER_TOKEN  */
+    CONSTRUCTOR_LIST_TOKEN = 273,  /* CONSTRUCTOR_LIST_TOKEN  */
+    ADD_MIN_TOKEN = 274,           /* ADD_MIN_TOKEN  */
+    ASSIGN_TOKEN = 275,            /* ASSIGN_TOKEN  */
+    OR_TOKEN = 276,                /* OR_TOKEN  */
+    AND_TOKEN = 277,               /* AND_TOKEN  */
+    EQ_EXC_TOKEN = 278,            /* EQ_EXC_TOKEN  */
+    LE_GR_TOKEN = 279,             /* LE_GR_TOKEN  */
+    ADD_UNARY_TOKEN = 280,         /* ADD_UNARY_TOKEN  */
+    MIN_UNARY_TOKEN = 281,         /* MIN_UNARY_TOKEN  */
+    EQUAL_TOKEN = 282,             /* EQUAL_TOKEN  */
+    DIFF_EQ_TOKEN = 283,           /* DIFF_EQ_TOKEN  */
+    LESS_TOKEN = 284,              /* LESS_TOKEN  */
+    LE_EQ_TOKEN = 285,             /* LE_EQ_TOKEN  */
+    GREAT_TOKEN = 286,             /* GREAT_TOKEN  */
+    GR_EQ_TOKEN = 287,             /* GR_EQ_TOKEN  */
+    ADD_TOKEN = 288,               /* ADD_TOKEN  */
+    MIN_TOKEN = 289,               /* MIN_TOKEN  */
+    MUL_TOKEN = 290,               /* MUL_TOKEN  */
+    DIV_TOKEN = 291,               /* DIV_TOKEN  */
+    UNI_OP = 292,                  /* UNI_OP  */
+    IF_TOKEN = 293,                /* IF_TOKEN  */
+    ELSE_TOKEN = 294,              /* ELSE_TOKEN  */
+    FOR_TOKEN = 295,               /* FOR_TOKEN  */
+    RETURN_TOKEN = 296,            /* RETURN_TOKEN  */
+    STRING_TOKEN = 297             /* STRING_TOKEN  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -103,11 +102,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 57 "./src/bison.y"
+#line 59 "./src/bison.y"
 
     struct AstNode *astnode;
     struct Symbol *symbol;
     struct List *list;
+    char *string;
 
 #line 113 "lib/bison.h"
 

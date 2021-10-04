@@ -32,7 +32,7 @@
 %}
 
 SIMPLE_TYPES            "int"|"float"
-LIST_TYPES              int{WS}+list|float{WS}+list
+LIST_TYPES              list
 TYPES                   {SIMPLE_TYPES}|{LIST_TYPES}
 
 DIGIT                   [0-9]
@@ -79,10 +79,10 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval.astnode = create_astnode_context(AST_TYPE_INT, yytext);
+            yylval.string = yytext;
             return INT_TOKEN;
         case 'f':
-            yylval.astnode = create_astnode_context(AST_TYPE_FLOAT, yytext);
+            yylval.string = yytext;
             return FLOAT_TOKEN;
     }
 }
@@ -90,14 +90,8 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 {LIST_TYPES} {
     if(DEBUG_LEX == 1) print_token("LIST_TYPES");
     num_col += yyleng;
-    switch(yytext[0]){
-        case 'i':
-            yylval.astnode = create_astnode_context(AST_TYPE_INT_LIST, yytext);
-            return INT_LIST_TOKEN;
-        case 'f':
-            yylval.astnode = create_astnode_context(AST_TYPE_FLOAT_LIST, yytext);
-            return FLOAT_LIST_TOKEN;
-    }
+    yylval.string = yytext;
+    return LIST_TOKEN;
 }
 
 {CONSTANT_INTEGER} {

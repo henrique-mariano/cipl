@@ -16,6 +16,8 @@
 
     #define RED "\033[1;31m"
     #define RESET "\033[0m"
+    #define SEMANTIC_ERROR(__STR_ERR__, ...) \
+            printf(RED"Semantic error: "RESET __STR_ERR__, ##__VA_ARGS__);
 
     extern int error, num_line, num_col;
 
@@ -58,6 +60,7 @@
     struct AstNode *astnode;
     struct Symbol *symbol;
     struct List *list;
+    char *string;
 }
 
 /* Declaração de tipos e tokens */
@@ -70,14 +73,15 @@
 %type<astnode> optExpression returnExpression unaArith constant
 %type<astnode> constantInteger constantReal constantNIL funcCall
 %type<astnode> constantString
-%type<astnode> FLOAT_LIST_TOKEN INT_LIST_TOKEN FLOAT_TOKEN INT_TOKEN
 %type<astnode> ID_TOKEN READ_TOKEN WRITE_TOKEN STRING_TOKEN
 %type<astnode> CONSTANT_INTEGER_TOKEN CONSTANT_REAL_TOKEN NIL_TOKEN
 
 %type<list> optListParams listParams optListCodeBlock listCodeBlock
 %type<list> listExpression optListExpression
 
-%token INT_TOKEN FLOAT_TOKEN INT_LIST_TOKEN FLOAT_LIST_TOKEN /* Tipos */
+%type<string> INT_TOKEN FLOAT_TOKEN LIST_TOKEN
+
+%token INT_TOKEN FLOAT_TOKEN LIST_TOKEN /* Tipos */
 %token ID_TOKEN READ_TOKEN WRITE_TOKEN /* IDs */
 %token NIL_TOKEN CONSTANT_REAL_TOKEN CONSTANT_INTEGER_TOKEN /* Constantes */
 %token MUL_DIV_TOKEN EXCLAMATION_TOKEN QUESTION_TOKEN PERCENTAGE_TOKEN/* Operadores */
@@ -140,7 +144,7 @@ variableDeclare:
         // printf("current_context_var: %p || name: %s\n", (void *) current_context, $2->context->name);
         Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
         if(sym_declared != NULL){
-            printf(RED"Semantic error: variable redeclaration of '%s' || line: %d, column: %d\n"RESET, sym_declared->name, @2.first_line, @2.first_column);
+            SEMANTIC_ERROR("variable redeclaration of '%s' || line: %d, column: %d\n", sym_declared->name, @2.first_line, @2.first_column);
             semantic_error = 1;
             $$ = NULL;
             delete_astnode($1);
@@ -163,7 +167,7 @@ functionDeclare:
         Symbol *sym_declared = lookup_symbol_context($2->context->name, last_context);
 
         if(sym_declared != NULL){
-            printf(RED"Semantic error: function redeclaration of '%s' || line: %d, column: %d\n"RESET, sym_declared->name, @2.first_line, @2.first_column);
+            SEMANTIC_ERROR("function redeclaration of '%s' || line: %d, column: %d\n", sym_declared->name, @2.first_line, @2.first_column);
             semantic_error = 1;
         } else {
             list_symbol_insert($1->context->type, ((SymbolTable *)current_context->value)->symbols, $2->context->name, 0, @2.first_line, @2.first_column, FUNCTION);
@@ -175,6 +179,7 @@ functionDeclare:
                 current_context = iterator->value;
             }
             insert_children(current_context, last_context);
+            list_symbol_insert($1->context->type, ((SymbolTable *)current_context->value)->symbols, $2->context->name, 0, @2.first_line, @2.first_column, FUNCTION);
         }
     } optListParams ')' compoundStatement {
         $$ = create_astnode_context(AST_FUNC_DECLARE, "func declare");
@@ -222,7 +227,7 @@ param:
     type id {
         Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
         if(sym_declared != NULL){
-            printf(RED"Semantic error: param redeclaration of '%s' || line: %d, column: %d\n"RESET, sym_declared->name, @2.first_line, @2.first_column);
+            SEMANTIC_ERROR("param redeclaration of '%s' || line: %d, column: %d\n", sym_declared->name, @2.first_line, @2.first_column);
             semantic_error = 1;
             $$ = NULL;
             delete_astnode($1);
@@ -374,7 +379,7 @@ expression:
     id {
         Symbol *has_sym = lookup_symbol($1->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, $1->context->name, @1.first_line, @1.first_column);
+            SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
             semantic_error = 1;
         }
     } ASSIGN_TOKEN expression {
@@ -405,7 +410,7 @@ expression:
     | id {
         Symbol *has_sym = lookup_symbol($1->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, $1->context->name, @1.first_line, @1.first_column);
+            SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
             semantic_error = 1;
         } else {
             $$ = create_astnode_context(AST_EXPRESSION, "");
@@ -569,7 +574,7 @@ funcCall:
     id {
        Symbol *has_sym = lookup_symbol($1->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, $1->context->name, @1.first_line, @1.first_column);
+            SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
             semantic_error = 1;
         } 
     } '(' optListExpression ')' {
@@ -589,7 +594,7 @@ funcCall:
     | READ_TOKEN '(' id {
         Symbol *has_sym = lookup_symbol($3->context->name, current_context);
         if(has_sym == NULL){
-            printf(RED"Semantic error: identifier '%s' undeclared || line: %d, column: %d\n"RESET, $3->context->name, @3.first_line, @3.first_column);
+            SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $3->context->name, @3.first_line, @3.first_column);
             semantic_error = 1;
         }
     } ')' {
@@ -639,16 +644,26 @@ id:
 
 type:
     INT_TOKEN {
-        $$ = $1;
+        $$ = create_astnode_context(AST_TYPE_INT, $1);
     }
     | FLOAT_TOKEN {
-        $$ = $1;
+        $$ = create_astnode_context(AST_TYPE_FLOAT, $1);
     }
-    | INT_LIST_TOKEN {
-        $$ = $1;
+    | INT_TOKEN LIST_TOKEN {
+        char *str = (char *) calloc((strlen($1) + strlen($2) + 10), sizeof(char));
+        strcat(str, $1);
+        strcat(str, " ");
+        strcat(str, $2);
+        $$ = create_astnode_context(AST_TYPE_INT_LIST, str);
+        free(str);
     }
-    | FLOAT_LIST_TOKEN {
-        $$ = $1;
+    | FLOAT_TOKEN LIST_TOKEN {
+        char *str = (char *) calloc((strlen($1) + strlen($2) + 10), sizeof(char));
+        strcat(str, $1);
+        strcat(str, " ");
+        strcat(str, $2);
+        $$ = create_astnode_context(AST_TYPE_FLOAT_LIST, str);
+        free(str);
     }
 ;
 

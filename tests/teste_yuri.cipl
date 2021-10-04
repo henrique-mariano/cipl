@@ -1,18 +1,289 @@
-int main(int a){
-    int b;
-    int m;
-    int m;
-    {
-        {
-            int b;
-            m = 2;
-        }
-        int b;
-    }
-    int x;
-    l = 1;
+int no_return(int i, int j, int k) {
+  int m;
+  m = i * j * k + (i + j + k);
 }
 
-int x;
+int div0() {
+  int a;
+  a = 10 / 0;
+  return a;
+}
 
-// int main;
+int nil_arith(int x) {
+  x = NIL + 2 - 3 * 4 / 5;
+  x = 1 + 2 - 3 * NIL / 5;
+  x = (1 * 2) - (3 + NIL);
+  return x;
+}
+
+int nil_rel(float x) {
+  x = NIL < 2 >= 3 <= 4 > 5 == 6 != 7;
+  x = 1 < 2 >= 3 <= 4 > 5 == NIL != 7;
+  x = 1 < 2 > 3;
+  return x;
+}
+
+int list_in_arith_op(int list l) {
+  l = l + NIL;
+  l = 3 != 2;
+  l = NIL <= 2;
+  l = 3 < NIL;
+  l = 3 == l;
+  l = l >= 2;
+  int x;
+  x = l == NIL;
+  return x;
+}
+
+int many_or_few_args_fn_call(int i) {
+  return many_or_few_args_fn_call(i);
+  return many_or_few_args_fn_call(i, i);
+  return many_or_few_args_fn_call();
+}
+
+int mismatch_types_fn_call(int i, int list l) {
+  return mismatch_types_fn_call(NIL, NIL);
+  return mismatch_types_fn_call(12312.237123, 100);
+}
+
+int list get_l(int n) {
+  return NIL;
+}
+
+int err_assign() {
+  int list x;
+  x = mismatch_types_fn_call(100, x);
+  x = 1203;
+  x = 213.51;
+  {
+      int x;
+      x = get_l(x);
+      {
+        int x;
+        x = NIL;
+      }
+  }
+  x = NIL;
+  return 0;
+}
+
+int invalid_map(int i, int j) {
+  return i + 1;
+}
+
+int invalid_map2() {
+  return 1 + 2 - 3;
+}
+
+int filter(float i) {
+  return i < 10;
+}
+
+int invalid_filter(int list l) {
+  return 0;
+}
+
+float i2f(int i) {
+  return i * 1.0;
+}
+
+int list_mapfil() {
+  int list l;
+  int x;
+  x = 10;
+  l = x >> l;
+  l = invalid_map >> x;
+  l = invalid_map >> l;
+  l = invalid_map2 >> l;
+  l = filter << l;
+  l = invalid_map2 << l;
+  l = invalid_filter << l;
+  l = invalid_filter << x;
+  x = filter << l;
+
+  float list fl;
+  l = i2f >> (1 : 2 : 3 : ?%l : l);
+  fl = i2f >> fl;
+  fl = i2f >> l;
+  // i2f cast a `int list` to a `float list` so i2f works fine for `float list` only
+  l = i2f >> fl;
+  // i2f cast a `int list` to a `float list`, but l still are a `int list` so isnt possible to assign
+  l = i2f >> l;
+
+  return x;
+}
+
+int list ll() {
+  return NIL;
+}
+
+int list_cons(int list l) {
+  float x;
+  l = 1 : 2 : l;
+  l = (NIL + 2) : l;
+  l = 1.123123 : 2 : x + 2 * 3 / 4 - 5 : l;
+  l = NIL : l;
+  l = l : x;
+  l = 1 : l + x;
+  return ?l;
+}
+
+int uniops() {
+  int list l;
+  float x;
+
+  x = !l; // a `number` cant be the tail of `int list`
+  l = !x; // a `int list` cant be the tail of `number`
+  l = %123; // a `int list` cant be the pop-tail of `number`
+  x = %l; // a `number` cant be the pop-tail of `int list` 
+  l = ?x; // a `int list` cant be the head of `number`
+
+  x = ?l;
+  x = ?ll();
+  x = list_cons(l);
+  x = list_cons(NIL);
+  x = !?%!%!%!%l;
+  x = ?%(!%(?%!(!!NIL : !NIL : ?l : !%%%l) : l));
+
+  x = %ll(); // a `number` cant be the pop-tail of `int list` 
+  x = !ll(); // a `number` cant be the tail of `int list`
+
+  float list L_;
+  L_ = ?ll(); // a `float list` cant be the head of `float list`
+  L_ = %ll(); // a `float list` cant be the pop-tail of `int list`
+  L_ = !ll(); // a `float list` cant be the tail of `int list`
+  x = list_cons(L_); // a `int list` argument cant be `float list`
+
+  L_ = %!l; // a `float list` cant be the pop-tail of tail of `int list`
+  L_ = !%l; // a `float list` cant be the tail of pop-tail of `int list`
+  L_ = !l; // a `float list` cant be the tail of `int list`
+
+  int list x_;
+  x_ = ?NIL;
+  x_ = %NIL;
+  x_ = !NIL;
+  x_ = %!get_l(x);
+  x_ = %l;
+  x_ = !l;
+  x_ = !%l;
+  x = ?%!l;
+  x = ?!%l + ?!ll() + ?%get_l(123) + ?ll();
+  l = ?!%l + ?!ll() + ?%ll() + ?get_l() : 23 : l;
+
+  l = ?L_ : l;
+  L_ = ?%!l : L_;
+
+  x = +x;
+  x = -x;
+  x = x + +x - -x * ?l / ?L_ && -NIL;
+  x = +x_;
+  l = -L_;
+
+  return x;
+}
+
+int wrong_returns() {
+  return NIL;
+
+  int list il;
+  return il;
+  return ?il;
+  return !il;
+
+  int x;
+  x = ?%il;
+
+  return !%il;
+  return x;
+  
+  float list fl;
+  return fl;
+  return ?fl;
+  return ?!fl;
+  return ?!%fl;
+
+  return !fl;
+  return !%fl;
+
+  return 1.2;
+  return 0;
+  return ?NIL;
+}
+
+float builtin() {
+  float list l;
+  int list ll;
+  int x;
+  read(l);
+  read(ll);
+  return !(?!%l) - ?!ll;
+
+  write(1);
+  writeln(l);
+  write(ll);
+  write("ola mundo");
+  write(1 : 2 : l);
+  writeln(1 + 2 + NIL);
+}
+
+int ifelse(int list h) {
+  if (h = 123) {
+    int l;
+    h = l;
+    l = ?h;
+  }
+
+  if (?(123 : h) && NIL) {
+    int i;
+    i = NIL;
+    return NIL;
+  } else {
+    int list l;
+    float f;
+    f = ?(123 : l);
+    l = %(123.132 : l);
+    return NIL;
+    if (NIL) {
+      f = l;
+      return ?l;
+    } else {
+      l = f;
+      return !l;
+      {
+        int h;
+        if (h && 1 || 0) return h - 1/2 + NIL;
+      }
+    }
+  }
+  return 213;
+}
+
+float list iter(int n) {
+  int it;
+  float list fl;
+  for (it = 0; it < n && fl != NIL; it = it + 1) {
+    fl = it + 2 : it + 1 : it : fl;
+    if (?fl >= 12) {
+      int it;
+      for (it = ?!fl + NIL; fl != 2; it = it - 1 + ?fl * NIL) n = n - 1;
+      return it;
+    } else {
+      fl = NIL;
+      for (it = it + 123.213; it < n - 2 / fl; NIL) {
+        it = it + 1;
+        if (it > 100) return !?fl;
+      }
+    }
+  }
+
+  for (NIL;;NIL) it = it + 1;
+  return ?!!%!!%!fl;
+}
+
+int no_main() {
+  return 0;
+}
+
+int main(){
+    return 0;
+}
