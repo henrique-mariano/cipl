@@ -4,13 +4,14 @@
 #include <stdlib.h>
 #include "list.h"
 
-typedef struct TreeNode{
+typedef struct TreeNode
+{
     void *value;
     void *father;
     struct List *children;
 } TreeNode;
 
-TreeNode* create_node(void *value);
+TreeNode *create_node(void *value);
 
 void insert_children(TreeNode *child, TreeNode *node);
 

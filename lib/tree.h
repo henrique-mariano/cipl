@@ -5,13 +5,14 @@
 #include <stdlib.h>
 #include "list.h"
 
-typedef struct AstNode{
+typedef struct AstNode
+{
     struct AstContext *context;
     struct AstNode *father;
     List *kids;
 } AstNode;
 
-AstNode* create_astnode(struct AstContext *context);
+AstNode *create_astnode(struct AstContext *context);
 
 void print_tree(AstNode *root, int tab);
 

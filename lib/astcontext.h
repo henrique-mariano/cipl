@@ -5,7 +5,8 @@
 #include <string.h>
 #include "tree.h"
 
-enum {
+enum
+{
     AST_ROOT = 1,
     AST_TYPE,
     AST_TYPE_INT,
@@ -41,13 +42,14 @@ enum {
     AST_FUNC_CALL
 };
 
-typedef struct AstContext{
+typedef struct AstContext
+{
     int type;
     char *name;
 } AstContext;
 
-AstContext* create_astcontext(int type, char *name);
-AstNode* create_astnode_context(int type, char *name);
+AstContext *create_astcontext(int type, char *name);
+AstNode *create_astnode_context(int type, char *name);
 void free_astcontext(AstContext *context);
 void create_context_ast(List *lista_contexto);
 
