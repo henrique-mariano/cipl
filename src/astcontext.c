@@ -20,5 +20,3 @@ void free_astcontext(AstContext *context)
     free(context);
     context = NULL;
 }
-
-// void create_context_codeblock(List *lista)

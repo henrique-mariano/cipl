@@ -37,7 +37,6 @@ void list_symbol_insert(unsigned int type, List *symbol_list, char *name, double
     {
     case AST_TYPE_INT:
         insert_list_element(symbol_list, create_symbol(strdup(name), value, line, column, INT_SYMBOL_CONST, isfunction));
-        // insert_symbol(symbol_list, create_symbol(strdup(name), value, line, column, INT_SYMBOL_CONST, isfunction));
         break;
 
     case AST_TYPE_FLOAT:
@@ -80,6 +79,5 @@ void print_symbol_list(Element *elemento)
 
 void print_symbol(Symbol *symbol)
 {
-    // printf("%s\n", nome_tipos[INT_SYMBOL_CONST]);
     printf("# %-14s || %-11s || %-10s || %-4d || %-6d #\n", nome_tipos[symbol->type_simbol], symbol->isfunction ? "function" : "variable", symbol->name, symbol->line, symbol->column);
 }

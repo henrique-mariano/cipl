@@ -33,10 +33,6 @@ void insert_list_element(List *lista, void *value);
 
 void print_list(List *lista, void (*callback)(Element *));
 
-/* Função de deletar um astnode da lista */
-
-// void delete_list_astnode(Element *elemento);
-
 void delete_list(List *lista, void (*callback)(Element *));
 
 #endif

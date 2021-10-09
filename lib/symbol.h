@@ -49,6 +49,4 @@ void print_symbol(Symbol *symbol);
 
 void lookup_symbol_table(SymbolTable *table, char *symbol);
 
-// Lista -> tabela -> lista
-
 #endif

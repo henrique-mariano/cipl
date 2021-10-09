@@ -1,7 +1,5 @@
 #include "../lib/list.h"
 
-// struct AstNode;
-
 Element *create_element(void *value)
 {
     Element *elemento = (Element *)malloc(sizeof(Element));
@@ -59,7 +57,6 @@ void *pop_element_list(List *lista)
 void *remove_first_element_list(List *lista)
 {
     Element *first = lista->first;
-    // Element *past = first;
 
     void *value;
 
@@ -85,7 +82,6 @@ void print_element(void *elemento, void (*callback)(Element *))
         callback(elemento);
     else
         printf("Callback vazio\n");
-    // printf("%s ->", ((struct AstNode *) elemento)->context->name);
 }
 
 List *create_list()
