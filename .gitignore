@@ -52,6 +52,7 @@ Mkfile.old
 dkms.conf
 
 teste_ed.c
+teste.c
 
 # .vscode
 
