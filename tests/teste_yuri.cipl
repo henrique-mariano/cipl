@@ -25,36 +25,38 @@
 
 // float func;
 
-int a_var_not_a_fn;
+// int a_var_not_a_fn;
 
-int main() {
-    int aaaa;
-    int aaaa;
+// int main() {
+//     int aaaa;
+//     int aaaa;
 
-    a_var_not_a_fn();
-    not_declared_fn();
+//     a_var_not_a_fn();
+//     not_declared_fn();
 
-    fn(1 aaaa);
-    fn(1 + 2 aaaa);
+//     fn(1 aaaa);
+//     fn(1 + 2 aaaa);
 
-    float;
-    int list;
-    float list;
+//     float;
+//     int list;
+//     float list;
 
-    undeclared_var = 2;
+//     undeclared_var = 2;
 
-    return;
-}
+//     return;
+// }
 
-// float builtin() {
-//     // all of them has arity 1
+// float _builtin() {
+//     // all of them has arity 1 
 //     read();
 //     write();
 //     writeln();
 //     read(undefined_var);
-//     write;
-//     read;
-//     write("a")
+//     write 2 2;
+//     read 2 2;
+//     ()
+//     // func()
+//     write(1, 2 ,3);
 // }
 
 // int params_err(int a, b c) {
@@ -118,50 +120,50 @@ int main() {
 //     int x;
 // }
 
-// int list invalid_exprs(int a) {
-//     a = ||a;
-//     a = a||;
+int list invalid_exprs(int a) {
+    // a = a||;
+    // a = ||b;
 
-//     a = &&a;
-//     a = a&&;
+    // a = &&a;
+    // a = a&&;
 
-//     a = ==a;
-//     a = a==;
-//     a = !=a;
-//     a = a!=;
+    // a = ==a;
+    // a = a==;
+    // a = !=a;
+    // a = a!=;
     
-//     a = >a;
-//     a = a>;
-//     a = >=a;
-//     a = a>=;
-//     a = <a;
-//     a = a<;
-//     a = <=a;
-//     a = a<=;
+    // a = >a;
+    // a = a>;
+    // a = >=a;
+    // a = a>=;
+    // a = <a;
+    // a = a<;
+    // a = <=a;
+    // a = a<=;
 
-//     a = >>a;
-//     a = a>>;
-//     a = <<a;
-//     a = a<<;
-//     a = :a;
-//     a = a:;
+    // a = >>a;
+    // a = a>>;
+    // a = <<a;
+    // a = a<<;
+    // a = :a;
+    // a = a:;
 
-//     a = +a;
-//     a = a+;
-//     a = -a;
-//     a = a-;
+    // a = +a;
+    // a = a+;
+    // a = -a;
+    // a = a-;
 
-//     a = *a;
-//     a = a*;
-//     a = /a;
-//     a = a/;
+    // a = *a;
+    // a = a*;
+    // a = /a;
+    // a = a/;
 
-//     a = (a/);
+    a = (a/);
 
-//     a = a a;
-//     a = (a a);
-//     // this still dont work
-//     // a = (a) a;
+    a = a a;
+    a = (a a);
+    // this still dont work
+    a = (a) a;
 
-//     return NIL;
-// }
+    return NIL;
+}

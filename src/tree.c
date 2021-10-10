@@ -45,7 +45,7 @@ void print_tree(AstNode *root, int tab)
     {
         for (int i = 0; *root->context->name && (i < tab + 1); i++)
         {
-            printf("\t");
+            printf("    ");
         }
         print_tree(first_son->value, tab + (*root->context->name ? 1 : 0));
         first_son = first_son->next;

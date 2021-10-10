@@ -34,8 +34,7 @@
 %}
 
 SIMPLE_TYPES            "int"|"float"
-LIST_TYPES              list
-TYPES                   {SIMPLE_TYPES}|{LIST_TYPES}
+LIST_TYPES              "list"
 
 DIGIT                   [0-9]
 CONSTANT_INTEGER        ([1-9]{DIGIT}*|0)
@@ -81,10 +80,10 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case 'i':
-            yylval.string = yytext;
+            yylval.string = strdup(yytext);
             return INT_TOKEN;
         case 'f':
-            yylval.string = yytext;
+            yylval.string = strdup(yytext);
             return FLOAT_TOKEN;
     }
 }
@@ -92,7 +91,7 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 {LIST_TYPES} {
     if(DEBUG_LEX == 1) print_token("LIST_TYPES");
     num_col += yyleng;
-    yylval.string = yytext;
+    yylval.string = strdup(yytext);
     return LIST_TOKEN;
 }
 

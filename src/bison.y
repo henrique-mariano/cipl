@@ -74,11 +74,10 @@
 %type<astnode> declaration variableDeclare type id
 %type<astnode> functionDeclare param
 %type<astnode> statement codeBlock expression elseError
-%type<astnode> binArith listArith compoundStatement
+%type<astnode> binArith listArith compoundStatement assignArith
 %type<astnode> flowExpression condExpression interationExpression
 %type<astnode> optExpression returnExpression unaArith constant
-%type<astnode> constantInteger constantReal constantNIL funcCall
-%type<astnode> constantString
+%type<astnode> constantInteger constantReal constantNIL funcCall ioCommand
 %type<astnode> ID_TOKEN READ_TOKEN WRITE_TOKEN STRING_TOKEN
 %type<astnode> CONSTANT_INTEGER_TOKEN CONSTANT_REAL_TOKEN NIL_TOKEN
 
@@ -423,6 +422,58 @@ statement:
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @2.first_line, @2.first_column);
         $$ = NULL;
     }
+    /* () */
+    | '(' error ')' {
+        SHOW_SYNTAX_ERROR("expected expression before ')' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        $$ = NULL;
+    }
+    /* write() */
+    | WRITE_TOKEN '(' error ')' {
+       SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
+       delete_astnode($1);
+       $$ = NULL;
+    }
+    /* write()';' */
+    | WRITE_TOKEN '(' error ')' ';' {
+       SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
+       delete_astnode($1);
+       $$ = NULL;
+    }
+    | WRITE_TOKEN '(' expression ')' error {
+       SHOW_SYNTAX_ERROR("expected ';' token || line: %d, column: %d\n", @5.first_line, @5.first_column);
+       delete_astnode($1);
+       delete_astnode($3);
+       $$ = NULL;
+    }
+    /* write("string") */
+    | WRITE_TOKEN '(' STRING_TOKEN ')' error {
+       SHOW_SYNTAX_ERROR("expected ';' token || line: %d, column: %d\n", @5.first_line, @5.first_column);
+       delete_astnode($1);
+       delete_astnode($3);
+       $$ = NULL;
+    }
+    /* read(i) */
+    /* read() */
+    | READ_TOKEN '(' error ')' {
+        SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | READ_TOKEN '(' error ')' ';' {
+        SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | READ_TOKEN error ';' {
+        SHOW_SYNTAX_ERROR("expected '(' token after 'read' || line: %d, column: %d\n", @1.first_line, @1.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | WRITE_TOKEN error ';' {
+        SHOW_SYNTAX_ERROR("expected '(' token after 'write' || line: %d, column: %d\n", @1.first_line, @1.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
 ;
 
 flowExpression:
@@ -584,16 +635,9 @@ optExpression:
 ;
 
 expression:
-    id {
-        Symbol *has_sym = lookup_symbol($1->context->name, current_context);
-        if(has_sym == NULL){
-            SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
-            semantic_error = 1;
-        }
-    } ASSIGN_TOKEN expression {
-        $$ = create_astnode_context(AST_EXPR_ASSIGN, "assign");
+    assignArith {
+        $$ = create_astnode_context(AST_EXPRESSION, "");
         insert_kid($1, $$);
-        insert_kid($4, $$);
     }
     | binArith {
         $$ = create_astnode_context(AST_EXPRESSION, "");
@@ -612,6 +656,10 @@ expression:
         insert_kid($1, $$);
     }
     | funcCall {
+        $$ = create_astnode_context(AST_EXPRESSION, "");
+        insert_kid($1, $$);
+    }
+    | ioCommand {
         $$ = create_astnode_context(AST_EXPRESSION, "");
         insert_kid($1, $$);
     }
@@ -636,9 +684,19 @@ expression:
         delete_astnode($1);
         $$ = NULL;
     }
-    | '(' error ')' {
-        SHOW_SYNTAX_ERROR("expected expression before ')' || line: %d, column: %d\n", @3.first_line, @3.first_column);
-        $$ = NULL;
+;
+
+assignArith:
+    id {
+        Symbol *has_sym = lookup_symbol($1->context->name, current_context);
+        if(has_sym == NULL){
+            SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
+            semantic_error = 1;
+        }
+    } ASSIGN_TOKEN expression {
+        $$ = create_astnode_context(AST_EXPR_ASSIGN, "assign");
+        insert_kid($1, $$);
+        insert_kid($4, $$);
     }
 ;
 
@@ -703,6 +761,67 @@ binArith:
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
+    /* Erros */
+    | expression OR_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression AND_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression EQUAL_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression DIFF_EQ_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression LESS_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression LE_EQ_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression GREAT_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression GR_EQ_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression '+' error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression '-' error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression '*' error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression '/' error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
 ;
 
 listArith:
@@ -720,6 +839,22 @@ listArith:
         $$ = create_astnode_context(AST_EXPR_LIST_ARITH, "operation {list constructor}");
         insert_kid($1, $$);
         insert_kid($3, $$);
+    }
+    /* Erros */
+    | expression MAP_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression FILTER_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | expression CONSTRUCTOR_LIST_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        $$ = NULL;
     }
 ;
 
@@ -744,6 +879,27 @@ unaArith:
         $$ = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {-}");
         insert_kid($2, $$);
     }
+    /* Erros */
+    | EXCLAMATION_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @2.first_line, @2.first_column);
+        $$ = NULL;
+    }
+    | QUESTION_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @2.first_line, @2.first_column);
+        $$ = NULL;
+    }
+    | PERCENTAGE_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @2.first_line, @2.first_column);
+        $$ = NULL;
+    }
+    | '+' error %prec UNI_OP {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @2.first_line, @2.first_column);
+        $$ = NULL;
+    }
+    | '-' error %prec UNI_OP {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @2.first_line, @2.first_column);
+        $$ = NULL;
+    }
 ;
 
 constant:
@@ -757,10 +913,6 @@ constant:
     }
     | constantNIL {
         $$ = create_astnode_context(AST_CONSTANT, "constant nil");
-        insert_kid($1, $$);
-    }
-    | constantString {
-        $$ = create_astnode_context(AST_CONSTANT, "constant string");
         insert_kid($1, $$);
     }
 ;
@@ -779,12 +931,6 @@ constantReal:
 
 constantNIL:
     NIL_TOKEN {
-        $$ = $1;
-    }
-;
-
-constantString:
-    STRING_TOKEN {
         $$ = $1;
     }
 ;
@@ -810,30 +956,29 @@ funcCall:
             insert_kid(arguments, $$);
         }
     }
-    | READ_TOKEN '(' id {
+;
+
+ioCommand:
+    READ_TOKEN '(' id {
         Symbol *has_sym = lookup_symbol($3->context->name, current_context);
         if(has_sym == NULL){
             SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $3->context->name, @3.first_line, @3.first_column);
             semantic_error = 1;
         }
     } ')' {
-        $$ = create_astnode_context(AST_FUNC_CALL, "func call");
+        $$ = create_astnode_context(AST_FUNC_CALL, "read call");
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
-    | WRITE_TOKEN '(' optListExpression ')' {
-        $$ = create_astnode_context(AST_FUNC_CALL, "func call");
+    | WRITE_TOKEN '(' expression ')' {
+        $$ = create_astnode_context(AST_FUNC_CALL, "write call");
         insert_kid($1, $$);
-        if($3){
-            AstNode *arguments = create_astnode_context(AST_CODE_BLOCK, "arguments");
-
-            while($3->size) {
-                AstNode *aux = remove_first_element_list($3);
-                insert_kid(aux, arguments);
-            }
-            delete_list($3, delete_list_astnode);
-            insert_kid(arguments, $$);
-        }
+        insert_kid($3, $$);
+    }
+    | WRITE_TOKEN '(' STRING_TOKEN ')'{
+        $$ = create_astnode_context(AST_FUNC_CALL, "write call");
+        insert_kid($1, $$);
+        insert_kid($3, $$);
     }
 ;
 
@@ -864,9 +1009,11 @@ id:
 type:
     INT_TOKEN {
         $$ = create_astnode_context(AST_TYPE_INT, $1);
+        free($1);
     }
     | FLOAT_TOKEN {
         $$ = create_astnode_context(AST_TYPE_FLOAT, $1);
+        free($1);
     }
     | INT_TOKEN LIST_TOKEN {
         char *str = (char *) calloc((strlen($1) + strlen($2) + 10), sizeof(char));
@@ -875,6 +1022,8 @@ type:
         strcat(str, $2);
         $$ = create_astnode_context(AST_TYPE_INT_LIST, str);
         free(str);
+        free($1);
+        free($2);
     }
     | FLOAT_TOKEN LIST_TOKEN {
         char *str = (char *) calloc((strlen($1) + strlen($2) + 10), sizeof(char));
@@ -883,6 +1032,8 @@ type:
         strcat(str, $2);
         $$ = create_astnode_context(AST_TYPE_FLOAT_LIST, str);
         free(str);
+        free($1);
+        free($2);
     }
 ;
 
@@ -951,7 +1102,7 @@ int main(int argc, char **argv){
     if(root->kids->size > 0) {
         // printf("##################### %s #####################\n", "Abstract Syntax Tree");
         // print_tree(root, 0);
-        printf("\n");
+        // printf("\n");
     } else 
         printf(RED"AST error: " RESET "unable to print AST\n");
 
