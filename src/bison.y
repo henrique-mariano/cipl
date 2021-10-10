@@ -16,14 +16,20 @@
 
     #define RED "\033[1;31m"
     #define RESET "\033[0m"
-    #define SEMANTIC_ERROR(__STR_ERR__, ...) \
-            printf(RED"Semantic error: "RESET __STR_ERR__, ##__VA_ARGS__);
+
+    #define SEMANTIC_ERROR(__STR_ERR_SEM__, ...) \
+            printf(RED"Semantic error: "RESET __STR_ERR_SEM__, ##__VA_ARGS__);
+    #define SHOW_SYNTAX_ERROR(__STR_ERR_SYN__, ...) \
+            printf(RED"Syntax error: "RESET __STR_ERR_SYN__, ##__VA_ARGS__);
+
+    #define SHOW_SHOW_SYNTAX_ERROR(__STR_ERR__, ...) { \
+        yyerror(NULL); \
+        SHOW_SYNTAX_ERROR(__STR_ERR__, ##__VA_ARGS__); \
+    }
 
     extern int error, num_line, num_col;
 
     int semantic_error = 0;
-
-    // static int symbol_id;
 
     unsigned int current_scope;
     
@@ -47,19 +53,19 @@
     /* Lista para ajudar na criacao da arvore */
     List *node_aux;
 
-    /* Tabela de simbolos */
-    // SymbolTable *symbol_table;
-
     void delete_single_node(Element *node);
     void delete_list_treenode(Element *elem);
     void delete_tree_symbol_table(void *sym);
-
 %}
 
 %union{
+    /* Estrutura da árvore sintática */
     struct AstNode *astnode;
-    struct Symbol *symbol;
+    /* Estrutura de Símbolo */
+    // struct Symbol *symbol;
+    /* Estrutura de Lista */
     struct List *list;
+    /* String */
     char *string;
 }
 
@@ -67,7 +73,7 @@
 /* Tipação da regra */
 %type<astnode> declaration variableDeclare type id
 %type<astnode> functionDeclare param
-%type<astnode> statement codeBlock expression
+%type<astnode> statement codeBlock expression elseError
 %type<astnode> binArith listArith compoundStatement
 %type<astnode> flowExpression condExpression interationExpression
 %type<astnode> optExpression returnExpression unaArith constant
@@ -84,9 +90,9 @@
 %token INT_TOKEN FLOAT_TOKEN LIST_TOKEN /* Tipos */
 %token ID_TOKEN READ_TOKEN WRITE_TOKEN /* IDs */
 %token NIL_TOKEN CONSTANT_REAL_TOKEN CONSTANT_INTEGER_TOKEN /* Constantes */
-%token MUL_DIV_TOKEN EXCLAMATION_TOKEN QUESTION_TOKEN PERCENTAGE_TOKEN/* Operadores */
-%token MAP_TOKEN FILTER_TOKEN CONSTRUCTOR_LIST_TOKEN ADD_MIN_TOKEN /* */
-%token ASSIGN_TOKEN OR_TOKEN AND_TOKEN EQ_EXC_TOKEN LE_GR_TOKEN /* */
+%token MUL_DIV_TOKEN EXCLAMATION_TOKEN QUESTION_TOKEN PERCENTAGE_TOKEN ADD_MIN_TOKEN /* Operadores normais */
+%token MAP_TOKEN FILTER_TOKEN CONSTRUCTOR_LIST_TOKEN /* Operadores de lista */
+%token ASSIGN_TOKEN OR_TOKEN AND_TOKEN EQ_EXC_TOKEN LE_GR_TOKEN /* Assign e operadores lógicos */
 %token ADD_UNARY_TOKEN MIN_UNARY_TOKEN
 %token EQUAL_TOKEN DIFF_EQ_TOKEN
 %token LESS_TOKEN LE_EQ_TOKEN GREAT_TOKEN GR_EQ_TOKEN
@@ -115,14 +121,52 @@
 %precedence IF_TOKEN
 %precedence ELSE_TOKEN
 
+/* Destrutores */
 %destructor{
     delete_astnode($$);
 }<astnode>
 
+%destructor{
+    delete_list($$, delete_list_astnode);
+}<list>
+
+%destructor{
+    free($$);
+}<string>
+
+// assignError:
+//     /* Error de assign */
+//     /*  = 1';' */
+//     error ASSIGN_TOKEN expression {
+//         SHOW_SYNTAX_ERROR("expected expression before '=' token || line: %d, column: %d\n", @1.first_line, @1.first_column);
+//         delete_astnode($3);
+//         $$ = NULL;
+//     }
+//     | id ASSIGN_TOKEN error {
+//         SHOW_SYNTAX_ERROR("expected expression after '=' token || line: %d, column: %d\n", @2.first_line, @2.first_column);
+//         delete_astnode($1);
+//         $$ = NULL;
+//     }
+// ;
+
 %%
 
 startProgram:
-    startProgram declaration {
+    declarationList
+    /* Erros */
+    /* Erro inesperado */
+    /* int a */
+    | error {
+        SHOW_SYNTAX_ERROR("unexpected error || line: %d, column: %d\n", @1.first_line, @1.first_column);
+    }
+    /* Programa vazio */
+    | %empty {
+        SHOW_SYNTAX_ERROR("empty translation unit\n");
+    }
+;
+
+declarationList: 
+    declarationList declaration {
         insert_kid($2, root);
     }
     | declaration {
@@ -136,6 +180,13 @@ declaration:
     }
     | functionDeclare {
         $$ = $1;
+    }
+    /* Erros */
+    /*a = 2 + 3';'int main(){} */
+    | statement {
+        SHOW_SYNTAX_ERROR("an statement is not permitted at this top level || line: %d, column: %d\n", @1.first_line, @1.first_column);
+        delete_astnode($1);
+        $$ = NULL;
     }
 ;
 
@@ -155,6 +206,34 @@ variableDeclare:
             insert_kid($1, $$);
             insert_kid($2, $$);
         }
+    }
+    /* Erros */
+    /* int ';' */
+    | type ';' {
+        SHOW_SYNTAX_ERROR("useless type name in empty declaration || line: %d, column: %d\n", @1.first_line, @1.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    /* int a = 2 */
+    | type id ASSIGN_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected ';' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        delete_astnode($2);
+        $$ = NULL;
+    }
+    /* string a = 2 */
+    | id id ASSIGN_TOKEN error {
+        SHOW_SYNTAX_ERROR("unexpected type || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        delete_astnode($2);
+        $$ = NULL;
+    }
+    /* string a';' */
+    | id id ';' {
+        SHOW_SYNTAX_ERROR("unexpected type || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($1);
+        delete_astnode($2);
+        $$ = NULL;
     }
 ;
 
@@ -221,6 +300,12 @@ listParams:
         $$ = create_list();
         insert_list_element($$, $1);
     }
+    /* Erros */
+    /* int func(int a,) */
+    | error {
+        SHOW_SYNTAX_ERROR("unexpected params || line: %d, column: %d\n", @1.first_line, @1.first_column);
+        $$ = NULL;
+    }
 ;
 
 param:
@@ -238,6 +323,19 @@ param:
             insert_kid($1, $$);
             insert_kid($2, $$);
         }
+    }
+    /* Erros */
+    /* int func(int) */
+    | type {
+        SHOW_SYNTAX_ERROR("after '%s' expected identifier || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    /* int func(a) */
+    | id {
+        SHOW_SYNTAX_ERROR("expected type to '%s' || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
+        delete_astnode($1);
+        $$ = NULL;
     }
 ;
 
@@ -303,6 +401,7 @@ codeBlock:
         $$ = create_astnode_context(AST_CODE_BLOCK, "");
         insert_kid($1, $$);
     }
+    | elseError
 ;
 
 statement:
@@ -317,6 +416,12 @@ statement:
     | expression ';' {
         $$ = create_astnode_context(AST_STATEMENT, "");
         insert_kid($1, $$);
+    }
+    /* Erros */
+    /* 2 1';' */
+    | error ';' {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @2.first_line, @2.first_column);
+        $$ = NULL;
     }
 ;
 
@@ -344,6 +449,54 @@ condExpression:
         insert_kid($5, $$);
         insert_kid($7, $$);
     }
+    /* Erros */
+    /* if(){} */
+    | IF_TOKEN '(' error ')' statement %prec IF_TOKEN {
+        SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($5);
+        $$ = NULL;
+    }
+    /* if(){}else{} */
+    | IF_TOKEN '(' error ')' statement ELSE_TOKEN statement {
+        SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($5);
+        delete_astnode($7);
+        $$ = NULL;
+    }
+    /* if(1+2)else{} */
+    | IF_TOKEN '(' expression ')' ELSE_TOKEN statement {
+        SHOW_SYNTAX_ERROR("expected expression before 'else' || line: %d, column: %d\n", @5.first_line, @5.first_column);
+        delete_astnode($3);
+        delete_astnode($6);
+        $$ = NULL;
+    }
+    /* if()else{} */
+    | IF_TOKEN '(' error ')' ELSE_TOKEN statement {
+        SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($6);
+        $$ = NULL;
+    }
+    /* if */
+    | IF_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected '(' token || line: %d, column: %d\n", @2.first_line, @2.first_column);
+        $$ = NULL;
+    }
+;
+
+/* Erros de else */
+elseError:
+    /* else 1+2';' */
+    ELSE_TOKEN statement {
+        SHOW_SYNTAX_ERROR("'else' without a previous 'if' || line: %d, column: %d\n", @1.first_line, @1.first_column);
+        delete_astnode($2);
+        $$ = NULL;
+    }
+    /* 1 2 else 1+2';' */
+    | error ELSE_TOKEN statement {
+        SHOW_SYNTAX_ERROR("'else' without a previous 'if' || line: %d, column: %d\n", @2.first_line, @2.first_column);
+        delete_astnode($3);
+        $$ = NULL;
+    }
 ;
 
 interationExpression:
@@ -357,12 +510,67 @@ interationExpression:
             insert_kid($7, $$);
         insert_kid($9, $$);
     }
+    /* Erros */
+    /* for(1 1';'i > 2';'i++){} */
+    | FOR_TOKEN '(' error ';' optExpression ';' optExpression ')' statement {
+        SHOW_SYNTAX_ERROR("expected expression before ';' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($5);
+        delete_astnode($7);
+        delete_astnode($9);
+        $$ = NULL;
+    }
+    /* for(i = 1';'1 2';'i++){} */
+    | FOR_TOKEN '(' optExpression ';' error ';' optExpression ')' statement {
+        SHOW_SYNTAX_ERROR("expected expression before ';' token || line: %d, column: %d\n", @5.first_line, @5.first_column);
+        delete_astnode($3);
+        delete_astnode($7);
+        delete_astnode($9);
+        $$ = NULL;
+    }
+    /* for(i = 1';'i > 2';'1 2){} */
+    | FOR_TOKEN '(' optExpression ';' optExpression ';' error ')' statement {
+        SHOW_SYNTAX_ERROR("expected expression before ';' token || line: %d, column: %d\n", @7.first_line, @7.first_column);
+        delete_astnode($3);
+        delete_astnode($5);
+        delete_astnode($9);
+        $$ = NULL;
+    }
+    /* for(1 1';'i=i+1){} */
+    | FOR_TOKEN '(' error ';' optExpression ')' statement {
+        SHOW_SYNTAX_ERROR("expected expression before ';' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        delete_astnode($5);
+        delete_astnode($7);
+        $$ = NULL;
+    }
+    /* for(i > 2';'1 1){} */
+    | FOR_TOKEN '(' optExpression ';' error ')' statement {
+        SHOW_SYNTAX_ERROR("expected expression before ';' token || line: %d, column: %d\n", @5.first_line, @5.first_column);
+        delete_astnode($3);
+        delete_astnode($7);
+        $$ = NULL;
+    }
+    /* for() */
+    | FOR_TOKEN '(' error ')' {
+        SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @4.first_line, @4.first_column);
+        $$ = NULL;
+    }
+    /* for */
+    | FOR_TOKEN error {
+        SHOW_SYNTAX_ERROR("expected '(' token after 'for' || line: %d, column: %d\n", @2.first_line, @2.first_column);
+        $$ = NULL;
+    }
 ;
 
 returnExpression: 
     RETURN_TOKEN expression {
         $$ = create_astnode_context(AST_EXPR_RETURN, "return expression");
         insert_kid($2, $$);
+    }
+    /* Erros */
+    /* return ';' */
+    | RETURN_TOKEN error {
+        SHOW_SYNTAX_ERROR("'return' with no value, in function returning non-void || line: %d, column: %d\n", @1.first_line, @1.first_column);
+        $$ = NULL;
     }
 ;
 
@@ -420,6 +628,17 @@ expression:
     | '(' expression ')' {
         $$ = create_astnode_context(AST_EXPRESSION, "");
         insert_kid($2, $$);
+    }
+    /* Erros */
+    /* i 2 2 */
+    | id error {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", @1.first_line, @1.first_column);
+        delete_astnode($1);
+        $$ = NULL;
+    }
+    | '(' error ')' {
+        SHOW_SYNTAX_ERROR("expected expression before ')' || line: %d, column: %d\n", @3.first_line, @3.first_column);
+        $$ = NULL;
     }
 ;
 
@@ -670,14 +889,18 @@ type:
 %%
 
 void yyerror(const char *error_msg){
-    error++;
-    printf(RED"Line: %d || Column: %d || "RESET, num_line, num_col);
-    printf(RED"Error: %s || Error count: %d \n"RESET, error_msg, error);
+    // if (error_msg) {
+    //     printf(RED"Line: %d || Column: %d || "RESET, num_line, num_col);
+    //     printf(RED"Error: %s || Error count: %d \n"RESET, error_msg, error);
+    // }
+
+    if(!error_msg)
+        error++;
 }
 
 /* 
-*   O primeiro node ja deleta os nodes subsequentes 
-*   e portanto nao precisamos deletar na lista. 
+*   O primeiro node ja deleta os nodes subsequentes, 
+*   assim nao eh necessario deletar os elementos da lista. 
 */
 void delete_single_node(Element *node){
     if(!node)
@@ -721,34 +944,30 @@ int main(int argc, char **argv){
 
     if(sym_main){
         if(!sym_main->isfunction) 
-            printf(RED"Semantic error: Undefined reference to function main\n"RESET);
-    } else 
-        printf(RED"Semantic error: Undefined reference to function main\n"RESET);
+            SEMANTIC_ERROR("undefined reference to function main\n");
+    } else
+        SEMANTIC_ERROR("undefined reference to function main\n");
 
-    if(!semantic_error){
-        if(root->kids->size > 0) {
-            printf("##################### %s #####################\n", "Abstract Syntax Tree");
-            print_tree(root, 0);
-            printf("\n");
-        } else 
-            printf(RED"Unable to print AST\n"RESET);
-    }
+    if(root->kids->size > 0) {
+        // printf("##################### %s #####################\n", "Abstract Syntax Tree");
+        // print_tree(root, 0);
+        printf("\n");
+    } else 
+        printf(RED"AST error: " RESET "unable to print AST\n");
 
     Element *iterator;
-    if(!semantic_error){
-        // TODO: Arrumar if
-        if(((SymbolTable *)((TreeNode *) list_context->first->value)->value)->symbols->size > 0){
-            for(iterator = list_context->first; iterator != NULL; iterator = iterator->next){
-                if(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols->size > 0) {
-                    printf("########################## %s #########################\n", "Symbol Table");
-                    printf("# %-14s || %11s || %-10s || %4s || %6s #\n", "Type", "Symbol Kind", "ID", "Line", "Column");
-                    print_list(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols, print_symbol_list);
-                    printf("#################################################################\n");
-                }
+    /* TODO: Arrumar if */
+    if(((SymbolTable *)((TreeNode *) list_context->first->value)->value)->symbols->size > 0){
+        for(iterator = list_context->first; iterator != NULL; iterator = iterator->next){
+            if(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols->size > 0) {
+                printf("########################## %s #########################\n", "Symbol Table");
+                printf("# %-14s || %11s || %-10s || %4s || %6s #\n", "Type", "Symbol Kind", "ID", "Line", "Column");
+                print_list(((SymbolTable *)((TreeNode *)iterator->value)->value)->symbols, print_symbol_list);
+                printf("#################################################################\n");
             }
-        } else 
-            printf(RED"Unable to print Symbol Table\n"RESET);
-    }
+        }
+    } else 
+        printf(RED"Symbol Table error: " RESET "unable to print symbol table\n");
 
     delete_astnode(root);
     delete_list(node_aux, delete_list_astnode);

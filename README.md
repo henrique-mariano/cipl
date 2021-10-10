@@ -27,4 +27,5 @@ Para a execução:
 - [X] Verificar existência de variáveis e funções
 - [] Verificar os tipos das variáveis e funções
 - [] Verificar tipo de retorno da função
-- [] Tratamento de erros
+- [] Tratamento de erros sintático
+- [] Expressões e uso de funções.

@@ -67,10 +67,10 @@ extern int yydebug;
     EXCLAMATION_TOKEN = 268,       /* EXCLAMATION_TOKEN  */
     QUESTION_TOKEN = 269,          /* QUESTION_TOKEN  */
     PERCENTAGE_TOKEN = 270,        /* PERCENTAGE_TOKEN  */
-    MAP_TOKEN = 271,               /* MAP_TOKEN  */
-    FILTER_TOKEN = 272,            /* FILTER_TOKEN  */
-    CONSTRUCTOR_LIST_TOKEN = 273,  /* CONSTRUCTOR_LIST_TOKEN  */
-    ADD_MIN_TOKEN = 274,           /* ADD_MIN_TOKEN  */
+    ADD_MIN_TOKEN = 271,           /* ADD_MIN_TOKEN  */
+    MAP_TOKEN = 272,               /* MAP_TOKEN  */
+    FILTER_TOKEN = 273,            /* FILTER_TOKEN  */
+    CONSTRUCTOR_LIST_TOKEN = 274,  /* CONSTRUCTOR_LIST_TOKEN  */
     ASSIGN_TOKEN = 275,            /* ASSIGN_TOKEN  */
     OR_TOKEN = 276,                /* OR_TOKEN  */
     AND_TOKEN = 277,               /* AND_TOKEN  */
@@ -102,14 +102,18 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 59 "./src/bison.y"
+#line 61 "./src/bison.y"
 
+    /* Estrutura da árvore sintática */
     struct AstNode *astnode;
-    struct Symbol *symbol;
+    /* Estrutura de Símbolo */
+    // struct Symbol *symbol;
+    /* Estrutura de Lista */
     struct List *list;
+    /* String */
     char *string;
 
-#line 113 "lib/bison.h"
+#line 117 "lib/bison.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

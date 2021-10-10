@@ -542,6 +542,8 @@ char *yytext;
 
 
     #define DEBUG_LEX 0
+    #define RED "\033[1;31m"
+    #define RESET "\033[0m"
 
     #include <stdio.h>
     #include <stdlib.h>
@@ -554,8 +556,8 @@ char *yytext;
     int num_line = 1, num_col = 1, error = 0, scope = 0, symbol_id = 0;
 
     void print_token(char *type);
-#line 558 "lex.yy.c"
-#line 559 "lex.yy.c"
+#line 560 "lex.yy.c"
+#line 561 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -770,9 +772,9 @@ YY_DECL
 		}
 
 	{
-#line 65 "./src/lex.l"
+#line 67 "./src/lex.l"
 
-#line 776 "lex.yy.c"
+#line 778 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -841,7 +843,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 66 "./src/lex.l"
+#line 68 "./src/lex.l"
 {
     num_col += yyleng;
 }
@@ -849,7 +851,7 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 70 "./src/lex.l"
+#line 72 "./src/lex.l"
 {
     num_line += yyleng;
     num_col = 1;
@@ -857,12 +859,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 75 "./src/lex.l"
+#line 77 "./src/lex.l"
 {}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 77 "./src/lex.l"
+#line 79 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("SIMPLE_TYPE");
     num_col += yyleng;
@@ -878,7 +880,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 90 "./src/lex.l"
+#line 92 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("LIST_TYPES");
     num_col += yyleng;
@@ -888,7 +890,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 97 "./src/lex.l"
+#line 99 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Constant integer");
     num_col += yyleng;
@@ -898,7 +900,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 104 "./src/lex.l"
+#line 106 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Constant real");
     num_col += yyleng;
@@ -908,7 +910,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 111 "./src/lex.l"
+#line 113 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("String");
     num_col += yyleng;
@@ -918,7 +920,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 118 "./src/lex.l"
+#line 120 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Arithmetic operation");
     num_col += yyleng;
@@ -936,7 +938,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 133 "./src/lex.l"
+#line 135 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Logic operation");
     num_col += yyleng;
@@ -950,7 +952,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 144 "./src/lex.l"
+#line 146 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Relational operation");
     num_col += yyleng;
@@ -974,7 +976,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 165 "./src/lex.l"
+#line 167 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Unary operation list");
     num_col += yyleng;
@@ -993,7 +995,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 181 "./src/lex.l"
+#line 183 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Binary operation list");
     num_col += yyleng;
@@ -1009,7 +1011,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 194 "./src/lex.l"
+#line 196 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Flow control command");
     num_col += yyleng;
@@ -1030,7 +1032,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 212 "./src/lex.l"
+#line 214 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("IN/OUT operation");
     num_col += yyleng;
@@ -1046,7 +1048,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 225 "./src/lex.l"
+#line 227 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("ID");
     num_col += yyleng;
@@ -1056,7 +1058,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 232 "./src/lex.l"
+#line 234 "./src/lex.l"
 {
     num_col += yyleng;
     if(DEBUG_LEX == 1) print_token("Bracket");
@@ -1065,7 +1067,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 238 "./src/lex.l"
+#line 240 "./src/lex.l"
 {
     num_col += yyleng;
     if(DEBUG_LEX == 1) print_token("Comma");
@@ -1074,7 +1076,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 244 "./src/lex.l"
+#line 246 "./src/lex.l"
 {
     if(DEBUG_LEX == 1) print_token("Assign");
     num_col += yyleng;
@@ -1083,20 +1085,19 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 250 "./src/lex.l"
+#line 252 "./src/lex.l"
 {
     error++;
-    printf("Line: %d || Column: %d || ", num_line, num_col);
-    printf("Lexic Error: Unexpected character: %s || Error count: %d\n", yytext, error);
+    printf(RED"Lexic error: " RESET "unexpected character: %s || line: %d, column: %d\n", yytext, num_line, num_col);
     num_col += yyleng;
 }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 256 "./src/lex.l"
+#line 257 "./src/lex.l"
 ECHO;
 	YY_BREAK
-#line 1100 "lex.yy.c"
+#line 1101 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2072,7 +2073,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 256 "./src/lex.l"
+#line 257 "./src/lex.l"
 
 
 void print_token(char *type){

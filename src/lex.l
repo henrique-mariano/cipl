@@ -17,6 +17,8 @@
 
 
     #define DEBUG_LEX 0
+    #define RED "\033[1;31m"
+    #define RESET "\033[0m"
 
     #include <stdio.h>
     #include <stdlib.h>
@@ -249,8 +251,7 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 
 . {
     error++;
-    printf("Line: %d || Column: %d || ", num_line, num_col);
-    printf("Lexic Error: Unexpected character: %s || Error count: %d\n", yytext, error);
+    printf(RED"Lexic error: " RESET "unexpected character: %s || line: %d, column: %d\n", yytext, num_line, num_col);
     num_col += yyleng;
 }
 %%
