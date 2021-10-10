@@ -22,10 +22,13 @@ Para a execução:
 - [X] Tabela de símbolos
 - [X] Lidar com contextos na árvore
 - [X] Escopos
+- [X] Tratamento de erros sintáticos
+- [] Tratamento de erros semânticos
+- [X] Redeclaração de funções
 - [X] Redeclaração de variáveis
-- [X] Redeclaração de função
+- [X] Redeclaração de parâmetros
 - [X] Verificar existência de variáveis e funções
+- [X] Verificar existência da main
 - [] Verificar os tipos das variáveis e funções
+- [] Verificar tipos nas aritméticas
 - [] Verificar tipo de retorno da função
-- [] Tratamento de erros sintático
-- [] Expressões e uso de funções.
