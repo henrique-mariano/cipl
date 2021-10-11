@@ -6,7 +6,7 @@ FLEXFILES= $(SRC)/lex.l
 
 BISONFILES= $(SRC)/bison.y
 
-CFILES= src/list.c src/tree.c src/astcontext.c src/symbol.c src/treenode.c src/context.c lex.yy.c bison.tab.c
+CFILES= src/list.c src/tree.c src/astcontext.c src/symbol.c src/treenode.c src/context.c src/sem_eval.c lex.yy.c bison.tab.c
 
 FLAGS= -Wall -pedantic -Wpedantic -Werror -lm -lfl -g -std=gnu11
 
@@ -29,7 +29,7 @@ flex: $(FLEXFILES)
 	flex $(FLEXFILES)
 
 main: $(OFILES)
-	gcc -o $(NAME) -O $(CFILES) $(FLAGS)
+	gcc -o $(NAME) $(CFILES) $(FLAGS)
 
 move:
 ifeq ($(FILE_EXISTS), 1)

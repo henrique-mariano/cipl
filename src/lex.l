@@ -98,21 +98,22 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 {CONSTANT_INTEGER} {
     if(DEBUG_LEX == 1) print_token("Constant integer");
     num_col += yyleng;
-    yylval.astnode = create_astnode_context(AST_CONSTANT_INT, yytext);
+    yylval.astnode = create_astnode_context(AST_CONSTANT_INT, yytext, yylloc);
     return CONSTANT_INTEGER_TOKEN;
 }
 
 {CONSTANT_REAL} {
     if(DEBUG_LEX == 1) print_token("Constant real");
     num_col += yyleng;
-    yylval.astnode = create_astnode_context(AST_CONSTANT_REAL, yytext);
+    yylval.astnode = create_astnode_context(AST_CONSTANT_REAL, yytext, yylloc);
     return CONSTANT_REAL_TOKEN;
 }
 
 {STRING} {
     if(DEBUG_LEX == 1) print_token("String");
     num_col += yyleng;
-    yylval.astnode = create_astnode_context(AST_CONSTANT_STRING, yytext);
+    yylval.astnode = create_astnode_context(AST_CONSTANT_STRING, yytext, yylloc);
+    yylval.astnode->context->dtype = DTYPE_STRING;
     return STRING_TOKEN;
 }
 
@@ -205,7 +206,7 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
         case 'r':
             return RETURN_TOKEN;
         case 'N':
-            yylval.astnode = create_astnode_context(AST_CONSTANT_NIL, yytext);
+            yylval.astnode = create_astnode_context(AST_CONSTANT_NIL, yytext, yylloc);
             return NIL_TOKEN;
     }
 }
@@ -215,10 +216,10 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     num_col += yyleng;
     switch(yytext[0]){
         case 'r':
-            yylval.astnode = create_astnode_context(AST_FUNC_CALL, yytext);
+            yylval.astnode = create_astnode_context(AST_FUNC_CALL, yytext, yylloc);
             return READ_TOKEN;
         case 'w':
-            yylval.astnode = create_astnode_context(AST_FUNC_CALL, yytext);
+            yylval.astnode = create_astnode_context(AST_FUNC_CALL, yytext, yylloc);
             return WRITE_TOKEN;
     }
 }
@@ -226,7 +227,7 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
 {ID} {
     if(DEBUG_LEX == 1) print_token("ID");
     num_col += yyleng;
-    yylval.astnode = create_astnode_context(AST_ID, yytext);
+    yylval.astnode = create_astnode_context(AST_ID, yytext, yylloc);
     return ID_TOKEN;
 }
 

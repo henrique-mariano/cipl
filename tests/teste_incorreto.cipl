@@ -1,3 +1,4 @@
 int main(){
-    string s = "string";
+    // write(1 + 2);
+    write("NIL");
 }

@@ -29,6 +29,8 @@ Para a execução:
 - [X] Redeclaração de parâmetros
 - [X] Verificar existência de variáveis e funções
 - [X] Verificar existência da main
+- [X] Verificar se a main não possui parâmetros
+- [X] Verificar se a main retorna int
 - [] Verificar os tipos das variáveis e funções
 - [] Verificar tipos nas aritméticas
 - [] Verificar tipo de retorno da função

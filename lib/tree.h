@@ -16,6 +16,8 @@ AstNode *create_astnode(struct AstContext *context);
 
 void print_tree(AstNode *root, int tab);
 
+AstNode *lookup_node(AstNode *root, char *name);
+
 void insert_kid(AstNode *kid, AstNode *no);
 
 void delete_astnode(AstNode *no);

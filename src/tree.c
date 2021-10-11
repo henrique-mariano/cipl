@@ -51,3 +51,20 @@ void print_tree(AstNode *root, int tab)
         first_son = first_son->next;
     }
 }
+
+AstNode *lookup_node(AstNode *root, char *name)
+{
+    if (!root)
+        return NULL;
+    Element *first_son = root->kids->first;
+    if (!strcmp(root->context->name, name))
+        return root;
+    while (first_son != NULL)
+    {
+        root = lookup_node(first_son->value, name);
+        if(root)
+            return root;
+        first_son = first_son->next;
+    }
+    return NULL;
+}

@@ -76,22 +76,8 @@
     #include "lib/symbol.h"
     #include "lib/context.h"
     #include "lib/treenode.h"
-
-    #define FUNCTION 1
-    #define VARIABLE 0
-
-    #define RED "\033[1;31m"
-    #define RESET "\033[0m"
-
-    #define SEMANTIC_ERROR(__STR_ERR_SEM__, ...) \
-            printf(RED"Semantic error: "RESET __STR_ERR_SEM__, ##__VA_ARGS__);
-    #define SHOW_SYNTAX_ERROR(__STR_ERR_SYN__, ...) \
-            printf(RED"Syntax error: "RESET __STR_ERR_SYN__, ##__VA_ARGS__);
-
-    #define SHOW_SHOW_SYNTAX_ERROR(__STR_ERR__, ...) { \
-        yyerror(NULL); \
-        SHOW_SYNTAX_ERROR(__STR_ERR__, ##__VA_ARGS__); \
-    }
+    #include "lib/sem_eval.h"
+    #include "lib/macros.h"
 
     extern int error, num_line, num_col;
 
@@ -122,8 +108,9 @@
     void delete_single_node(Element *node);
     void delete_list_treenode(Element *elem);
     void delete_tree_symbol_table(void *sym);
+    unsigned int type_check(AstNode *root);
 
-#line 127 "bison.tab.c"
+#line 114 "bison.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -630,21 +617,21 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   154,   154,   158,   162,   168,   171,   177,   180,   185,
-     193,   211,   217,   224,   231,   240,   240,   287,   290,   294,
-     298,   304,   311,   328,   334,   342,   342,   377,   380,   384,
-     388,   395,   399,   403,   407,   411,   415,   421,   426,   431,
-     437,   442,   449,   457,   462,   467,   472,   480,   483,   486,
-     492,   497,   505,   511,   518,   525,   531,   540,   546,   554,
-     566,   574,   582,   590,   597,   604,   609,   616,   622,   629,
-     632,   638,   642,   646,   650,   654,   658,   662,   666,   676,
-     682,   690,   690,   704,   709,   714,   719,   724,   729,   734,
-     739,   744,   749,   754,   759,   765,   770,   775,   780,   785,
-     790,   795,   800,   805,   810,   815,   820,   828,   833,   838,
-     844,   849,   854,   862,   866,   870,   874,   878,   883,   887,
-     891,   895,   899,   906,   910,   914,   921,   927,   933,   939,
-     939,   962,   962,   973,   978,   986,   989,   993,   997,  1004,
-    1010,  1014,  1018,  1028
+       0,   141,   141,   145,   149,   155,   158,   164,   167,   172,
+     180,   198,   204,   211,   218,   227,   227,   274,   277,   281,
+     285,   291,   298,   315,   321,   329,   329,   364,   367,   371,
+     375,   382,   386,   390,   394,   398,   402,   408,   413,   418,
+     424,   429,   436,   444,   449,   454,   459,   467,   470,   473,
+     479,   484,   492,   498,   505,   512,   518,   527,   533,   541,
+     553,   561,   569,   577,   584,   591,   596,   603,   609,   616,
+     619,   625,   629,   633,   637,   641,   645,   649,   653,   663,
+     669,   677,   677,   691,   696,   701,   706,   711,   716,   721,
+     726,   731,   736,   741,   746,   752,   757,   762,   767,   772,
+     777,   782,   787,   792,   797,   802,   807,   815,   820,   825,
+     831,   836,   841,   849,   854,   859,   864,   869,   875,   879,
+     883,   887,   891,   898,   903,   908,   916,   923,   930,   937,
+     937,   960,   960,   971,   976,   984,   987,   991,   995,  1002,
+    1008,  1013,  1018,  1029
 };
 #endif
 
@@ -5256,347 +5243,347 @@ yydestruct (const char *yymsg,
   switch (yykind)
     {
     case YYSYMBOL_INT_TOKEN: /* INT_TOKEN  */
-#line 132 "./src/bison.y"
+#line 119 "./src/bison.y"
            {
     free(((*yyvaluep).string));
 }
-#line 5264 "bison.tab.c"
+#line 5251 "bison.tab.c"
         break;
 
     case YYSYMBOL_FLOAT_TOKEN: /* FLOAT_TOKEN  */
-#line 132 "./src/bison.y"
+#line 119 "./src/bison.y"
            {
     free(((*yyvaluep).string));
 }
-#line 5272 "bison.tab.c"
+#line 5259 "bison.tab.c"
         break;
 
     case YYSYMBOL_LIST_TOKEN: /* LIST_TOKEN  */
-#line 132 "./src/bison.y"
+#line 119 "./src/bison.y"
            {
     free(((*yyvaluep).string));
 }
-#line 5280 "bison.tab.c"
+#line 5267 "bison.tab.c"
         break;
 
     case YYSYMBOL_ID_TOKEN: /* ID_TOKEN  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5288 "bison.tab.c"
+#line 5275 "bison.tab.c"
         break;
 
     case YYSYMBOL_READ_TOKEN: /* READ_TOKEN  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5296 "bison.tab.c"
+#line 5283 "bison.tab.c"
         break;
 
     case YYSYMBOL_WRITE_TOKEN: /* WRITE_TOKEN  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5304 "bison.tab.c"
+#line 5291 "bison.tab.c"
         break;
 
     case YYSYMBOL_NIL_TOKEN: /* NIL_TOKEN  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5312 "bison.tab.c"
+#line 5299 "bison.tab.c"
         break;
 
     case YYSYMBOL_CONSTANT_REAL_TOKEN: /* CONSTANT_REAL_TOKEN  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5320 "bison.tab.c"
+#line 5307 "bison.tab.c"
         break;
 
     case YYSYMBOL_CONSTANT_INTEGER_TOKEN: /* CONSTANT_INTEGER_TOKEN  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5328 "bison.tab.c"
+#line 5315 "bison.tab.c"
         break;
 
     case YYSYMBOL_STRING_TOKEN: /* STRING_TOKEN  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5336 "bison.tab.c"
+#line 5323 "bison.tab.c"
         break;
 
     case YYSYMBOL_declaration: /* declaration  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5344 "bison.tab.c"
+#line 5331 "bison.tab.c"
         break;
 
     case YYSYMBOL_variableDeclare: /* variableDeclare  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5352 "bison.tab.c"
+#line 5339 "bison.tab.c"
         break;
 
     case YYSYMBOL_functionDeclare: /* functionDeclare  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5360 "bison.tab.c"
+#line 5347 "bison.tab.c"
         break;
 
     case YYSYMBOL_59_1: /* @1  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5368 "bison.tab.c"
+#line 5355 "bison.tab.c"
         break;
 
     case YYSYMBOL_optListParams: /* optListParams  */
-#line 128 "./src/bison.y"
+#line 115 "./src/bison.y"
            {
     delete_list(((*yyvaluep).list), delete_list_astnode);
 }
-#line 5376 "bison.tab.c"
+#line 5363 "bison.tab.c"
         break;
 
     case YYSYMBOL_listParams: /* listParams  */
-#line 128 "./src/bison.y"
+#line 115 "./src/bison.y"
            {
     delete_list(((*yyvaluep).list), delete_list_astnode);
 }
-#line 5384 "bison.tab.c"
+#line 5371 "bison.tab.c"
         break;
 
     case YYSYMBOL_param: /* param  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5392 "bison.tab.c"
+#line 5379 "bison.tab.c"
         break;
 
     case YYSYMBOL_compoundStatement: /* compoundStatement  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5400 "bison.tab.c"
+#line 5387 "bison.tab.c"
         break;
 
     case YYSYMBOL_optListCodeBlock: /* optListCodeBlock  */
-#line 128 "./src/bison.y"
+#line 115 "./src/bison.y"
            {
     delete_list(((*yyvaluep).list), delete_list_astnode);
 }
-#line 5408 "bison.tab.c"
+#line 5395 "bison.tab.c"
         break;
 
     case YYSYMBOL_listCodeBlock: /* listCodeBlock  */
-#line 128 "./src/bison.y"
+#line 115 "./src/bison.y"
            {
     delete_list(((*yyvaluep).list), delete_list_astnode);
 }
-#line 5416 "bison.tab.c"
+#line 5403 "bison.tab.c"
         break;
 
     case YYSYMBOL_codeBlock: /* codeBlock  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5424 "bison.tab.c"
+#line 5411 "bison.tab.c"
         break;
 
     case YYSYMBOL_statement: /* statement  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5432 "bison.tab.c"
+#line 5419 "bison.tab.c"
         break;
 
     case YYSYMBOL_flowExpression: /* flowExpression  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5440 "bison.tab.c"
+#line 5427 "bison.tab.c"
         break;
 
     case YYSYMBOL_condExpression: /* condExpression  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5448 "bison.tab.c"
+#line 5435 "bison.tab.c"
         break;
 
     case YYSYMBOL_elseError: /* elseError  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5456 "bison.tab.c"
+#line 5443 "bison.tab.c"
         break;
 
     case YYSYMBOL_interationExpression: /* interationExpression  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5464 "bison.tab.c"
+#line 5451 "bison.tab.c"
         break;
 
     case YYSYMBOL_returnExpression: /* returnExpression  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5472 "bison.tab.c"
+#line 5459 "bison.tab.c"
         break;
 
     case YYSYMBOL_optExpression: /* optExpression  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5480 "bison.tab.c"
+#line 5467 "bison.tab.c"
         break;
 
     case YYSYMBOL_expression: /* expression  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5488 "bison.tab.c"
+#line 5475 "bison.tab.c"
         break;
 
     case YYSYMBOL_assignArith: /* assignArith  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5496 "bison.tab.c"
+#line 5483 "bison.tab.c"
         break;
 
     case YYSYMBOL_binArith: /* binArith  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5504 "bison.tab.c"
+#line 5491 "bison.tab.c"
         break;
 
     case YYSYMBOL_listArith: /* listArith  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5512 "bison.tab.c"
+#line 5499 "bison.tab.c"
         break;
 
     case YYSYMBOL_unaArith: /* unaArith  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5520 "bison.tab.c"
+#line 5507 "bison.tab.c"
         break;
 
     case YYSYMBOL_constant: /* constant  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5528 "bison.tab.c"
+#line 5515 "bison.tab.c"
         break;
 
     case YYSYMBOL_constantInteger: /* constantInteger  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5536 "bison.tab.c"
+#line 5523 "bison.tab.c"
         break;
 
     case YYSYMBOL_constantReal: /* constantReal  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5544 "bison.tab.c"
+#line 5531 "bison.tab.c"
         break;
 
     case YYSYMBOL_constantNIL: /* constantNIL  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5552 "bison.tab.c"
+#line 5539 "bison.tab.c"
         break;
 
     case YYSYMBOL_funcCall: /* funcCall  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5560 "bison.tab.c"
+#line 5547 "bison.tab.c"
         break;
 
     case YYSYMBOL_ioCommand: /* ioCommand  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5568 "bison.tab.c"
+#line 5555 "bison.tab.c"
         break;
 
     case YYSYMBOL_optListExpression: /* optListExpression  */
-#line 128 "./src/bison.y"
+#line 115 "./src/bison.y"
            {
     delete_list(((*yyvaluep).list), delete_list_astnode);
 }
-#line 5576 "bison.tab.c"
+#line 5563 "bison.tab.c"
         break;
 
     case YYSYMBOL_listExpression: /* listExpression  */
-#line 128 "./src/bison.y"
+#line 115 "./src/bison.y"
            {
     delete_list(((*yyvaluep).list), delete_list_astnode);
 }
-#line 5584 "bison.tab.c"
+#line 5571 "bison.tab.c"
         break;
 
     case YYSYMBOL_id: /* id  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5592 "bison.tab.c"
+#line 5579 "bison.tab.c"
         break;
 
     case YYSYMBOL_type: /* type  */
-#line 124 "./src/bison.y"
+#line 111 "./src/bison.y"
            {
     delete_astnode(((*yyvaluep).astnode));
 }
-#line 5600 "bison.tab.c"
+#line 5587 "bison.tab.c"
         break;
 
       default:
@@ -5890,65 +5877,65 @@ yyreduce:
   switch (yyn)
     {
   case 3: /* startProgram: error  */
-#line 158 "./src/bison.y"
+#line 145 "./src/bison.y"
             {
         SHOW_SYNTAX_ERROR("unexpected error || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
     }
-#line 5898 "bison.tab.c"
+#line 5885 "bison.tab.c"
     break;
 
   case 4: /* startProgram: %empty  */
-#line 162 "./src/bison.y"
+#line 149 "./src/bison.y"
              {
         SHOW_SYNTAX_ERROR("empty translation unit\n");
     }
-#line 5906 "bison.tab.c"
+#line 5893 "bison.tab.c"
     break;
 
   case 5: /* declarationList: declarationList declaration  */
-#line 168 "./src/bison.y"
+#line 155 "./src/bison.y"
                                 {
         insert_kid((yyvsp[0].astnode), root);
     }
-#line 5914 "bison.tab.c"
+#line 5901 "bison.tab.c"
     break;
 
   case 6: /* declarationList: declaration  */
-#line 171 "./src/bison.y"
+#line 158 "./src/bison.y"
                   {
         insert_kid((yyvsp[0].astnode), root);
     }
-#line 5922 "bison.tab.c"
+#line 5909 "bison.tab.c"
     break;
 
   case 7: /* declaration: variableDeclare  */
-#line 177 "./src/bison.y"
+#line 164 "./src/bison.y"
                     {
         (yyval.astnode) = (yyvsp[0].astnode);
     }
-#line 5930 "bison.tab.c"
+#line 5917 "bison.tab.c"
     break;
 
   case 8: /* declaration: functionDeclare  */
-#line 180 "./src/bison.y"
+#line 167 "./src/bison.y"
                       {
         (yyval.astnode) = (yyvsp[0].astnode);
     }
-#line 5938 "bison.tab.c"
+#line 5925 "bison.tab.c"
     break;
 
   case 9: /* declaration: statement  */
-#line 185 "./src/bison.y"
+#line 172 "./src/bison.y"
                 {
         SHOW_SYNTAX_ERROR("an statement is not permitted at this top level || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 5948 "bison.tab.c"
+#line 5935 "bison.tab.c"
     break;
 
   case 10: /* variableDeclare: type id ';'  */
-#line 193 "./src/bison.y"
+#line 180 "./src/bison.y"
                 {
         // printf("current_context_var: %p || name: %s\n", (void *) current_context, $2->context->name);
         Symbol *sym_declared = lookup_symbol_context((yyvsp[-1].astnode)->context->name, current_context);
@@ -5960,59 +5947,59 @@ yyreduce:
             delete_astnode((yyvsp[-1].astnode));
         } else {
             list_symbol_insert((yyvsp[-2].astnode)->context->type, ((SymbolTable *)current_context->value)->symbols, (yyvsp[-1].astnode)->context->name, 0, (yylsp[-1]).first_line, (yylsp[-1]).first_column, VARIABLE);
-            (yyval.astnode) = create_astnode_context(AST_VAR_DECLARE, "variable declare");
+            (yyval.astnode) = create_astnode_context(AST_VAR_DECLARE, "variable declare", (yylsp[-2]));
             insert_kid((yyvsp[-2].astnode), (yyval.astnode));
             insert_kid((yyvsp[-1].astnode), (yyval.astnode));
         }
     }
-#line 5969 "bison.tab.c"
+#line 5956 "bison.tab.c"
     break;
 
   case 11: /* variableDeclare: type ';'  */
-#line 211 "./src/bison.y"
+#line 198 "./src/bison.y"
                {
         SHOW_SYNTAX_ERROR("useless type name in empty declaration || line: %d, column: %d\n", (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         delete_astnode((yyvsp[-1].astnode));
         (yyval.astnode) = NULL;
     }
-#line 5979 "bison.tab.c"
+#line 5966 "bison.tab.c"
     break;
 
   case 12: /* variableDeclare: type id ASSIGN_TOKEN error  */
-#line 217 "./src/bison.y"
+#line 204 "./src/bison.y"
                                  {
         SHOW_SYNTAX_ERROR("expected ';' || line: %d, column: %d\n", (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         delete_astnode((yyvsp[-3].astnode));
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 5990 "bison.tab.c"
+#line 5977 "bison.tab.c"
     break;
 
   case 13: /* variableDeclare: id id ASSIGN_TOKEN error  */
-#line 224 "./src/bison.y"
+#line 211 "./src/bison.y"
                                {
         SHOW_SYNTAX_ERROR("unexpected type || line: %d, column: %d\n", (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         delete_astnode((yyvsp[-3].astnode));
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6001 "bison.tab.c"
+#line 5988 "bison.tab.c"
     break;
 
   case 14: /* variableDeclare: id id ';'  */
-#line 231 "./src/bison.y"
+#line 218 "./src/bison.y"
                 {
         SHOW_SYNTAX_ERROR("unexpected type || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         delete_astnode((yyvsp[-1].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6012 "bison.tab.c"
+#line 5999 "bison.tab.c"
     break;
 
   case 15: /* @1: %empty  */
-#line 240 "./src/bison.y"
+#line 227 "./src/bison.y"
                          {
         (yyval.astnode) = (yyvsp[-1].astnode);
         // printf("current_context_func: %p || name: %s\n", (void *) current_context, $2->context->name);
@@ -6036,13 +6023,13 @@ yyreduce:
             list_symbol_insert((yyvsp[-2].astnode)->context->type, ((SymbolTable *)current_context->value)->symbols, (yyvsp[-1].astnode)->context->name, 0, (yylsp[-1]).first_line, (yylsp[-1]).first_column, FUNCTION);
         }
     }
-#line 6040 "bison.tab.c"
+#line 6027 "bison.tab.c"
     break;
 
   case 16: /* functionDeclare: type id '(' @1 optListParams ')' compoundStatement  */
-#line 262 "./src/bison.y"
+#line 249 "./src/bison.y"
                                           {
-        (yyval.astnode) = create_astnode_context(AST_FUNC_DECLARE, "func declare");
+        (yyval.astnode) = create_astnode_context(AST_FUNC_DECLARE, "func declare", (yyloc));
         
         if((yyvsp[-6].astnode))
             insert_kid((yyvsp[-6].astnode), (yyval.astnode));
@@ -6051,7 +6038,7 @@ yyreduce:
         }
         if((yyvsp[-2].list)){ /* Se existir parametros insira */
             // Cria um noh que recebe os parametros
-            AstNode *params = create_astnode_context(AST_LIST_PARAM, "params");
+            AstNode *params = create_astnode_context(AST_LIST_PARAM, "params", (yylsp[-2]));
 
             // Percorre a lista de parametros inserindo os parametros no noh params
             while((yyvsp[-2].list)->size) {
@@ -6063,46 +6050,46 @@ yyreduce:
         }
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6067 "bison.tab.c"
+#line 6054 "bison.tab.c"
     break;
 
   case 17: /* optListParams: %empty  */
-#line 287 "./src/bison.y"
+#line 274 "./src/bison.y"
            {
         (yyval.list) = NULL;
     }
-#line 6075 "bison.tab.c"
+#line 6062 "bison.tab.c"
     break;
 
   case 19: /* listParams: listParams ',' param  */
-#line 294 "./src/bison.y"
+#line 281 "./src/bison.y"
                          {
         insert_list_element((yyvsp[-2].list), (yyvsp[0].astnode));
         (yyval.list) = (yyvsp[-2].list);
     }
-#line 6084 "bison.tab.c"
+#line 6071 "bison.tab.c"
     break;
 
   case 20: /* listParams: param  */
-#line 298 "./src/bison.y"
+#line 285 "./src/bison.y"
             {
         (yyval.list) = create_list();
         insert_list_element((yyval.list), (yyvsp[0].astnode));
     }
-#line 6093 "bison.tab.c"
+#line 6080 "bison.tab.c"
     break;
 
   case 21: /* listParams: error  */
-#line 304 "./src/bison.y"
+#line 291 "./src/bison.y"
             {
         SHOW_SYNTAX_ERROR("unexpected params || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         (yyval.list) = NULL;
     }
-#line 6102 "bison.tab.c"
+#line 6089 "bison.tab.c"
     break;
 
   case 22: /* param: type id  */
-#line 311 "./src/bison.y"
+#line 298 "./src/bison.y"
             {
         Symbol *sym_declared = lookup_symbol_context((yyvsp[0].astnode)->context->name, current_context);
         if(sym_declared != NULL){
@@ -6113,36 +6100,36 @@ yyreduce:
             delete_astnode((yyvsp[0].astnode));
         } else {
             list_symbol_insert((yyvsp[-1].astnode)->context->type, ((SymbolTable *)current_context->value)->symbols, (yyvsp[0].astnode)->context->name, 0, (yylsp[0]).first_line, (yylsp[0]).first_column, VARIABLE);
-            (yyval.astnode) = create_astnode_context(AST_PARAM, "param");
+            (yyval.astnode) = create_astnode_context(AST_PARAM, "param", (yyloc));
             insert_kid((yyvsp[-1].astnode), (yyval.astnode));
             insert_kid((yyvsp[0].astnode), (yyval.astnode));
         }
     }
-#line 6122 "bison.tab.c"
+#line 6109 "bison.tab.c"
     break;
 
   case 23: /* param: type  */
-#line 328 "./src/bison.y"
+#line 315 "./src/bison.y"
            {
         SHOW_SYNTAX_ERROR("after '%s' expected identifier || line: %d, column: %d\n", (yyvsp[0].astnode)->context->name, (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6132 "bison.tab.c"
+#line 6119 "bison.tab.c"
     break;
 
   case 24: /* param: id  */
-#line 334 "./src/bison.y"
+#line 321 "./src/bison.y"
          {
         SHOW_SYNTAX_ERROR("expected type to '%s' || line: %d, column: %d\n", (yyvsp[0].astnode)->context->name, (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6142 "bison.tab.c"
+#line 6129 "bison.tab.c"
     break;
 
   case 25: /* $@2: %empty  */
-#line 342 "./src/bison.y"
+#line 329 "./src/bison.y"
         {
         // printf("current_context_compound: %p\n", (void *) current_context);
         if(!isFunctionContext){
@@ -6158,16 +6145,16 @@ yyreduce:
         }
         isFunctionContext = 0;
     }
-#line 6162 "bison.tab.c"
+#line 6149 "bison.tab.c"
     break;
 
   case 26: /* compoundStatement: '{' $@2 optListCodeBlock '}'  */
-#line 356 "./src/bison.y"
+#line 343 "./src/bison.y"
                            {
-        (yyval.astnode) = create_astnode_context(AST_STATE_COMPOUND, "compound statement");
+        (yyval.astnode) = create_astnode_context(AST_STATE_COMPOUND, "compound statement", (yyloc));
         if((yyvsp[-1].list)){ /* Se existir code block insira */
             // Cria um noh que recebe os code blocks
-            AstNode *codeblocks = create_astnode_context(AST_CODE_BLOCK, "code block");
+            AstNode *codeblocks = create_astnode_context(AST_CODE_BLOCK, "code block", (yylsp[-1]));
 
             // Percorre a lista de code blocks inserindo os code blocks no noh code blocks
             while((yyvsp[-1].list)->size) {
@@ -6181,300 +6168,300 @@ yyreduce:
         current_context = current_context->father;
         // printf("Depois current_context: %p || pai: %p\n", (void *) current_context, (void *) current_context->father);
     }
-#line 6185 "bison.tab.c"
+#line 6172 "bison.tab.c"
     break;
 
   case 27: /* optListCodeBlock: %empty  */
-#line 377 "./src/bison.y"
+#line 364 "./src/bison.y"
            {
         (yyval.list) = NULL;
     }
-#line 6193 "bison.tab.c"
+#line 6180 "bison.tab.c"
     break;
 
   case 29: /* listCodeBlock: listCodeBlock codeBlock  */
-#line 384 "./src/bison.y"
+#line 371 "./src/bison.y"
                             {
         insert_list_element((yyvsp[-1].list), (yyvsp[0].astnode));
         (yyval.list) = (yyvsp[-1].list);
     }
-#line 6202 "bison.tab.c"
+#line 6189 "bison.tab.c"
     break;
 
   case 30: /* listCodeBlock: codeBlock  */
-#line 388 "./src/bison.y"
+#line 375 "./src/bison.y"
                 {
         (yyval.list) = create_list();
         insert_list_element((yyval.list), (yyvsp[0].astnode));
     }
-#line 6211 "bison.tab.c"
+#line 6198 "bison.tab.c"
     break;
 
   case 31: /* codeBlock: statement  */
-#line 395 "./src/bison.y"
+#line 382 "./src/bison.y"
               {
-        (yyval.astnode) = create_astnode_context(AST_CODE_BLOCK, "");
+        (yyval.astnode) = create_astnode_context(AST_CODE_BLOCK, "", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6220 "bison.tab.c"
+#line 6207 "bison.tab.c"
     break;
 
   case 32: /* codeBlock: variableDeclare  */
-#line 399 "./src/bison.y"
+#line 386 "./src/bison.y"
                       {
-        (yyval.astnode) = create_astnode_context(AST_CODE_BLOCK, "");
+        (yyval.astnode) = create_astnode_context(AST_CODE_BLOCK, "", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6229 "bison.tab.c"
+#line 6216 "bison.tab.c"
     break;
 
   case 34: /* statement: flowExpression  */
-#line 407 "./src/bison.y"
+#line 394 "./src/bison.y"
                    {
-        (yyval.astnode) = create_astnode_context(AST_STATEMENT, "");
+        (yyval.astnode) = create_astnode_context(AST_STATEMENT, "", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6238 "bison.tab.c"
+#line 6225 "bison.tab.c"
     break;
 
   case 35: /* statement: compoundStatement  */
-#line 411 "./src/bison.y"
+#line 398 "./src/bison.y"
                         {
-        (yyval.astnode) = create_astnode_context(AST_STATEMENT, "");
+        (yyval.astnode) = create_astnode_context(AST_STATEMENT, "", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6247 "bison.tab.c"
+#line 6234 "bison.tab.c"
     break;
 
   case 36: /* statement: expression ';'  */
-#line 415 "./src/bison.y"
+#line 402 "./src/bison.y"
                      {
-        (yyval.astnode) = create_astnode_context(AST_STATEMENT, "");
+        (yyval.astnode) = create_astnode_context(AST_STATEMENT, "", (yyloc));
         insert_kid((yyvsp[-1].astnode), (yyval.astnode));
     }
-#line 6256 "bison.tab.c"
+#line 6243 "bison.tab.c"
     break;
 
   case 37: /* statement: error ';'  */
-#line 421 "./src/bison.y"
+#line 408 "./src/bison.y"
                 {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         (yyval.astnode) = NULL;
     }
-#line 6265 "bison.tab.c"
+#line 6252 "bison.tab.c"
     break;
 
   case 38: /* statement: '(' error ')'  */
-#line 426 "./src/bison.y"
+#line 413 "./src/bison.y"
                     {
         SHOW_SYNTAX_ERROR("expected expression before ')' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         (yyval.astnode) = NULL;
     }
-#line 6274 "bison.tab.c"
+#line 6261 "bison.tab.c"
     break;
 
   case 39: /* statement: WRITE_TOKEN '(' error ')'  */
-#line 431 "./src/bison.y"
+#line 418 "./src/bison.y"
                                 {
        SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", (yylsp[-1]).first_line, (yylsp[-1]).first_column);
        delete_astnode((yyvsp[-3].astnode));
        (yyval.astnode) = NULL;
     }
-#line 6284 "bison.tab.c"
+#line 6271 "bison.tab.c"
     break;
 
   case 40: /* statement: WRITE_TOKEN '(' error ')' ';'  */
-#line 437 "./src/bison.y"
+#line 424 "./src/bison.y"
                                     {
        SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
        delete_astnode((yyvsp[-4].astnode));
        (yyval.astnode) = NULL;
     }
-#line 6294 "bison.tab.c"
+#line 6281 "bison.tab.c"
     break;
 
   case 41: /* statement: WRITE_TOKEN '(' expression ')' error  */
-#line 442 "./src/bison.y"
+#line 429 "./src/bison.y"
                                            {
        SHOW_SYNTAX_ERROR("expected ';' token || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
        delete_astnode((yyvsp[-4].astnode));
        delete_astnode((yyvsp[-2].astnode));
        (yyval.astnode) = NULL;
     }
-#line 6305 "bison.tab.c"
+#line 6292 "bison.tab.c"
     break;
 
   case 42: /* statement: WRITE_TOKEN '(' STRING_TOKEN ')' error  */
-#line 449 "./src/bison.y"
+#line 436 "./src/bison.y"
                                              {
        SHOW_SYNTAX_ERROR("expected ';' token || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
        delete_astnode((yyvsp[-4].astnode));
        delete_astnode((yyvsp[-2].astnode));
        (yyval.astnode) = NULL;
     }
-#line 6316 "bison.tab.c"
+#line 6303 "bison.tab.c"
     break;
 
   case 43: /* statement: READ_TOKEN '(' error ')'  */
-#line 457 "./src/bison.y"
+#line 444 "./src/bison.y"
                                {
         SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         delete_astnode((yyvsp[-3].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6326 "bison.tab.c"
+#line 6313 "bison.tab.c"
     break;
 
   case 44: /* statement: READ_TOKEN '(' error ')' ';'  */
-#line 462 "./src/bison.y"
+#line 449 "./src/bison.y"
                                    {
         SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
         delete_astnode((yyvsp[-4].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6336 "bison.tab.c"
+#line 6323 "bison.tab.c"
     break;
 
   case 45: /* statement: READ_TOKEN error ';'  */
-#line 467 "./src/bison.y"
+#line 454 "./src/bison.y"
                            {
         SHOW_SYNTAX_ERROR("expected '(' token after 'read' || line: %d, column: %d\n", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6346 "bison.tab.c"
+#line 6333 "bison.tab.c"
     break;
 
   case 46: /* statement: WRITE_TOKEN error ';'  */
-#line 472 "./src/bison.y"
+#line 459 "./src/bison.y"
                             {
         SHOW_SYNTAX_ERROR("expected '(' token after 'write' || line: %d, column: %d\n", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6356 "bison.tab.c"
+#line 6343 "bison.tab.c"
     break;
 
   case 47: /* flowExpression: condExpression  */
-#line 480 "./src/bison.y"
+#line 467 "./src/bison.y"
                    {
         (yyval.astnode) = (yyvsp[0].astnode);
     }
-#line 6364 "bison.tab.c"
+#line 6351 "bison.tab.c"
     break;
 
   case 48: /* flowExpression: interationExpression  */
-#line 483 "./src/bison.y"
+#line 470 "./src/bison.y"
                            {
         (yyval.astnode) = (yyvsp[0].astnode);
     }
-#line 6372 "bison.tab.c"
+#line 6359 "bison.tab.c"
     break;
 
   case 49: /* flowExpression: returnExpression ';'  */
-#line 486 "./src/bison.y"
+#line 473 "./src/bison.y"
                            {
         (yyval.astnode) = (yyvsp[-1].astnode);
     }
-#line 6380 "bison.tab.c"
+#line 6367 "bison.tab.c"
     break;
 
   case 50: /* condExpression: IF_TOKEN '(' expression ')' statement  */
-#line 492 "./src/bison.y"
+#line 479 "./src/bison.y"
                                                          {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_COND, "cond expression");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_COND, "cond expression", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6390 "bison.tab.c"
+#line 6377 "bison.tab.c"
     break;
 
   case 51: /* condExpression: IF_TOKEN '(' expression ')' statement ELSE_TOKEN statement  */
-#line 497 "./src/bison.y"
+#line 484 "./src/bison.y"
                                                                  {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_COND, "cond expression");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_COND, "cond expression", (yyloc));
         insert_kid((yyvsp[-4].astnode), (yyval.astnode));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6401 "bison.tab.c"
+#line 6388 "bison.tab.c"
     break;
 
   case 52: /* condExpression: IF_TOKEN '(' error ')' statement  */
-#line 505 "./src/bison.y"
+#line 492 "./src/bison.y"
                                                       {
         SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6411 "bison.tab.c"
+#line 6398 "bison.tab.c"
     break;
 
   case 53: /* condExpression: IF_TOKEN '(' error ')' statement ELSE_TOKEN statement  */
-#line 511 "./src/bison.y"
+#line 498 "./src/bison.y"
                                                             {
         SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", (yylsp[-4]).first_line, (yylsp[-4]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6422 "bison.tab.c"
+#line 6409 "bison.tab.c"
     break;
 
   case 54: /* condExpression: IF_TOKEN '(' expression ')' ELSE_TOKEN statement  */
-#line 518 "./src/bison.y"
+#line 505 "./src/bison.y"
                                                        {
         SHOW_SYNTAX_ERROR("expected expression before 'else' || line: %d, column: %d\n", (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         delete_astnode((yyvsp[-3].astnode));
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6433 "bison.tab.c"
+#line 6420 "bison.tab.c"
     break;
 
   case 55: /* condExpression: IF_TOKEN '(' error ')' ELSE_TOKEN statement  */
-#line 525 "./src/bison.y"
+#line 512 "./src/bison.y"
                                                   {
         SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", (yylsp[-3]).first_line, (yylsp[-3]).first_column);
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6443 "bison.tab.c"
+#line 6430 "bison.tab.c"
     break;
 
   case 56: /* condExpression: IF_TOKEN error  */
-#line 531 "./src/bison.y"
+#line 518 "./src/bison.y"
                      {
         SHOW_SYNTAX_ERROR("expected '(' token || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         (yyval.astnode) = NULL;
     }
-#line 6452 "bison.tab.c"
+#line 6439 "bison.tab.c"
     break;
 
   case 57: /* elseError: ELSE_TOKEN statement  */
-#line 540 "./src/bison.y"
+#line 527 "./src/bison.y"
                          {
         SHOW_SYNTAX_ERROR("'else' without a previous 'if' || line: %d, column: %d\n", (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6462 "bison.tab.c"
+#line 6449 "bison.tab.c"
     break;
 
   case 58: /* elseError: error ELSE_TOKEN statement  */
-#line 546 "./src/bison.y"
+#line 533 "./src/bison.y"
                                  {
         SHOW_SYNTAX_ERROR("'else' without a previous 'if' || line: %d, column: %d\n", (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6472 "bison.tab.c"
+#line 6459 "bison.tab.c"
     break;
 
   case 59: /* interationExpression: FOR_TOKEN '(' optExpression ';' optExpression ';' optExpression ')' statement  */
-#line 554 "./src/bison.y"
+#line 541 "./src/bison.y"
                                                                                   {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_ITERATION, "interation expression");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_ITERATION, "interation expression", (yyloc));
         if((yyvsp[-6].astnode))
             insert_kid((yyvsp[-6].astnode), (yyval.astnode));
         if((yyvsp[-4].astnode))
@@ -6483,11 +6470,11 @@ yyreduce:
             insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6487 "bison.tab.c"
+#line 6474 "bison.tab.c"
     break;
 
   case 60: /* interationExpression: FOR_TOKEN '(' error ';' optExpression ';' optExpression ')' statement  */
-#line 566 "./src/bison.y"
+#line 553 "./src/bison.y"
                                                                             {
         SHOW_SYNTAX_ERROR("expected expression before ';' token || line: %d, column: %d\n", (yylsp[-6]).first_line, (yylsp[-6]).first_column);
         delete_astnode((yyvsp[-4].astnode));
@@ -6495,11 +6482,11 @@ yyreduce:
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6499 "bison.tab.c"
+#line 6486 "bison.tab.c"
     break;
 
   case 61: /* interationExpression: FOR_TOKEN '(' optExpression ';' error ';' optExpression ')' statement  */
-#line 574 "./src/bison.y"
+#line 561 "./src/bison.y"
                                                                             {
         SHOW_SYNTAX_ERROR("expected expression before ';' token || line: %d, column: %d\n", (yylsp[-4]).first_line, (yylsp[-4]).first_column);
         delete_astnode((yyvsp[-6].astnode));
@@ -6507,11 +6494,11 @@ yyreduce:
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6511 "bison.tab.c"
+#line 6498 "bison.tab.c"
     break;
 
   case 62: /* interationExpression: FOR_TOKEN '(' optExpression ';' optExpression ';' error ')' statement  */
-#line 582 "./src/bison.y"
+#line 569 "./src/bison.y"
                                                                             {
         SHOW_SYNTAX_ERROR("expected expression before ';' token || line: %d, column: %d\n", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
         delete_astnode((yyvsp[-6].astnode));
@@ -6519,182 +6506,182 @@ yyreduce:
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6523 "bison.tab.c"
+#line 6510 "bison.tab.c"
     break;
 
   case 63: /* interationExpression: FOR_TOKEN '(' error ';' optExpression ')' statement  */
-#line 590 "./src/bison.y"
+#line 577 "./src/bison.y"
                                                           {
         SHOW_SYNTAX_ERROR("expected expression before ';' token || line: %d, column: %d\n", (yylsp[-4]).first_line, (yylsp[-4]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6534 "bison.tab.c"
+#line 6521 "bison.tab.c"
     break;
 
   case 64: /* interationExpression: FOR_TOKEN '(' optExpression ';' error ')' statement  */
-#line 597 "./src/bison.y"
+#line 584 "./src/bison.y"
                                                           {
         SHOW_SYNTAX_ERROR("expected expression before ';' token || line: %d, column: %d\n", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
         delete_astnode((yyvsp[-4].astnode));
         delete_astnode((yyvsp[0].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6545 "bison.tab.c"
+#line 6532 "bison.tab.c"
     break;
 
   case 65: /* interationExpression: FOR_TOKEN '(' error ')'  */
-#line 604 "./src/bison.y"
+#line 591 "./src/bison.y"
                               {
         SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         (yyval.astnode) = NULL;
     }
-#line 6554 "bison.tab.c"
+#line 6541 "bison.tab.c"
     break;
 
   case 66: /* interationExpression: FOR_TOKEN error  */
-#line 609 "./src/bison.y"
+#line 596 "./src/bison.y"
                       {
         SHOW_SYNTAX_ERROR("expected '(' token after 'for' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         (yyval.astnode) = NULL;
     }
-#line 6563 "bison.tab.c"
+#line 6550 "bison.tab.c"
     break;
 
   case 67: /* returnExpression: RETURN_TOKEN expression  */
-#line 616 "./src/bison.y"
+#line 603 "./src/bison.y"
                             {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_RETURN, "return expression");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_RETURN, "return expression", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6572 "bison.tab.c"
+#line 6559 "bison.tab.c"
     break;
 
   case 68: /* returnExpression: RETURN_TOKEN error  */
-#line 622 "./src/bison.y"
+#line 609 "./src/bison.y"
                          {
         SHOW_SYNTAX_ERROR("'return' with no value, in function returning non-void || line: %d, column: %d\n", (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         (yyval.astnode) = NULL;
     }
-#line 6581 "bison.tab.c"
+#line 6568 "bison.tab.c"
     break;
 
   case 69: /* optExpression: %empty  */
-#line 629 "./src/bison.y"
+#line 616 "./src/bison.y"
            {
         (yyval.astnode) = NULL;
     }
-#line 6589 "bison.tab.c"
+#line 6576 "bison.tab.c"
     break;
 
   case 70: /* optExpression: expression  */
-#line 632 "./src/bison.y"
+#line 619 "./src/bison.y"
                  {
         (yyval.astnode) = (yyvsp[0].astnode);
     }
-#line 6597 "bison.tab.c"
+#line 6584 "bison.tab.c"
     break;
 
   case 71: /* expression: assignArith  */
-#line 638 "./src/bison.y"
+#line 625 "./src/bison.y"
                 {
-        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "");
+        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "expression assign", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6606 "bison.tab.c"
+#line 6593 "bison.tab.c"
     break;
 
   case 72: /* expression: binArith  */
-#line 642 "./src/bison.y"
+#line 629 "./src/bison.y"
                {
-        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "");
+        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "expression bin", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6615 "bison.tab.c"
+#line 6602 "bison.tab.c"
     break;
 
   case 73: /* expression: listArith  */
-#line 646 "./src/bison.y"
+#line 633 "./src/bison.y"
                 {
-        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "");
+        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "expression list", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6624 "bison.tab.c"
+#line 6611 "bison.tab.c"
     break;
 
   case 74: /* expression: unaArith  */
-#line 650 "./src/bison.y"
+#line 637 "./src/bison.y"
                {
-        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "");
+        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "expression unarith", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6633 "bison.tab.c"
+#line 6620 "bison.tab.c"
     break;
 
   case 75: /* expression: constant  */
-#line 654 "./src/bison.y"
+#line 641 "./src/bison.y"
                {
-        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "");
+        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "expression constant", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6642 "bison.tab.c"
+#line 6629 "bison.tab.c"
     break;
 
   case 76: /* expression: funcCall  */
-#line 658 "./src/bison.y"
+#line 645 "./src/bison.y"
                {
-        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "");
+        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "ex funccall", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6651 "bison.tab.c"
+#line 6638 "bison.tab.c"
     break;
 
   case 77: /* expression: ioCommand  */
-#line 662 "./src/bison.y"
+#line 649 "./src/bison.y"
                 {
-        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "");
+        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "ex comandio", (yyloc));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6660 "bison.tab.c"
+#line 6647 "bison.tab.c"
     break;
 
   case 78: /* expression: id  */
-#line 666 "./src/bison.y"
+#line 653 "./src/bison.y"
          {
         Symbol *has_sym = lookup_symbol((yyvsp[0].astnode)->context->name, current_context);
         if(has_sym == NULL){
             SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", (yyvsp[0].astnode)->context->name, (yylsp[0]).first_line, (yylsp[0]).first_column);
             semantic_error = 1;
         } else {
-            (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "");
+            (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "id exp", (yyloc));
             insert_kid((yyvsp[0].astnode), (yyval.astnode));
         }
     }
-#line 6675 "bison.tab.c"
+#line 6662 "bison.tab.c"
     break;
 
   case 79: /* expression: '(' expression ')'  */
-#line 676 "./src/bison.y"
+#line 663 "./src/bison.y"
                          {
-        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "");
+        (yyval.astnode) = create_astnode_context(AST_EXPRESSION, "(exp)", (yyloc));
         insert_kid((yyvsp[-1].astnode), (yyval.astnode));
     }
-#line 6684 "bison.tab.c"
+#line 6671 "bison.tab.c"
     break;
 
   case 80: /* expression: id error  */
-#line 682 "./src/bison.y"
+#line 669 "./src/bison.y"
                {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[-1]).first_line, (yylsp[-1]).first_column);
         delete_astnode((yyvsp[-1].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6694 "bison.tab.c"
+#line 6681 "bison.tab.c"
     break;
 
   case 81: /* $@3: %empty  */
-#line 690 "./src/bison.y"
+#line 677 "./src/bison.y"
        {
         Symbol *has_sym = lookup_symbol((yyvsp[0].astnode)->context->name, current_context);
         if(has_sym == NULL){
@@ -6702,462 +6689,473 @@ yyreduce:
             semantic_error = 1;
         }
     }
-#line 6706 "bison.tab.c"
+#line 6693 "bison.tab.c"
     break;
 
   case 82: /* assignArith: id $@3 ASSIGN_TOKEN expression  */
-#line 696 "./src/bison.y"
+#line 683 "./src/bison.y"
                               {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_ASSIGN, "assign");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_ASSIGN, "assign", (yyloc));
         insert_kid((yyvsp[-3].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6716 "bison.tab.c"
+#line 6703 "bison.tab.c"
     break;
 
   case 83: /* binArith: expression OR_TOKEN expression  */
-#line 704 "./src/bison.y"
+#line 691 "./src/bison.y"
                                    {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {or}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {or}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6726 "bison.tab.c"
+#line 6713 "bison.tab.c"
     break;
 
   case 84: /* binArith: expression AND_TOKEN expression  */
-#line 709 "./src/bison.y"
+#line 696 "./src/bison.y"
                                       {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {and}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {and}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6736 "bison.tab.c"
+#line 6723 "bison.tab.c"
     break;
 
   case 85: /* binArith: expression EQUAL_TOKEN expression  */
-#line 714 "./src/bison.y"
+#line 701 "./src/bison.y"
                                         {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {==}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {==}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6746 "bison.tab.c"
+#line 6733 "bison.tab.c"
     break;
 
   case 86: /* binArith: expression DIFF_EQ_TOKEN expression  */
-#line 719 "./src/bison.y"
+#line 706 "./src/bison.y"
                                           {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {!=}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {!=}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6756 "bison.tab.c"
+#line 6743 "bison.tab.c"
     break;
 
   case 87: /* binArith: expression LESS_TOKEN expression  */
-#line 724 "./src/bison.y"
+#line 711 "./src/bison.y"
                                        {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {<}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {<}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6766 "bison.tab.c"
+#line 6753 "bison.tab.c"
     break;
 
   case 88: /* binArith: expression LE_EQ_TOKEN expression  */
-#line 729 "./src/bison.y"
+#line 716 "./src/bison.y"
                                         {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {<=}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {<=}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6776 "bison.tab.c"
+#line 6763 "bison.tab.c"
     break;
 
   case 89: /* binArith: expression GREAT_TOKEN expression  */
-#line 734 "./src/bison.y"
+#line 721 "./src/bison.y"
                                         {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {>}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {>}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6786 "bison.tab.c"
+#line 6773 "bison.tab.c"
     break;
 
   case 90: /* binArith: expression GR_EQ_TOKEN expression  */
-#line 739 "./src/bison.y"
+#line 726 "./src/bison.y"
                                         {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {>=}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {>=}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6796 "bison.tab.c"
+#line 6783 "bison.tab.c"
     break;
 
   case 91: /* binArith: expression '+' expression  */
-#line 744 "./src/bison.y"
+#line 731 "./src/bison.y"
                                 {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {+}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {+}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6806 "bison.tab.c"
+#line 6793 "bison.tab.c"
     break;
 
   case 92: /* binArith: expression '-' expression  */
-#line 749 "./src/bison.y"
+#line 736 "./src/bison.y"
                                 {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {-}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {-}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6816 "bison.tab.c"
+#line 6803 "bison.tab.c"
     break;
 
   case 93: /* binArith: expression '*' expression  */
-#line 754 "./src/bison.y"
+#line 741 "./src/bison.y"
                                 {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {*}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {*}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6826 "bison.tab.c"
+#line 6813 "bison.tab.c"
     break;
 
   case 94: /* binArith: expression '/' expression  */
-#line 759 "./src/bison.y"
+#line 746 "./src/bison.y"
                                 {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {/}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_BIN_ARITH, "operation {/}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6836 "bison.tab.c"
+#line 6823 "bison.tab.c"
     break;
 
   case 95: /* binArith: expression OR_TOKEN error  */
-#line 765 "./src/bison.y"
+#line 752 "./src/bison.y"
                                 {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6846 "bison.tab.c"
+#line 6833 "bison.tab.c"
     break;
 
   case 96: /* binArith: expression AND_TOKEN error  */
-#line 770 "./src/bison.y"
+#line 757 "./src/bison.y"
                                  {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6856 "bison.tab.c"
+#line 6843 "bison.tab.c"
     break;
 
   case 97: /* binArith: expression EQUAL_TOKEN error  */
-#line 775 "./src/bison.y"
+#line 762 "./src/bison.y"
                                    {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6866 "bison.tab.c"
+#line 6853 "bison.tab.c"
     break;
 
   case 98: /* binArith: expression DIFF_EQ_TOKEN error  */
-#line 780 "./src/bison.y"
+#line 767 "./src/bison.y"
                                      {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6876 "bison.tab.c"
+#line 6863 "bison.tab.c"
     break;
 
   case 99: /* binArith: expression LESS_TOKEN error  */
-#line 785 "./src/bison.y"
+#line 772 "./src/bison.y"
                                   {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6886 "bison.tab.c"
+#line 6873 "bison.tab.c"
     break;
 
   case 100: /* binArith: expression LE_EQ_TOKEN error  */
-#line 790 "./src/bison.y"
+#line 777 "./src/bison.y"
                                    {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6896 "bison.tab.c"
+#line 6883 "bison.tab.c"
     break;
 
   case 101: /* binArith: expression GREAT_TOKEN error  */
-#line 795 "./src/bison.y"
+#line 782 "./src/bison.y"
                                    {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6906 "bison.tab.c"
+#line 6893 "bison.tab.c"
     break;
 
   case 102: /* binArith: expression GR_EQ_TOKEN error  */
-#line 800 "./src/bison.y"
+#line 787 "./src/bison.y"
                                    {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6916 "bison.tab.c"
+#line 6903 "bison.tab.c"
     break;
 
   case 103: /* binArith: expression '+' error  */
-#line 805 "./src/bison.y"
+#line 792 "./src/bison.y"
                            {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6926 "bison.tab.c"
+#line 6913 "bison.tab.c"
     break;
 
   case 104: /* binArith: expression '-' error  */
-#line 810 "./src/bison.y"
+#line 797 "./src/bison.y"
                            {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6936 "bison.tab.c"
+#line 6923 "bison.tab.c"
     break;
 
   case 105: /* binArith: expression '*' error  */
-#line 815 "./src/bison.y"
+#line 802 "./src/bison.y"
                            {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6946 "bison.tab.c"
+#line 6933 "bison.tab.c"
     break;
 
   case 106: /* binArith: expression '/' error  */
-#line 820 "./src/bison.y"
+#line 807 "./src/bison.y"
                            {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6956 "bison.tab.c"
+#line 6943 "bison.tab.c"
     break;
 
   case 107: /* listArith: expression MAP_TOKEN expression  */
-#line 828 "./src/bison.y"
+#line 815 "./src/bison.y"
                                     {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_LIST_ARITH, "operation {list map}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_LIST_ARITH, "operation {list map}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6966 "bison.tab.c"
+#line 6953 "bison.tab.c"
     break;
 
   case 108: /* listArith: expression FILTER_TOKEN expression  */
-#line 833 "./src/bison.y"
+#line 820 "./src/bison.y"
                                          {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_LIST_ARITH, "operation {list filter}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_LIST_ARITH, "operation {list filter}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6976 "bison.tab.c"
+#line 6963 "bison.tab.c"
     break;
 
   case 109: /* listArith: expression CONSTRUCTOR_LIST_TOKEN expression  */
-#line 838 "./src/bison.y"
+#line 825 "./src/bison.y"
                                                    {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_LIST_ARITH, "operation {list constructor}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_LIST_ARITH, "operation {list constructor}", (yyloc));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 6986 "bison.tab.c"
+#line 6973 "bison.tab.c"
     break;
 
   case 110: /* listArith: expression MAP_TOKEN error  */
-#line 844 "./src/bison.y"
+#line 831 "./src/bison.y"
                                  {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 6996 "bison.tab.c"
+#line 6983 "bison.tab.c"
     break;
 
   case 111: /* listArith: expression FILTER_TOKEN error  */
-#line 849 "./src/bison.y"
+#line 836 "./src/bison.y"
                                     {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 7006 "bison.tab.c"
+#line 6993 "bison.tab.c"
     break;
 
   case 112: /* listArith: expression CONSTRUCTOR_LIST_TOKEN error  */
-#line 854 "./src/bison.y"
+#line 841 "./src/bison.y"
                                               {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         delete_astnode((yyvsp[-2].astnode));
         (yyval.astnode) = NULL;
     }
-#line 7016 "bison.tab.c"
+#line 7003 "bison.tab.c"
     break;
 
   case 113: /* unaArith: EXCLAMATION_TOKEN expression  */
-#line 862 "./src/bison.y"
+#line 849 "./src/bison.y"
                                  {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {!}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {!}", (yyloc));
+        (yyval.astnode)->context->operation = "!";
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 7025 "bison.tab.c"
+#line 7013 "bison.tab.c"
     break;
 
   case 114: /* unaArith: QUESTION_TOKEN expression  */
-#line 866 "./src/bison.y"
+#line 854 "./src/bison.y"
                                 {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {?}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {?}", (yyloc));
+        (yyval.astnode)->context->operation = "?";
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 7034 "bison.tab.c"
+#line 7023 "bison.tab.c"
     break;
 
   case 115: /* unaArith: PERCENTAGE_TOKEN expression  */
-#line 870 "./src/bison.y"
+#line 859 "./src/bison.y"
                                   {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {%}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {%}", (yyloc));
+        (yyval.astnode)->context->operation = "%";
+        insert_kid((yyvsp[0].astnode), (yyval.astnode));
+    }
+#line 7033 "bison.tab.c"
+    break;
+
+  case 116: /* unaArith: '+' expression  */
+#line 864 "./src/bison.y"
+                                  {
+        (yyval.astnode) = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {+}", (yyloc));
+        (yyval.astnode)->context->operation = "+";
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
 #line 7043 "bison.tab.c"
     break;
 
-  case 116: /* unaArith: '+' expression  */
-#line 874 "./src/bison.y"
-                                  {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {+}");
-        insert_kid((yyvsp[0].astnode), (yyval.astnode));
-    }
-#line 7052 "bison.tab.c"
-    break;
-
   case 117: /* unaArith: '-' expression  */
-#line 878 "./src/bison.y"
+#line 869 "./src/bison.y"
                                   {
-        (yyval.astnode) = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {-}");
+        (yyval.astnode) = create_astnode_context(AST_EXPR_UNA_ARITH, "unitary operation {-}", (yyloc));
+        (yyval.astnode)->context->operation = "-";
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 7061 "bison.tab.c"
+#line 7053 "bison.tab.c"
     break;
 
   case 118: /* unaArith: EXCLAMATION_TOKEN error  */
-#line 883 "./src/bison.y"
+#line 875 "./src/bison.y"
                               {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         (yyval.astnode) = NULL;
     }
-#line 7070 "bison.tab.c"
+#line 7062 "bison.tab.c"
     break;
 
   case 119: /* unaArith: QUESTION_TOKEN error  */
-#line 887 "./src/bison.y"
+#line 879 "./src/bison.y"
                            {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         (yyval.astnode) = NULL;
     }
-#line 7079 "bison.tab.c"
+#line 7071 "bison.tab.c"
     break;
 
   case 120: /* unaArith: PERCENTAGE_TOKEN error  */
+#line 883 "./src/bison.y"
+                             {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
+        (yyval.astnode) = NULL;
+    }
+#line 7080 "bison.tab.c"
+    break;
+
+  case 121: /* unaArith: '+' error  */
+#line 887 "./src/bison.y"
+                             {
+        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
+        (yyval.astnode) = NULL;
+    }
+#line 7089 "bison.tab.c"
+    break;
+
+  case 122: /* unaArith: '-' error  */
 #line 891 "./src/bison.y"
                              {
         SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
         (yyval.astnode) = NULL;
     }
-#line 7088 "bison.tab.c"
-    break;
-
-  case 121: /* unaArith: '+' error  */
-#line 895 "./src/bison.y"
-                             {
-        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
-        (yyval.astnode) = NULL;
-    }
-#line 7097 "bison.tab.c"
-    break;
-
-  case 122: /* unaArith: '-' error  */
-#line 899 "./src/bison.y"
-                             {
-        SHOW_SYNTAX_ERROR("expected expression before ';' || line: %d, column: %d\n", (yylsp[0]).first_line, (yylsp[0]).first_column);
-        (yyval.astnode) = NULL;
-    }
-#line 7106 "bison.tab.c"
+#line 7098 "bison.tab.c"
     break;
 
   case 123: /* constant: constantInteger  */
-#line 906 "./src/bison.y"
+#line 898 "./src/bison.y"
                     {
-        (yyval.astnode) = create_astnode_context(AST_CONSTANT, "constant int");
+        (yyval.astnode) = create_astnode_context(AST_CONSTANT, "constant int", (yyloc));
+        (yyval.astnode)->context->dtype = DTYPE_INT;
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 7115 "bison.tab.c"
+#line 7108 "bison.tab.c"
     break;
 
   case 124: /* constant: constantReal  */
-#line 910 "./src/bison.y"
+#line 903 "./src/bison.y"
                    {
-        (yyval.astnode) = create_astnode_context(AST_CONSTANT, "constant real");
+        (yyval.astnode) = create_astnode_context(AST_CONSTANT, "constant real", (yyloc));
+        (yyval.astnode)->context->dtype = DTYPE_FLOAT;
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 7124 "bison.tab.c"
+#line 7118 "bison.tab.c"
     break;
 
   case 125: /* constant: constantNIL  */
-#line 914 "./src/bison.y"
+#line 908 "./src/bison.y"
                   {
-        (yyval.astnode) = create_astnode_context(AST_CONSTANT, "constant nil");
+        (yyval.astnode) = create_astnode_context(AST_CONSTANT, "constant nil", (yyloc));
+        (yyval.astnode)->context->dtype = DTYPE_LIST;
         insert_kid((yyvsp[0].astnode), (yyval.astnode));
     }
-#line 7133 "bison.tab.c"
+#line 7128 "bison.tab.c"
     break;
 
   case 126: /* constantInteger: CONSTANT_INTEGER_TOKEN  */
-#line 921 "./src/bison.y"
+#line 916 "./src/bison.y"
                            {
+        (yyvsp[0].astnode)->context->dtype = DTYPE_INT;
         (yyval.astnode) = (yyvsp[0].astnode);
     }
-#line 7141 "bison.tab.c"
+#line 7137 "bison.tab.c"
     break;
 
   case 127: /* constantReal: CONSTANT_REAL_TOKEN  */
-#line 927 "./src/bison.y"
+#line 923 "./src/bison.y"
                         {
+        (yyvsp[0].astnode)->context->dtype = DTYPE_FLOAT;
         (yyval.astnode) = (yyvsp[0].astnode);
     }
-#line 7149 "bison.tab.c"
+#line 7146 "bison.tab.c"
     break;
 
   case 128: /* constantNIL: NIL_TOKEN  */
-#line 933 "./src/bison.y"
+#line 930 "./src/bison.y"
               {
+        (yyvsp[0].astnode)->context->dtype = DTYPE_LIST;
         (yyval.astnode) = (yyvsp[0].astnode);
     }
-#line 7157 "bison.tab.c"
+#line 7155 "bison.tab.c"
     break;
 
   case 129: /* $@4: %empty  */
-#line 939 "./src/bison.y"
+#line 937 "./src/bison.y"
        {
        Symbol *has_sym = lookup_symbol((yyvsp[0].astnode)->context->name, current_context);
         if(has_sym == NULL){
@@ -7165,16 +7163,16 @@ yyreduce:
             semantic_error = 1;
         } 
     }
-#line 7169 "bison.tab.c"
+#line 7167 "bison.tab.c"
     break;
 
   case 130: /* funcCall: id $@4 '(' optListExpression ')'  */
-#line 945 "./src/bison.y"
+#line 943 "./src/bison.y"
                                 {
-        (yyval.astnode) = create_astnode_context(AST_FUNC_CALL, "func call");
+        (yyval.astnode) = create_astnode_context(AST_FUNC_CALL, "func call", (yyloc));
         insert_kid((yyvsp[-4].astnode), (yyval.astnode));
         if((yyvsp[-1].list)){
-            AstNode *arguments = create_astnode_context(AST_CODE_BLOCK, "arguments");
+            AstNode *arguments = create_astnode_context(AST_CODE_BLOCK, "arguments", (yylsp[-1]));
 
             while((yyvsp[-1].list)->size) {
                 AstNode *aux = remove_first_element_list((yyvsp[-1].list));
@@ -7184,11 +7182,11 @@ yyreduce:
             insert_kid(arguments, (yyval.astnode));
         }
     }
-#line 7188 "bison.tab.c"
+#line 7186 "bison.tab.c"
     break;
 
   case 131: /* $@5: %empty  */
-#line 962 "./src/bison.y"
+#line 960 "./src/bison.y"
                       {
         Symbol *has_sym = lookup_symbol((yyvsp[0].astnode)->context->name, current_context);
         if(has_sym == NULL){
@@ -7196,86 +7194,88 @@ yyreduce:
             semantic_error = 1;
         }
     }
-#line 7200 "bison.tab.c"
+#line 7198 "bison.tab.c"
     break;
 
   case 132: /* ioCommand: READ_TOKEN '(' id $@5 ')'  */
-#line 968 "./src/bison.y"
+#line 966 "./src/bison.y"
           {
-        (yyval.astnode) = create_astnode_context(AST_FUNC_CALL, "read call");
+        (yyval.astnode) = create_astnode_context(AST_BUILT_IN, "read call", (yyloc));
         insert_kid((yyvsp[-4].astnode), (yyval.astnode));
         insert_kid((yyvsp[-2].astnode), (yyval.astnode));
     }
-#line 7210 "bison.tab.c"
+#line 7208 "bison.tab.c"
     break;
 
   case 133: /* ioCommand: WRITE_TOKEN '(' expression ')'  */
-#line 973 "./src/bison.y"
+#line 971 "./src/bison.y"
                                      {
-        (yyval.astnode) = create_astnode_context(AST_FUNC_CALL, "write call");
+        (yyval.astnode) = create_astnode_context(AST_BUILT_IN, "write call", (yyloc));
         insert_kid((yyvsp[-3].astnode), (yyval.astnode));
         insert_kid((yyvsp[-1].astnode), (yyval.astnode));
     }
-#line 7220 "bison.tab.c"
+#line 7218 "bison.tab.c"
     break;
 
   case 134: /* ioCommand: WRITE_TOKEN '(' STRING_TOKEN ')'  */
-#line 978 "./src/bison.y"
+#line 976 "./src/bison.y"
                                       {
-        (yyval.astnode) = create_astnode_context(AST_FUNC_CALL, "write call");
+        (yyval.astnode) = create_astnode_context(AST_BUILT_IN, "write call", (yyloc));
         insert_kid((yyvsp[-3].astnode), (yyval.astnode));
         insert_kid((yyvsp[-1].astnode), (yyval.astnode));
     }
-#line 7230 "bison.tab.c"
+#line 7228 "bison.tab.c"
     break;
 
   case 135: /* optListExpression: %empty  */
-#line 986 "./src/bison.y"
+#line 984 "./src/bison.y"
            {
         (yyval.list) = NULL;
     }
-#line 7238 "bison.tab.c"
+#line 7236 "bison.tab.c"
     break;
 
   case 137: /* listExpression: listExpression ',' expression  */
-#line 993 "./src/bison.y"
+#line 991 "./src/bison.y"
                                   {
         insert_list_element((yyvsp[-2].list), (yyvsp[0].astnode));
         (yyval.list) = (yyvsp[-2].list);
     }
-#line 7247 "bison.tab.c"
+#line 7245 "bison.tab.c"
     break;
 
   case 138: /* listExpression: expression  */
-#line 997 "./src/bison.y"
+#line 995 "./src/bison.y"
                  {
         (yyval.list) = create_list();
         insert_list_element((yyval.list), (yyvsp[0].astnode));
     }
-#line 7256 "bison.tab.c"
+#line 7254 "bison.tab.c"
     break;
 
   case 139: /* id: ID_TOKEN  */
-#line 1004 "./src/bison.y"
+#line 1002 "./src/bison.y"
              {
         (yyval.astnode) = (yyvsp[0].astnode);
     }
-#line 7264 "bison.tab.c"
+#line 7262 "bison.tab.c"
     break;
 
   case 140: /* type: INT_TOKEN  */
-#line 1010 "./src/bison.y"
+#line 1008 "./src/bison.y"
               {
-        (yyval.astnode) = create_astnode_context(AST_TYPE_INT, (yyvsp[0].string));
+        (yyval.astnode) = create_astnode_context(AST_TYPE_INT, (yyvsp[0].string), (yyloc));
+        (yyval.astnode)->context->dtype = DTYPE_INT;
         free((yyvsp[0].string));
     }
-#line 7273 "bison.tab.c"
+#line 7272 "bison.tab.c"
     break;
 
   case 141: /* type: FLOAT_TOKEN  */
-#line 1014 "./src/bison.y"
+#line 1013 "./src/bison.y"
                   {
-        (yyval.astnode) = create_astnode_context(AST_TYPE_FLOAT, (yyvsp[0].string));
+        (yyval.astnode) = create_astnode_context(AST_TYPE_FLOAT, (yyvsp[0].string), (yyloc));
+        (yyval.astnode)->context->dtype = DTYPE_FLOAT;
         free((yyvsp[0].string));
     }
 #line 7282 "bison.tab.c"
@@ -7288,31 +7288,33 @@ yyreduce:
         strcat(str, (yyvsp[-1].string));
         strcat(str, " ");
         strcat(str, (yyvsp[0].string));
-        (yyval.astnode) = create_astnode_context(AST_TYPE_INT_LIST, str);
+        (yyval.astnode) = create_astnode_context(AST_TYPE_INT_LIST, str, (yyloc));
+        (yyval.astnode)->context->dtype = DTYPE_INT_LIST;
         free(str);
         free((yyvsp[-1].string));
         free((yyvsp[0].string));
     }
-#line 7297 "bison.tab.c"
+#line 7298 "bison.tab.c"
     break;
 
   case 143: /* type: FLOAT_TOKEN LIST_TOKEN  */
-#line 1028 "./src/bison.y"
+#line 1029 "./src/bison.y"
                              {
         char *str = (char *) calloc((strlen((yyvsp[-1].string)) + strlen((yyvsp[0].string)) + 10), sizeof(char));
         strcat(str, (yyvsp[-1].string));
         strcat(str, " ");
         strcat(str, (yyvsp[0].string));
-        (yyval.astnode) = create_astnode_context(AST_TYPE_FLOAT_LIST, str);
+        (yyval.astnode) = create_astnode_context(AST_TYPE_FLOAT_LIST, str, (yyloc));
+        (yyval.astnode)->context->dtype = DTYPE_FLOAT_LIST;
         free(str);
         free((yyvsp[-1].string));
         free((yyvsp[0].string));
     }
-#line 7312 "bison.tab.c"
+#line 7314 "bison.tab.c"
     break;
 
 
-#line 7316 "bison.tab.c"
+#line 7318 "bison.tab.c"
 
       default: break;
     }
@@ -7542,7 +7544,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 1040 "./src/bison.y"
+#line 1042 "./src/bison.y"
 
 
 void yyerror(const char *error_msg){
@@ -7587,7 +7589,7 @@ int main(int argc, char **argv){
     }
 
     yyin = fp;
-    root = create_astnode_context(AST_ROOT, "root");
+    root = create_astnode_context(AST_ROOT, "root", yylloc);
     node_aux = create_list();
 
     list_context = create_list();
@@ -7598,17 +7600,36 @@ int main(int argc, char **argv){
     yyparse();
 
     Symbol *sym_main = lookup_symbol("main", current_context);
-
+    /* Verifica se existe main na tabela de simbolos */
     if(sym_main){
-        if(!sym_main->isfunction) 
-            SEMANTIC_ERROR("undefined reference to function main\n");
-    } else
+        if(!sym_main->isfunction) {
+            SEMANTIC_ERROR("main is not a function\n");
+        } else {
+            AstNode *main = lookup_node(root, "main");
+            AstNode *father = main->father;
+            AstNode *params = lookup_node(father, "params");
+            Element *it;
+            int has_int = 0;
+            for(it = father->kids->first; it != NULL; it = it->next){
+                if(!strcmp(((AstNode *) it->value)->context->name, "int")){
+                    has_int = 1;
+                }
+            }
+            if(!has_int)
+                SEMANTIC_ERROR("return type of 'main' is not 'int'\n");
+            if(params)
+                SEMANTIC_ERROR("'main' takes only zero arguments\n");
+        }
+    } else {
         SEMANTIC_ERROR("undefined reference to function main\n");
+    }
+
+    sem_eval(root);
 
     if(root->kids->size > 0) {
-        // printf("##################### %s #####################\n", "Abstract Syntax Tree");
-        // print_tree(root, 0);
-        // printf("\n");
+        printf("##################### %s #####################\n", "Abstract Syntax Tree");
+        print_tree(root, 0);
+        printf("\n");
     } else 
         printf(RED"AST error: " RESET "unable to print AST\n");
 

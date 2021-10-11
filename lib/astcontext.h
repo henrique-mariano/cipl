@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tree.h"
+#include "bison.h"
 
 enum
 {
@@ -39,21 +40,33 @@ enum
     AST_CONSTANT_REAL,
     AST_CONSTANT_NIL,
     AST_CONSTANT_STRING,
-    AST_FUNC_CALL
+    AST_FUNC_CALL,
+    AST_BUILT_IN
 };
+
+typedef enum
+{
+    DTYPE_ERROR,
+    DTYPE_INT,
+    DTYPE_FLOAT,
+    DTYPE_STRING,
+    DTYPE_LIST,
+    DTYPE_INT_LIST,
+    DTYPE_FLOAT_LIST,
+} DataTypes;
 
 typedef struct AstContext
 {
     int type;
+    int dtype;
+    char *operation;
     char *name;
+    YYLTYPE node_pos;
 } AstContext;
 
-AstContext *create_astcontext(int type, char *name);
-AstNode *create_astnode_context(int type, char *name);
+AstContext *create_astcontext(int type, char *name, YYLTYPE node_pos);
+AstNode *create_astnode_context(int type, char *name, YYLTYPE node_pos);
 void free_astcontext(AstContext *context);
 void create_context_ast(List *lista_contexto);
-
-// void delete_list_element_list(Element *lista);
-// void delete_context_ast(List *lista_contexto);
 
 #endif
