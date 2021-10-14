@@ -1091,14 +1091,16 @@ YY_RULE_SETUP
     error++;
     printf(RED"Lexic error: " RESET "unexpected character: %s || line: %d, column: %d\n", yytext, num_line, num_col);
     num_col += yyleng;
+    yylval.astnode = NULL;
+    return YYerror;
 }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 257 "./src/lex.l"
+#line 259 "./src/lex.l"
 ECHO;
 	YY_BREAK
-#line 1102 "lex.yy.c"
+#line 1104 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2074,7 +2076,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 257 "./src/lex.l"
+#line 259 "./src/lex.l"
 
 
 void print_token(char *type){

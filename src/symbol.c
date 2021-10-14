@@ -31,26 +31,32 @@ void insert_symbol(SymbolTable *symbol_table, Symbol *symbol)
     insert_list_element(symbol_table->symbols, symbol);
 }
 
-void list_symbol_insert(unsigned int type, List *symbol_list, char *name, double value, int line, int column, unsigned int isfunction)
+Symbol *list_symbol_insert(unsigned int type, List *symbol_list, char *name, double value, int line, int column, unsigned int isfunction)
 {
+    Symbol *sym;
     switch (type)
     {
     case AST_TYPE_INT:
-        insert_list_element(symbol_list, create_symbol(strdup(name), value, line, column, INT_SYMBOL_CONST, isfunction));
+        sym = create_symbol(strdup(name), value, line, column, INT_SYMBOL_CONST, isfunction);
+        insert_list_element(symbol_list, sym);
         break;
 
     case AST_TYPE_FLOAT:
-        insert_list_element(symbol_list, create_symbol(strdup(name), value, line, column, FLOAT_SYMBOL_CONST, isfunction));
+        sym = create_symbol(strdup(name), value, line, column, FLOAT_SYMBOL_CONST, isfunction);
+        insert_list_element(symbol_list, sym);
         break;
 
     case AST_TYPE_INT_LIST:
-        insert_list_element(symbol_list, create_symbol(strdup(name), value, line, column, INT_LIST_SYMBOL_CONST, isfunction));
+        sym = create_symbol(strdup(name), value, line, column, INT_LIST_SYMBOL_CONST, isfunction);
+        insert_list_element(symbol_list, sym);
         break;
 
     case AST_TYPE_FLOAT_LIST:
-        insert_list_element(symbol_list, create_symbol(strdup(name), value, line, column, FLOAT_LIST_SYMBOL_CONST, isfunction));
+        sym = create_symbol(strdup(name), value, line, column, FLOAT_LIST_SYMBOL_CONST, isfunction);
+        insert_list_element(symbol_list, sym);
         break;
     }
+    return sym;
 }
 
 void delete_symbol(Symbol *symbol)

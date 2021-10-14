@@ -55,6 +55,8 @@ typedef enum
     DTYPE_FLOAT_LIST,
 } DataTypes;
 
+extern char *nome_tipos_ast[AST_BUILT_IN + 1];
+
 typedef struct AstContext
 {
     int type;
@@ -62,6 +64,7 @@ typedef struct AstContext
     char *operation;
     char *name;
     YYLTYPE node_pos;
+    struct Symbol *sym_ref;
 } AstContext;
 
 AstContext *create_astcontext(int type, char *name, YYLTYPE node_pos);

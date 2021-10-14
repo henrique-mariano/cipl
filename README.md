@@ -23,7 +23,7 @@ Para a execução:
 - [X] Lidar com contextos na árvore
 - [X] Escopos
 - [X] Tratamento de erros sintáticos
-- [] Tratamento de erros semânticos
+- [X] Tratamento de erros semânticos
 - [X] Redeclaração de funções
 - [X] Redeclaração de variáveis
 - [X] Redeclaração de parâmetros
@@ -31,6 +31,7 @@ Para a execução:
 - [X] Verificar existência da main
 - [X] Verificar se a main não possui parâmetros
 - [X] Verificar se a main retorna int
-- [] Verificar os tipos das variáveis e funções
-- [] Verificar tipos nas aritméticas
-- [] Verificar tipo de retorno da função
+- [X] Verificar os tipos das variáveis e funções
+- [X] Verificar tipos nas aritméticas
+- [X] Verificar tipo de retorno da função
+- [] Verificar os returns das funções

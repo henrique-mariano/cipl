@@ -24,4 +24,8 @@ void delete_astnode(AstNode *no);
 
 void delete_list_astnode(Element *elemento);
 
+AstNode *lookup_global(AstNode *root, char *name);
+
+int get_depth(AstNode *root);
+
 #endif

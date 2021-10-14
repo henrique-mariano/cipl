@@ -1,4 +1,33 @@
-int main(){
-    // write(1 + 2);
-    write("NIL");
+int a(int b) {
+    
+    return a(2);
+    
+    int a;
+    if (1) 
+    {
+        int a;
+        return 0;
+    }
+    
+}
+
+int main() {
+    int a;
+    {
+        int a;
+        {
+            float b;
+            {
+                a = b;
+                int list a;
+                a = 1 : a;
+            }
+            b = main();
+            {
+                int main;
+                main = 20;
+            }
+        }
+        // a = a() * ;
+    }
 }

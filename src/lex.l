@@ -253,6 +253,8 @@ SINGLE_COMMENT          ("//"((.*)|[^\n]))
     error++;
     printf(RED"Lexic error: " RESET "unexpected character: %s || line: %d, column: %d\n", yytext, num_line, num_col);
     num_col += yyleng;
+    yylval.astnode = NULL;
+    return YYerror;
 }
 %%
 
