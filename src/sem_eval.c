@@ -50,13 +50,13 @@ int sem_check(AstNode *node)
         {
             if (fdtype >= DTYPE_LIST || sdtype >= DTYPE_LIST)
             {
-                SEMANTIC_ERROR("list type used in binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("list type used in binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
             if (fdtype == DTYPE_ERROR || sdtype == DTYPE_ERROR)
             {
-                SEMANTIC_ERROR("error in binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("error in binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
             return MAX(fdtype, sdtype);
@@ -66,7 +66,7 @@ int sem_check(AstNode *node)
         {
             if ((fdtype >= DTYPE_LIST || sdtype >= DTYPE_LIST) && (fdtype < DTYPE_LIST || sdtype < DTYPE_LIST))
             {
-                SEMANTIC_ERROR("list type used in binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("list type used in binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
             return DTYPE_INT;
@@ -75,7 +75,7 @@ int sem_check(AstNode *node)
         {
             if (fdtype >= DTYPE_LIST || sdtype >= DTYPE_LIST)
             {
-                SEMANTIC_ERROR("list type used in binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("list type used in binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
             return DTYPE_INT;
@@ -89,15 +89,22 @@ int sem_check(AstNode *node)
 
         Symbol *sym_id = FIRST_SON(node) ? FIRST_SON(node)->context->sym_ref : NULL;
 
+        Symbol *sym_sec = SECOND_SON(node) ? SECOND_SON(node)->context->sym_ref : NULL;
+
         if (sym_id->isfunction)
         {
-            SEMANTIC_ERROR("left operand can't be a function || line: %d, column: %d\n", FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+            SEMANTIC_ERROR("left operand can't be a function || line: %d, column: %d\n", FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
+            return DTYPE_ERROR;
+        }
+
+        if(sym_sec && sym_sec->isfunction){
+            SEMANTIC_ERROR("right operand can't be a function || line: %d, column: %d\n", FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
             return DTYPE_ERROR;
         }
 
         if (!dtcheck(sdtype, fdtype))
         {
-            SEMANTIC_ERROR("invalid list type assign with int or float || line: %d, column: %d\n", FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+            SEMANTIC_ERROR("invalid list type assign with int or float || line: %d, column: %d\n", FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
             return DTYPE_ERROR;
         }
 
@@ -112,7 +119,7 @@ int sem_check(AstNode *node)
         case '-':
             if (fdtype >= DTYPE_LIST)
             {
-                SEMANTIC_ERROR("list type used in unary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("list type used in unary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
             return fdtype;
@@ -120,7 +127,7 @@ int sem_check(AstNode *node)
         case '%':
             if (fdtype < DTYPE_INT_LIST)
             {
-                SEMANTIC_ERROR("NIL or number type used in unary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("NIL or number type used in unary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
             return list2num(fdtype);
@@ -128,7 +135,7 @@ int sem_check(AstNode *node)
         case '!':
             if (fdtype == DTYPE_LIST)
             {
-                SEMANTIC_ERROR("NIL or number type used in unary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("NIL or number type used in unary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
@@ -149,13 +156,13 @@ int sem_check(AstNode *node)
         { /* Lado direito precisa ser uma lista */
             if (sdtype < DTYPE_LIST)
             {
-                SEMANTIC_ERROR("number type used in right side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("number type used in right side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
             /* Lado esquerdo precisa ser um numero */
             if (fdtype > DTYPE_LIST)
             {
-                SEMANTIC_ERROR("list type used in left side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("list type used in left side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
             /* Se o lado direito for NIL o tipo da lista é o lado esquerdo no tipo lista */
@@ -173,7 +180,7 @@ int sem_check(AstNode *node)
 
             if (!func_node || (func_node && func_node->context->type != AST_FUNC_DECLARE))
             {
-                SEMANTIC_ERROR("left operand needs to be a function of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("left operand needs to be a function of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
@@ -181,7 +188,7 @@ int sem_check(AstNode *node)
 
             if (params->kids->size != 1 || params->context->type != AST_LIST_PARAM)
             {
-                SEMANTIC_ERROR("'%s' takes 1 argument in binary operation '%s' || line: %d, column: %d\n", SECOND_SON(func_node)->context->name, node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("'%s' takes 1 argument in binary operation '%s' || line: %d, column: %d\n", SECOND_SON(func_node)->context->name, node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
@@ -189,7 +196,7 @@ int sem_check(AstNode *node)
 
             if (paramdt >= DTYPE_LIST)
             {
-                SEMANTIC_ERROR("'%s' param type needs to be a int or float in binary operation '%s' || line: %d, column: %d\n", FIRST_SON(func_node)->context->name, node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("'%s' param type needs to be a int or float in binary operation '%s' || line: %d, column: %d\n", FIRST_SON(func_node)->context->name, node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
@@ -197,19 +204,19 @@ int sem_check(AstNode *node)
 
             if (!sym_func || (sym_func && !sym_func->isfunction))
             {
-                SEMANTIC_ERROR("variable used in left side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("variable used in left side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
             if (sdtype < DTYPE_LIST)
             {
-                SEMANTIC_ERROR("number type used in right side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("number type used in right side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
             if (fdtype > DTYPE_LIST)
             {
-                SEMANTIC_ERROR("list type used in left side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("list type used in left side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
@@ -222,7 +229,7 @@ int sem_check(AstNode *node)
 
             if (!func_node || (func_node && func_node->context->type != AST_FUNC_DECLARE))
             {
-                SEMANTIC_ERROR("left operand needs to be a function of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("left operand needs to be a function of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
@@ -230,7 +237,7 @@ int sem_check(AstNode *node)
 
             if (params->kids->size != 1 || params->context->type != AST_LIST_PARAM)
             {
-                SEMANTIC_ERROR("'%s' takes 1 argument in binary operation '%s' || line: %d, column: %d\n", SECOND_SON(func_node)->context->name, node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("'%s' takes 1 argument in binary operation '%s' || line: %d, column: %d\n", SECOND_SON(func_node)->context->name, node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
@@ -238,7 +245,7 @@ int sem_check(AstNode *node)
 
             if (paramdt >= DTYPE_LIST)
             {
-                SEMANTIC_ERROR("'%s' param type needs to be a int or float in binary operation '%s' || line: %d, column: %d\n", FIRST_SON(func_node)->context->name, node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("'%s' param type needs to be a int or float in binary operation '%s' || line: %d, column: %d\n", FIRST_SON(func_node)->context->name, node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
@@ -246,19 +253,19 @@ int sem_check(AstNode *node)
 
             if (!sym_func || (sym_func && !sym_func->isfunction))
             {
-                SEMANTIC_ERROR("variable used in left side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("variable used in left side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
             if (sdtype < DTYPE_LIST)
             {
-                SEMANTIC_ERROR("number type used in right side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("number type used in right side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
             if (fdtype > DTYPE_LIST)
             {
-                SEMANTIC_ERROR("list type used in left side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                SEMANTIC_ERROR("list type used in left side of binary operation '%s' || line: %d, column: %d\n", node->context->operation, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                 return DTYPE_ERROR;
             }
 
@@ -285,12 +292,12 @@ int sem_check(AstNode *node)
 
         if (((params_type == AST_LIST_PARAM) && !arg) || ((params_type != AST_LIST_PARAM) && arg))
         {
-            SEMANTIC_ERROR("number of arguments and params doesn't match || line: %d, column: %d\n", FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+            SEMANTIC_ERROR("number of arguments and params doesn't match || line: %d, column: %d\n", FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
             return DTYPE_ERROR;
         }
         else if (arg && params_func->kids->size != arg->kids->size)
         {
-            SEMANTIC_ERROR("number of arguments and params doesn't match || line: %d, column: %d\n", FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+            SEMANTIC_ERROR("number of arguments and params doesn't match || line: %d, column: %d\n", FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
             return DTYPE_ERROR;
         }
 
@@ -307,13 +314,13 @@ int sem_check(AstNode *node)
 
                 if ((paramdt < DTYPE_LIST && argdt >= DTYPE_LIST) || (paramdt >= DTYPE_LIST && argdt < DTYPE_LIST))
                 {
-                    SEMANTIC_ERROR("Types of arguments and params doesn't match || line: %d, column: %d\n", FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                    SEMANTIC_ERROR("Types of arguments and params doesn't match || line: %d, column: %d\n", FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                     return DTYPE_ERROR;
                 }
 
                 if ((paramdt > DTYPE_LIST || argdt > DTYPE_LIST) && paramdt != argdt)
                 {
-                    SEMANTIC_ERROR("Types of arguments and params doesn't match || line: %d, column: %d\n", FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+                    SEMANTIC_ERROR("Types of arguments and params doesn't match || line: %d, column: %d\n", FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
                     return DTYPE_ERROR;
                 }
             }
@@ -333,7 +340,7 @@ int sem_check(AstNode *node)
 
         if (!dtcheck(fdtype, symdt))
         {
-            SEMANTIC_ERROR("return with different type from function type || line: %d, column: %d\n", FIRST_SON(node)->context->node_pos.first_line, FIRST_SON(node)->context->node_pos.first_column);
+            SEMANTIC_ERROR("return with different type from function type || line: %d, column: %d\n", FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_line : -1, FIRST_SON(node) ? FIRST_SON(node)->context->node_pos.first_column : -1);
             return DTYPE_ERROR;
         }
     }

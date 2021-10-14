@@ -172,7 +172,7 @@ variableDeclare:
         Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
         if(sym_declared != NULL){
             SEMANTIC_ERROR("variable redeclaration of '%s' || line: %d, column: %d\n", sym_declared->name, @2.first_line, @2.first_column);
-            semantic_error = 1;
+            
             $$ = NULL;
             delete_astnode($1);
             delete_astnode($2);
@@ -225,7 +225,7 @@ functionDeclare:
         Symbol *sym_declared = lookup_symbol_context($2->context->name, last_context);
         if(sym_declared != NULL){
             SEMANTIC_ERROR("function redeclaration of '%s' || line: %d, column: %d\n", sym_declared->name, @2.first_line, @2.first_column);
-            semantic_error = 1;
+            
         } else {
             Symbol *sym_ret;
             sym_ret = list_symbol_insert($1->context->type, ((SymbolTable *)current_context->value)->symbols, $2->context->name, 0, @2.first_line, @2.first_column, FUNCTION);
@@ -304,7 +304,7 @@ param:
         Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
         if(sym_declared != NULL){
             SEMANTIC_ERROR("param redeclaration of '%s' || line: %d, column: %d\n", sym_declared->name, @2.first_line, @2.first_column);
-            semantic_error = 1;
+            
             $$ = NULL;
             delete_astnode($1);
             delete_astnode($2);
@@ -606,7 +606,7 @@ expression:
         Symbol *has_sym = lookup_symbol($1->context->name, current_context);
         if(has_sym == NULL){
             SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
-            semantic_error = 1;
+            
         } else {
             $$ = $1;
             $$->context->dtype = $1->context->dtype;
@@ -633,7 +633,6 @@ assignArith:
         Symbol *has_sym = lookup_symbol($1->context->name, current_context);
         if(has_sym == NULL){
             SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
-            semantic_error = 1;
         } else {
             $1->context->sym_ref = has_sym;
         }
@@ -908,7 +907,7 @@ funcCall:
        Symbol *has_sym = lookup_symbol($1->context->name, current_context);
         if(has_sym == NULL){
             SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
-            semantic_error = 1;
+            
         } else {
             $1->context->sym_ref = has_sym;
         }
@@ -933,7 +932,7 @@ ioCommand:
         Symbol *has_sym = lookup_symbol($3->context->name, current_context);
         if(has_sym == NULL){
             SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $3->context->name, @3.first_line, @3.first_column);
-            semantic_error = 1;
+            
         } else {
             $$ = create_astnode_context(AST_BUILT_IN, "read call", @$);
             insert_kid($1, $$);

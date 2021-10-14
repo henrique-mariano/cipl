@@ -1,6 +1,6 @@
-int a(int b) {
+int func(int b) {
     
-    return a(2);
+    int b;
     
     int a;
     if (1) 
@@ -13,21 +13,23 @@ int a(int b) {
 
 int main() {
     int a;
-    {
-        int a;
-        {
-            float b;
-            {
-                a = b;
-                int list a;
-                a = 1 : a;
-            }
-            b = main();
-            {
-                int main;
-                main = 20;
-            }
-        }
-        // a = a() * ;
-    }
+    int x;
+    a = x;
+    // {
+    //     int a;
+    //     {
+    //         float b;
+    //         {
+    //             a = b;
+    //             int list a;
+    //             a = 1 : a;
+    //         }
+    //         b = main();
+    //         {
+    //             int main;
+    //             main = 20;
+    //         }
+    //     }
+    //     // a = a() * ;
+    // }
 }
