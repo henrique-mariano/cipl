@@ -6,9 +6,9 @@ Foi disponibilizado um arquivo makefile para a compilação, mas caso seja neces
 
 > $ flex ./src/lex.l
 >
-> $ bison ./src/bison.y --defines="lib/bison.h" -Wcounterexamples -Wother
+> $ bison ./src/bison.y --defines="lib/bison.h" -Wother
 >
-> $ gcc -o tradutor -O src/list.c src/tree.c src/astcontext.c src/symbol.c src/treenode.c src/context.c lex.yy.c bison.tab.c -Wall -pedantic -Wpedantic -Werror -lm -lfl -g
+> $ gcc -o tradutor -O src/list.c src/tree.c src/astcontext.c src/symbol.c src/treenode.c src/context.c src/sem_eval.c lex.yy.c bison.tab.c -Wall -pedantic -Wpedantic -Werror -lm -lfl -g -std=gnu11
 
 Para a execução:
 
