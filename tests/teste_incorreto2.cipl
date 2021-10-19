@@ -1,5 +1,22 @@
-int x;
-int  main;
+int func(int b, int c) {
+    int list c;
+    {
+        int n;
+    }
 
+    {
+        int list n;
+    }
+    
+    return c;
+}
 
-float main;
+int no_main(){
+    int i;
+    1 + NIL;
+    i = func(1, 2, 3);
+
+    return 0;
+}
+
+int no_main;

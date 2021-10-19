@@ -1,15 +1,32 @@
-int list a;
+int x;
 
-// main
+int list list_pass(int list a){
+    int list b;
+    b = 1 : 2 : 3 : 4 : NIL;
+    a = b;
+
+    return a;
+}
+
+int valid_map(int x){
+    return x;
+}
+
+float valid_filter(float x){
+    return x;
+}
+
 int main(){
-    int aux;
-    int x;
-    x = 2;
-    aux = 3;
-    if (aux > 2){
-        a = 2 : a;
-    } else {
-        x = x + 2;
-    }
-    write("string");
+    float list j;
+    int list c;
+    j = 1.0 : 2.5 : 2.0 : NIL;
+    c = 1 : 2 : 3 : 4 : NIL;
+    c = valid_map >> c;
+    j = valid_filter << j;
+    int i;
+    int n;
+
+    c = list_pass(c);
+    
+    return 0;
 }

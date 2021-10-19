@@ -1,14 +1,28 @@
 int x;
 
-int main(int agrc, float argv, int m, int k){
+int recursive(int a){
+    if(a == 200)
+        return a;
+    return recursive(1) + 1;
+}
+
+int valid_map(int x){
+    return x;
+}
+
+float valid_filter(float x){
+    return x;
+}
+
+int main(){
     float list j;
+    int list c;
+    j = 1.0 : 2.5 : 2.0 : NIL;
+    c = 1 : 2 : 3 : 4 : NIL;
+    c = valid_map >> c;
+    j = valid_filter << j;
     int i;
     int n;
-    if(k > j){
-        for(i; i < n; i){
-            return 1;
-        }
-    } else {
-        return 2;
-    }
+    
+    return 0;
 }

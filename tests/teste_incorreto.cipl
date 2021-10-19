@@ -1,35 +1,24 @@
-int func(int b) {
-    
-    int b;
-    
-    int a;
-    if (1) 
+int func(int b, int c) {
+
     {
-        int a;
-        return 0;
+        int n;
+    }
+
+    {
+        int list n;
     }
     
+    return c;
 }
 
-int main() {
-    int a;
-    int x;
-    a = x;
-    // {
-    //     int a;
-    //     {
-    //         float b;
-    //         {
-    //             a = b;
-    //             int list a;
-    //             a = 1 : a;
-    //         }
-    //         b = main();
-    //         {
-    //             int main;
-    //             main = 20;
-    //         }
-    //     }
-    //     // a = a() * ;
-    // }
+int no_main(){
+    int i;
+
+    i = func;
+
+    return 0;
 }
+
+int no_main;
+
+int #;
