@@ -12,12 +12,15 @@
     #include "lib/treenode.h"
     #include "lib/sem_eval.h"
     #include "lib/macros.h"
+    #include "lib/code_gen.h"
 
     // extern int num_line, num_col;
 
     int erros = 0;
 
     int semantic_error = 0;
+
+    unsigned int temporary_count = 0;
 
     unsigned int current_scope;
     
@@ -172,13 +175,13 @@ variableDeclare:
         Symbol *sym_declared = lookup_symbol_context($2->context->name, current_context);
         if(sym_declared != NULL){
             SEMANTIC_ERROR("variable redeclaration of '%s' || line: %d, column: %d\n", sym_declared->name, @2.first_line, @2.first_column);
-            
             $$ = NULL;
             delete_astnode($1);
             delete_astnode($2);
         } else {
             Symbol *sym_ret;
             sym_ret = list_symbol_insert($1->context->type, ((SymbolTable *)current_context->value)->symbols, $2->context->name, 0, @2.first_line, @2.first_column, VARIABLE);
+            sym_ret->variable_tac = temporary_count++;
             $$ = create_astnode_context(AST_VAR_DECLARE, "variable declare", @1);
             insert_kid($1, $$);
             insert_kid($2, $$);
@@ -243,7 +246,7 @@ functionDeclare:
         }
     } optListParams ')' compoundStatement {
         $$ = create_astnode_context(AST_FUNC_DECLARE, "func declare", @$);
-        
+        $2->context->last_temp = temporary_count;
         if($1)
             insert_kid($1, $$);
         if($4){
@@ -262,16 +265,6 @@ functionDeclare:
             insert_kid(params, $$);
         }
         insert_kid($7, $$);
-        // AstNode *ret = lookup_node($7, "return");
-        // if(ret){
-        //     int val = sem_check(FIRST_SON(ret));
-        //     if($1->context->dtype != val){
-        //         if((val == 1 || val == 2) && val >= 4){
-        //             SEMANTIC_ERROR("returning '%s' from a function with return type '%s' || line: %d, column: %d\n", error_string_type(val), error_string_type($1->context->dtype), @1.first_line, @1.first_column);
-        //         }
-        //         // Cast
-        //     }
-        // }
     }
 ;
 
@@ -311,6 +304,7 @@ param:
         } else {
             Symbol *sym_ret;
             sym_ret = list_symbol_insert($1->context->type, ((SymbolTable *)current_context->value)->symbols, $2->context->name, 0, @2.first_line, @2.first_column, VARIABLE);
+            sym_ret->variable_tac = temporary_count++;
             $$ = create_astnode_context(AST_PARAM, "param", @$);
             insert_kid($1, $$);
             insert_kid($2, $$);
@@ -606,7 +600,7 @@ expression:
         Symbol *has_sym = lookup_symbol($1->context->name, current_context);
         if(has_sym == NULL){
             SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
-            
+            $$ = NULL;
         } else {
             $$ = $1;
             $$->context->dtype = $1->context->dtype;
@@ -907,7 +901,6 @@ funcCall:
        Symbol *has_sym = lookup_symbol($1->context->name, current_context);
         if(has_sym == NULL){
             SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $1->context->name, @1.first_line, @1.first_column);
-            
         } else {
             $1->context->sym_ref = has_sym;
         }
@@ -928,38 +921,30 @@ funcCall:
 ;
 
 ioCommand:
-    READ_TOKEN '(' id <astnode>{
+    READ_TOKEN '(' id ')' ';' {
         Symbol *has_sym = lookup_symbol($3->context->name, current_context);
         if(has_sym == NULL){
             SEMANTIC_ERROR("identifier '%s' undeclared || line: %d, column: %d\n", $3->context->name, @3.first_line, @3.first_column);
-            
+            $$ = NULL;
         } else {
             $$ = create_astnode_context(AST_BUILT_IN, "read call", @$);
             insert_kid($1, $$);
             $3->context->sym_ref = has_sym;
             insert_kid($3, $$);
         }
-    } ')' {
-        $$ = $4;
     }
-    | WRITE_TOKEN '(' expression ')' {
+    | WRITE_TOKEN '(' expression ')' ';' {
         $$ = create_astnode_context(AST_BUILT_IN, "write call", @$);
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
-    | WRITE_TOKEN '(' STRING_TOKEN ')'{
+    | WRITE_TOKEN '(' STRING_TOKEN ')' ';' {
         $$ = create_astnode_context(AST_BUILT_IN, "write call", @$);
         insert_kid($1, $$);
         insert_kid($3, $$);
     }
     /* Erros */
     /* write() */
-    | WRITE_TOKEN '(' error ')' {
-       SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
-       delete_astnode($1);
-       $$ = NULL;
-    }
-    /* write()';' */
     | WRITE_TOKEN '(' error ')' ';' {
        SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
        delete_astnode($1);
@@ -967,11 +952,6 @@ ioCommand:
     }
     /* read(i) */
     /* read() */
-    | READ_TOKEN '(' error ')' {
-        SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
-        delete_astnode($1);
-        $$ = NULL;
-    }
     | READ_TOKEN '(' error ')' ';' {
         SHOW_SYNTAX_ERROR("expected expression before ')' token || line: %d, column: %d\n", @3.first_line, @3.first_column);
         delete_astnode($1);
@@ -1152,6 +1132,11 @@ int main(int argc, char **argv){
 
     if(erros > 0)
         printf(RED"Error count: "RESET"%d\n", erros);
+    else {
+        FILE *output = fopen("teste.tac", "w+");
+        code_gen(root, output);
+        fclose(output);
+    }
 
     delete_astnode(root);
     delete_list(node_aux, delete_list_astnode);

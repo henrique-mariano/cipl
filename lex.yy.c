@@ -1039,10 +1039,10 @@ YY_RULE_SETUP
     num_col += yyleng;
     switch(yytext[0]){
         case 'r':
-            yylval.astnode = create_astnode_context(AST_FUNC_CALL, yytext, yylloc);
+            yylval.astnode = create_astnode_context(AST_ID, yytext, yylloc);
             return READ_TOKEN;
         case 'w':
-            yylval.astnode = create_astnode_context(AST_FUNC_CALL, yytext, yylloc);
+            yylval.astnode = create_astnode_context(AST_ID, yytext, yylloc);
             return WRITE_TOKEN;
     }
 }

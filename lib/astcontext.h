@@ -63,6 +63,7 @@ typedef struct AstContext
     int dtype;
     char *operation;
     char *name;
+    int last_temp;
     YYLTYPE node_pos;
     struct Symbol *sym_ref;
 } AstContext;

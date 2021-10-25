@@ -1,28 +1,30 @@
-int x;
-
-int recursive(int a){
-    if(a == 200)
-        return a;
-    return recursive(1) + 1;
+float arith(float a) {
+    return a + 2 - 3 * 4 / 5 + 1.1 - 2.1 * 10;
 }
 
-int valid_map(int x){
-    return x;
-}
+int main() {
+    // int a;
+    // write("digite o valor de \033[33m'a'\033[0m: ");
 
-float valid_filter(float x){
-    return x;
-}
+    // read(a);
 
-int main(){
-    float list j;
-    int list c;
-    j = 1.0 : 2.5 : 2.0 : NIL;
-    c = 1 : 2 : 3 : 4 : NIL;
-    c = valid_map >> c;
-    j = valid_filter << j;
-    int i;
-    int n;
-    
+    // write("func call: 'calc(a)' = ");
+    // // writeln(arith(a));
+
+    // write("static int: ");
+    // writeln(78);
+
+    // write("static float: ");
+    // writeln(3.14159);
+
+    // write("static '");
+    // write(a);
+    // write(" + 1 + 65 - 7.89 * 5.2 / 0.45' = ");
+    // writeln(a + 1 + 65 - 7.89 * 5.2 / 0.45);
+    writeln(1 + 2 * 2); // 5
+    writeln(1 - 5);
+    writeln(1.3 / 0.5); // 2,6
+    writeln(1.5 * 1.5); // 2,25
+
     return 0;
 }

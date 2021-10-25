@@ -14,6 +14,7 @@ Symbol *create_symbol(char *name, double value, int line, int column, unsigned i
     symbol->column = column;
     symbol->type_simbol = type_symbol;
     symbol->isfunction = function;
+    symbol->variable_tac = -1;
 
     return symbol;
 }

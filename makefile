@@ -6,7 +6,7 @@ FLEXFILES= $(SRC)/lex.l
 
 BISONFILES= $(SRC)/bison.y
 
-CFILES= src/list.c src/tree.c src/astcontext.c src/symbol.c src/treenode.c src/context.c src/sem_eval.c lex.yy.c bison.tab.c
+CFILES= src/list.c src/tree.c src/astcontext.c src/symbol.c src/treenode.c src/context.c src/sem_eval.c src/code_gen.c lex.yy.c bison.tab.c
 
 FLAGS= -Wall -pedantic -Wpedantic -Werror -lm -lfl -g -std=gnu11
 
@@ -48,3 +48,6 @@ endif
 
 valgrind: all $(VAL)
 	valgrind -v --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file="logfile.out" ./tradutor $(VAL)
+
+tac: valgrind
+	./tac/tac teste.tac

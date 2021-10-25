@@ -25,13 +25,11 @@ int sem_check(AstNode *node)
         return DTYPE_ERROR;
     case AST_BUILT_IN:
     {
-        AstNode *arg = SECOND_SON(node);
-
-        DataTypes arg_dtype = arg->context->dtype;
+        DataTypes arg_dtype = SECOND_SON(node) ? SECOND_SON(node)->context->dtype : 0;
 
         if (arg_dtype >= DTYPE_LIST)
         {
-            SEMANTIC_ERROR("type of argument invalid || line: %d, column: %d\n", arg->context->node_pos.first_line, arg->context->node_pos.first_column);
+            SEMANTIC_ERROR("type of argument invalid || line: %d, column: %d\n", node->context->node_pos.first_line, node->context->node_pos.first_column);
             return DTYPE_ERROR;
         }
 

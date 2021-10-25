@@ -21,6 +21,8 @@ typedef struct Symbol
     int line;
     int column;
     unsigned int isfunction;
+    // unsigned int isparam;
+    int variable_tac;
     TypeSymbol type_simbol;
 } Symbol;
 

@@ -102,7 +102,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 50 "./src/bison.y"
+#line 53 "./src/bison.y"
 
     /* Estrutura da árvore sintática */
     struct AstNode *astnode;

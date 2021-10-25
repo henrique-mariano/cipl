@@ -57,9 +57,12 @@ AstNode *create_astnode_context(int type, char *name, YYLTYPE node_pos)
 
 void free_astcontext(AstContext *context)
 {
-    free(context->name);
-    if (context->operation)
-        free(context->operation);
-    free(context);
+    if(context){
+        if(context->name)
+            free(context->name);
+        if (context->operation)
+            free(context->operation);
+        free(context);
+    }
     context = NULL;
 }
