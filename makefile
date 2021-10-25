@@ -1,5 +1,7 @@
 VAL=
 
+TAC=
+
 SRC= ./src
 
 FLEXFILES= $(SRC)/lex.l
@@ -23,7 +25,7 @@ endif
 all: flex bison main
 
 bison: $(BISONFILES)
-	bison $(BISONFILES) --defines="lib/bison.h" -Wcounterexamples -Wother
+	bison $(BISONFILES) --defines="lib/bison.h" -Wcounterexamples -Wother -Wall
 
 flex: $(FLEXFILES)
 	flex $(FLEXFILES)
@@ -49,5 +51,5 @@ endif
 valgrind: all $(VAL)
 	valgrind -v --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file="logfile.out" ./tradutor $(VAL)
 
-tac: valgrind
-	./tac/tac teste.tac
+tac: valgrind $(TAC)
+	./tac/tac $(TAC)

@@ -1,6 +1,8 @@
 %define lr.type canonical-lr
 %define parse.error detailed
 %define api.header.include {"lib/bison.h"}
+%define parse.lac full
+%locations
 
 %{
     // Autor: Henrique Mendes de Freitas Mariano - 17/0012280
@@ -94,7 +96,7 @@
 %token IF_TOKEN ELSE_TOKEN FOR_TOKEN RETURN_TOKEN STRING_TOKEN
 
 /* Precedencia dos operadores */
-%right ASSIGN_TOKEN
+%precedence ASSIGN_TOKEN
 %left OR_TOKEN
 %left AND_TOKEN
 %left EQUAL_TOKEN DIFF_EQ_TOKEN
@@ -104,10 +106,10 @@
 %right CONSTRUCTOR_LIST_TOKEN
 %left '+' '-'
 %left '*' '/'
-%right EXCLAMATION_TOKEN
-%right QUESTION_TOKEN
-%right PERCENTAGE_TOKEN
-%right UNI_OP
+%precedence EXCLAMATION_TOKEN
+%precedence QUESTION_TOKEN
+%precedence PERCENTAGE_TOKEN
+%precedence UNI_OP
 
 %precedence IF_TOKEN
 %precedence ELSE_TOKEN
@@ -1065,7 +1067,9 @@ int main(int argc, char **argv){
         return 0;
     }
 
-    FILE *fp = fopen(argv[1], "r");
+    char *fname = argv[1];
+
+    FILE *fp = fopen(fname, "r");
     if(!fp){
         printf(RED"Error: Unable to open file\n"RESET);
         return 0;
@@ -1133,7 +1137,17 @@ int main(int argc, char **argv){
     if(erros > 0)
         printf(RED"Error count: "RESET"%d\n", erros);
     else {
-        FILE *output = fopen("teste.tac", "w+");
+        char *tac_out_name = calloc(sizeof("./") + sizeof(fname) + sizeof(".tac") + 20, sizeof(char));
+        strcat(tac_out_name, "./");
+        char *fname_without_ext = calloc(strlen(fname) + 20, sizeof(char));
+        sscanf(fname, "%[^.]", fname_without_ext);
+        strcat(tac_out_name, fname_without_ext);
+        strcat(tac_out_name, ".tac");
+
+        FILE *output = fopen(tac_out_name, "w+");
+        free(tac_out_name);
+        free(fname_without_ext);
+
         code_gen(root, output);
         fclose(output);
     }

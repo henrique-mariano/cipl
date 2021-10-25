@@ -17,16 +17,17 @@ float valid_filter(float x){
 }
 
 int main(){
-    float list j;
-    int list c;
-    j = 1.0 : 2.5 : 2.0 : NIL;
-    c = 1 : 2 : 3 : 4 : NIL;
-    c = valid_map >> c;
-    j = valid_filter << j;
     int i;
-    int n;
+    float n;
 
-    c = list_pass(c);
-    
+    write("Digite o valor de i: ");
+    read(i);
+    writeln("");
+    write("O seu valor de i é este -> ");
+    writeln(i);
+    n = 5.5;
+    write("O valor de n é este -> ");
+    writeln(n);
+
     return 0;
 }

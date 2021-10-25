@@ -104,7 +104,7 @@ static void _code_gen(AstNode *node, FILE *fp)
         AstNode *maybe_params = THIRD_SON(node);
         if (maybe_params->context->type == AST_LIST_PARAM)
         {
-            printf("func params\n");
+            //TODO: printf("func params\n");
         }
         else
         {
@@ -292,7 +292,7 @@ static void _code_gen(AstNode *node, FILE *fp)
         fprintf(fp, "// End String\n\n");
         break;
     default:
-        printf("AST_TYPE: %s\n", nome_tipos_ast[node->context->type]);
+        printf(RED"Code gen: Tipo não implementado"RESET" AST_TYPE: %s\n", nome_tipos_ast[node->context->type]);
     }
 }
 
