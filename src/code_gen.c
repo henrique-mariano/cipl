@@ -77,10 +77,10 @@ static void write_var_declaration(DataTypes dtype, int temp, FILE *fp)
     fprintf(fp, "//End Var Declare\n\n");
 }
 
-static char *write_star_for_var(AstContext *ctx)
-{
-    return ctx->type == AST_ID ? "*" : "";
-}
+// static char *write_star_for_var(AstContext *ctx)
+// {
+//     return ctx->type == AST_ID ? "*" : "";
+// }
 
 static void _code_gen(AstNode *node, FILE *fp)
 {
@@ -142,7 +142,7 @@ static void _code_gen(AstNode *node, FILE *fp)
     case AST_ID:
     {
         Symbol *var_arg = node->context->sym_ref;
-        fprintf(fp, "mov $%d, $%d\n", func_ctx->last_temp, var_arg->variable_tac);
+        fprintf(fp, "push $%d\n", var_arg->variable_tac);
         break;
     }
     case AST_BUILT_IN:
@@ -154,10 +154,10 @@ static void _code_gen(AstNode *node, FILE *fp)
         fprintf(fp, "// Built-in\n");
         _code_gen(SECOND_SON(node), fp);
 
-        fprintf(fp, "mov $%d, %s$%d\n", func_ctx->last_temp, write_star_for_var(ss_ctx),
-                func_ctx->last_temp);
+        fprintf(fp, "pop $%d\n", func_ctx->last_temp);
         if (!strcmp(fs_ctx->name, "read"))
         {
+            fprintf(fp, "mov $%d, *$%d\n", func_ctx->last_temp, func_ctx->last_temp);
             fprintf(fp, "scan%c $%d\n", ss_ctx->dtype == DTYPE_INT ? 'i' : 'f', func_ctx->last_temp);
             fprintf(fp, "mov *$%d, $%d\n", var_arg->variable_tac, func_ctx->last_temp);
         }
@@ -176,9 +176,12 @@ static void _code_gen(AstNode *node, FILE *fp)
                 fprintf(fp, "add $%d, $%d, 1\n", func_ctx->last_temp + 1, func_ctx->last_temp + 1);
                 fprintf(fp, "jump write_STRING_%d_LOOP\n", label_count);
                 fprintf(fp, "write_ENDING_%d:\n", label_count++);
+                if (strstr(fs_ctx->name, "ln"))
+                    fprintf(fp, "println \n");
             }
             else
             {
+                fprintf(fp, "mov $%d, *$%d\n", func_ctx->last_temp, func_ctx->last_temp);
                 fprintf(fp, "print%s $%d\n", strstr(fs_ctx->name, "ln") ? "ln" : "", func_ctx->last_temp);
             }
         }
@@ -190,97 +193,141 @@ static void _code_gen(AstNode *node, FILE *fp)
         AstContext *fs_ctx = FIRST_SON(node)->context;
         fprintf(fp, "// Assign\n");
         _code_gen(SECOND_SON(node), fp);
-        fprintf(fp, "mov *$%d, $%d\n", fs_ctx->sym_ref->variable_tac, func_ctx->last_temp);
+        fprintf(fp, "pop $%d\n", func_ctx->last_temp);
+        fprintf(fp, "mov *$%d, *$%d\n", fs_ctx->sym_ref->variable_tac, func_ctx->last_temp);
         fprintf(fp, "// End Assign\n\n");
         break;
     }
     case AST_CONSTANT_INT:
-        fprintf(fp, "mov $%d, %ld\n", func_ctx->last_temp, atol(node->context->name));
+        write_var_declaration(DTYPE_INT, func_ctx->last_temp, fp);
+        fprintf(fp, "mov *$%d, %ld\n", func_ctx->last_temp, atol(node->context->name));
+        fprintf(fp, "push $%d\n", func_ctx->last_temp);
         break;
     case AST_CONSTANT_REAL:
-        fprintf(fp, "mov $%d, %lf\n", func_ctx->last_temp, atof(node->context->name));
+        write_var_declaration(DTYPE_FLOAT, func_ctx->last_temp, fp);
+        fprintf(fp, "mov *$%d, %lf\n", func_ctx->last_temp, atof(node->context->name));
+        fprintf(fp, "push $%d\n", func_ctx->last_temp);
         break;
     case AST_EXPR_BIN_ARITH:
     {
-        // TODO: Salvar o valor intermediário das operações.
         fprintf(fp, "// Binary op\n");
 
         _code_gen(FIRST_SON(node), fp);
-        fprintf(fp, "mov $%d, $%d\n", func_ctx->last_temp + 1, func_ctx->last_temp);
-        fprintf(fp, "mov $%d, %s$%d\n",
-                func_ctx->last_temp + 1, write_star_for_var(FIRST_SON(node)->context),
-                func_ctx->last_temp + 1);
-
         _code_gen(SECOND_SON(node), fp);
-        fprintf(fp, "mov $%d, $%d\n", func_ctx->last_temp + 2, func_ctx->last_temp);
-        fprintf(fp, "mov $%d, %s$%d\n",
-                func_ctx->last_temp + 2, write_star_for_var(SECOND_SON(node)->context),
-                func_ctx->last_temp + 2);
+
+        fprintf(fp, "pop $%d\n", func_ctx->last_temp + 1);
+        fprintf(fp, "mov $%d, *$%d\n", func_ctx->last_temp + 3, func_ctx->last_temp + 1);
+
+        if (SECOND_SON(node)->context->dtype != node->context->dtype)
+        {
+            int cast_to = dtcheck(SECOND_SON(node)->context->dtype, node->context->dtype);
+            fprintf(fp, "%s $%d, $%d\n", cast_to == DTYPE_INT ? "fltoint" : "inttofl", func_ctx->last_temp + 3, func_ctx->last_temp + 3);
+        }
+
+        fprintf(fp, "pop $%d\n", func_ctx->last_temp);
+        fprintf(fp, "mov $%d, *$%d\n", func_ctx->last_temp + 2, func_ctx->last_temp);
+
+        if (FIRST_SON(node)->context->dtype != node->context->dtype)
+        {
+            int cast_to = dtcheck(FIRST_SON(node)->context->dtype, node->context->dtype);
+            fprintf(fp, "%s $%d, $%d\n", cast_to == DTYPE_INT ? "fltoint" : "inttofl", func_ctx->last_temp + 2, func_ctx->last_temp + 2);
+        }
 
         switch (node->context->operation[0])
         {
         case '+':
-            fprintf(fp, "add $%d, $%d, $%d\n", func_ctx->last_temp,
-                    func_ctx->last_temp + 1, func_ctx->last_temp + 2);
+            fprintf(fp, "add $%d, $%d, $%d\n", func_ctx->last_temp + 3,
+                    func_ctx->last_temp + 2, func_ctx->last_temp + 3);
+            write_var_declaration(node->context->dtype, func_ctx->last_temp + 4, fp);
+            fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 4, func_ctx->last_temp + 3);
+            fprintf(fp, "push $%d\n", func_ctx->last_temp + 4);
             break;
         case '-':
-            fprintf(fp, "sub $%d, $%d, $%d\n", func_ctx->last_temp,
-                    func_ctx->last_temp + 1, func_ctx->last_temp + 2);
+            fprintf(fp, "sub $%d, $%d, $%d\n", func_ctx->last_temp + 3,
+                    func_ctx->last_temp + 2, func_ctx->last_temp + 3);
+            write_var_declaration(node->context->dtype, func_ctx->last_temp + 4, fp);
+            fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 4, func_ctx->last_temp + 3);
+            fprintf(fp, "push $%d\n", func_ctx->last_temp + 4);
             break;
         case '/':
-            fprintf(fp, "div $%d, $%d, $%d\n", func_ctx->last_temp,
-                    func_ctx->last_temp + 1, func_ctx->last_temp + 2);
+            fprintf(fp, "div $%d, $%d, $%d\n", func_ctx->last_temp + 3,
+                    func_ctx->last_temp + 2, func_ctx->last_temp + 3);
+            write_var_declaration(node->context->dtype, func_ctx->last_temp + 4, fp);
+            fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 4, func_ctx->last_temp + 3);
+            fprintf(fp, "push $%d\n", func_ctx->last_temp + 4);
             break;
         case '*':
-            fprintf(fp, "mul $%d, $%d, $%d\n", func_ctx->last_temp,
-                    func_ctx->last_temp + 1, func_ctx->last_temp + 2);
+            fprintf(fp, "mul $%d, $%d, $%d\n", func_ctx->last_temp + 3,
+                    func_ctx->last_temp + 2, func_ctx->last_temp + 3);
+            write_var_declaration(node->context->dtype, func_ctx->last_temp + 4, fp);
+            fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 4, func_ctx->last_temp + 3);
+            fprintf(fp, "push $%d\n", func_ctx->last_temp + 4);
             break;
         case '=':
-            fprintf(fp, "seq $%d, $%d, $%d\n", func_ctx->last_temp,
-                    func_ctx->last_temp + 1, func_ctx->last_temp + 2);
+            fprintf(fp, "seq $%d, $%d, $%d\n", func_ctx->last_temp + 3,
+                    func_ctx->last_temp + 2, func_ctx->last_temp + 3);
+            write_var_declaration(node->context->dtype, func_ctx->last_temp + 1, fp);
+            fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 1, func_ctx->last_temp + 3);
+            fprintf(fp, "push $%d\n", func_ctx->last_temp + 1);
             break;
         case '!':
-            fprintf(fp, "seq $%d, $%d, $%d\n", func_ctx->last_temp,
-                    func_ctx->last_temp + 1, func_ctx->last_temp + 2);
-            fprintf(fp, "not $%d, $%d\n", func_ctx->last_temp, func_ctx->last_temp);
+            fprintf(fp, "seq $%d, $%d, $%d\n", func_ctx->last_temp + 3,
+                    func_ctx->last_temp + 2, func_ctx->last_temp + 3);
+            fprintf(fp, "not $%d, $%d\n", func_ctx->last_temp, func_ctx->last_temp + 3);
+            write_var_declaration(node->context->dtype, func_ctx->last_temp + 1, fp);
+            fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 1, func_ctx->last_temp);
+            fprintf(fp, "push $%d\n", func_ctx->last_temp + 1);
             break;
         case '>':
         {
             // lhs >= rhs = !(lhs < rhs)
             if (strlen(node->context->operation) != 1)
             {
-                fprintf(fp, "%s $%d, $%d, $%d\n",
-                        "slt", func_ctx->last_temp,
-                        func_ctx->last_temp + 1, func_ctx->last_temp + 2);
+                fprintf(fp, "slt $%d, $%d, $%d\n", func_ctx->last_temp, func_ctx->last_temp + 2, func_ctx->last_temp + 3);
                 fprintf(fp, "not $%d, $%d\n", func_ctx->last_temp,
                         func_ctx->last_temp);
+                write_var_declaration(node->context->dtype, func_ctx->last_temp + 1, fp);
+                fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 1, func_ctx->last_temp);
+                fprintf(fp, "push $%d\n", func_ctx->last_temp + 1);
             }
             else
             {
                 // lhs > rhs = (rhs <= lhs) && (lhs != rhs)
-                fprintf(fp, "sleq $%d, $%d, $%d\n", func_ctx->last_temp + 3,
-                        func_ctx->last_temp + 2, func_ctx->last_temp + 1);
-                fprintf(fp, "seq $%d, $%d, $%d\n", func_ctx->last_temp + 4,
-                        func_ctx->last_temp + 1, func_ctx->last_temp + 2);
-                fprintf(fp, "not $%d, $%d\n", func_ctx->last_temp + 4,
-                        func_ctx->last_temp + 4);
+                fprintf(fp, "sleq $%d, $%d, $%d\n", func_ctx->last_temp + 4,
+                        func_ctx->last_temp + 3, func_ctx->last_temp + 2);
+                fprintf(fp, "seq $%d, $%d, $%d\n", func_ctx->last_temp + 5,
+                        func_ctx->last_temp + 2, func_ctx->last_temp + 3);
+                fprintf(fp, "not $%d, $%d\n", func_ctx->last_temp + 5,
+                        func_ctx->last_temp + 5);
                 fprintf(fp, "and $%d, $%d, $%d\n", func_ctx->last_temp,
-                        func_ctx->last_temp + 3, func_ctx->last_temp + 4);
+                        func_ctx->last_temp + 4, func_ctx->last_temp + 5);
+                write_var_declaration(node->context->dtype, func_ctx->last_temp + 1, fp);
+                fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 1, func_ctx->last_temp);
+                fprintf(fp, "push $%d\n", func_ctx->last_temp + 1);
             }
             break;
         }
         case '<':
             fprintf(fp, "%s $%d, $%d, $%d\n",
                     strlen(node->context->operation) == 1 ? "slt" : "sleq", func_ctx->last_temp,
-                    func_ctx->last_temp + 1, func_ctx->last_temp + 2);
+                    func_ctx->last_temp + 2, func_ctx->last_temp + 3);
+            write_var_declaration(node->context->dtype, func_ctx->last_temp + 1, fp);
+            fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 1, func_ctx->last_temp);
+            fprintf(fp, "push $%d\n", func_ctx->last_temp + 1);
             break;
         case '&':
             fprintf(fp, "and $%d, $%d, $%d\n", func_ctx->last_temp,
-                    func_ctx->last_temp + 1, func_ctx->last_temp + 2);
+                    func_ctx->last_temp + 2, func_ctx->last_temp + 3);
+            write_var_declaration(node->context->dtype, func_ctx->last_temp + 1, fp);
+            fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 1, func_ctx->last_temp);
+            fprintf(fp, "push $%d\n", func_ctx->last_temp + 1);
             break;
         case '|':
             fprintf(fp, "or $%d, $%d, $%d\n", func_ctx->last_temp,
-                    func_ctx->last_temp + 1, func_ctx->last_temp + 2);
+                    func_ctx->last_temp + 2, func_ctx->last_temp + 3);
+            write_var_declaration(node->context->dtype, func_ctx->last_temp + 1, fp);
+            fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 1, func_ctx->last_temp);
+            fprintf(fp, "push $%d\n", func_ctx->last_temp + 1);
             break;
         }
         fprintf(fp, "// End Binary op\n\n");
@@ -289,10 +336,11 @@ static void _code_gen(AstNode *node, FILE *fp)
     case AST_CONSTANT_STRING:
         fprintf(fp, "// String\n");
         fprintf(fp, "mov $%d, &string%d\n", func_ctx->last_temp, node->context->sym_ref->variable_tac);
+        fprintf(fp, "push $%d\n", func_ctx->last_temp);
         fprintf(fp, "// End String\n\n");
         break;
     default:
-        printf(RED"Code gen: Tipo não implementado"RESET" AST_TYPE: %s\n", nome_tipos_ast[node->context->type]);
+        printf(RED "Code gen: Tipo não implementado" RESET " AST_TYPE: %s\n", nome_tipos_ast[node->context->type]);
     }
 }
 

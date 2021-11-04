@@ -35,3 +35,16 @@ Para a execução:
 - [X] Verificar tipos nas aritméticas
 - [X] Verificar tipo de retorno da função
 - [] Verificar os returns das funções
+- [] Geração de código
+- [X] Operações binárias
+- [X] Impressão de string
+- [X] Declaração de variável
+- [] Declaração de função
+- [X] Built-in
+- [] Tipo de lista
+- [] Operadores binários de lista
+- [] Operadores unários de lista
+- [] Operadores unários aritiméticos
+- [] Chamada de função
+- [] return
+- [] variaveis globais
