@@ -41,9 +41,10 @@ mov $6[1], 2
 // Built-in
 // String
 mov $7, &string0
+push $7
 // End String
 
-mov $7, $7
+pop $7
 write_STRING_0:
 mov $8, 0
 write_STRING_0_LOOP:
@@ -58,7 +59,8 @@ write_ENDING_0:
 // End Built-in
 
 // Built-in
-mov $7, $5
+push $5
+pop $7
 mov $7, *$7
 scani $7
 mov *$5, $7
@@ -67,9 +69,10 @@ mov *$5, $7
 // Built-in
 // String
 mov $7, &string1
+push $7
 // End String
 
-mov $7, $7
+pop $7
 write_STRING_1:
 mov $8, 0
 write_STRING_1_LOOP:
@@ -81,14 +84,16 @@ print $10
 add $8, $8, 1
 jump write_STRING_1_LOOP
 write_ENDING_1:
+println 
 // End Built-in
 
 // Built-in
 // String
 mov $7, &string2
+push $7
 // End String
 
-mov $7, $7
+pop $7
 write_STRING_2:
 mov $8, 0
 write_STRING_2_LOOP:
@@ -103,22 +108,32 @@ write_ENDING_2:
 // End Built-in
 
 // Built-in
-mov $7, $5
+push $5
+pop $7
 mov $7, *$7
 println $7
 // End Built-in
 
 // Assign
-mov $7, 5.500000
-mov *$6, $7
+// Var Declare
+mema $7, 2
+mov *$7, 0.000000
+mov $7[1], 2
+//End Var Declare
+
+mov *$7, 5.500000
+push $7
+pop $7
+mov *$6, *$7
 // End Assign
 
 // Built-in
 // String
 mov $7, &string3
+push $7
 // End String
 
-mov $7, $7
+pop $7
 write_STRING_3:
 mov $8, 0
 write_STRING_3_LOOP:
@@ -133,7 +148,8 @@ write_ENDING_3:
 // End Built-in
 
 // Built-in
-mov $7, $6
+push $6
+pop $7
 mov $7, *$7
 println $7
 // End Built-in

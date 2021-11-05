@@ -16,35 +16,35 @@ Para a execução:
 
 ## TODO
 
-- [X] Completar gramática
-- [X] Estrutura de nó
-- [X] Árvore sintática abstrata
-- [X] Tabela de símbolos
-- [X] Lidar com contextos na árvore
-- [X] Escopos
-- [X] Tratamento de erros sintáticos
-- [X] Tratamento de erros semânticos
-- [X] Redeclaração de funções
-- [X] Redeclaração de variáveis
-- [X] Redeclaração de parâmetros
-- [X] Verificar existência de variáveis e funções
-- [X] Verificar existência da main
-- [X] Verificar se a main não possui parâmetros
-- [X] Verificar se a main retorna int
-- [X] Verificar os tipos das variáveis e funções
-- [X] Verificar tipos nas aritméticas
-- [X] Verificar tipo de retorno da função
+- [x] Completar gramática
+- [x] Estrutura de nó
+- [x] Árvore sintática abstrata
+- [x] Tabela de símbolos
+- [x] Lidar com contextos na árvore
+- [x] Escopos
+- [x] Tratamento de erros sintáticos
+- [x] Tratamento de erros semânticos
+- [x] Redeclaração de funções
+- [x] Redeclaração de variáveis
+- [x] Redeclaração de parâmetros
+- [x] Verificar existência de variáveis e funções
+- [x] Verificar existência da main
+- [x] Verificar se a main não possui parâmetros
+- [x] Verificar se a main retorna int
+- [x] Verificar os tipos das variáveis e funções
+- [x] Verificar tipos nas aritméticas
+- [x] Verificar tipo de retorno da função
 - [] Verificar os returns das funções
 - [] Geração de código
-- [X] Operações binárias
-- [X] Impressão de string
-- [X] Declaração de variável
+- [x] Operadores binários aritiméticos
+- [x] Impressão de string
+- [x] Declaração de variável
 - [] Declaração de função
-- [X] Built-in
+- [x] Built-in
 - [] Tipo de lista
 - [] Operadores binários de lista
 - [] Operadores unários de lista
 - [] Operadores unários aritiméticos
 - [] Chamada de função
-- [] return
-- [] variaveis globais
+- [] Return
+- [] Variáveis globais

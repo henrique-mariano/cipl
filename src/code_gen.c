@@ -195,6 +195,11 @@ static void _code_gen(AstNode *node, FILE *fp)
         _code_gen(SECOND_SON(node), fp);
         fprintf(fp, "pop $%d\n", func_ctx->last_temp);
         fprintf(fp, "mov *$%d, *$%d\n", fs_ctx->sym_ref->variable_tac, func_ctx->last_temp);
+        if (SECOND_SON(node)->context->dtype != node->context->dtype)
+        {
+            int cast_to = dtcheck(SECOND_SON(node)->context->dtype, node->context->dtype);
+            fprintf(fp, "%s $%d, $%d\n", cast_to == DTYPE_INT ? "fltoint" : "inttofl", func_ctx->last_temp, func_ctx->last_temp);
+        }
         fprintf(fp, "// End Assign\n\n");
         break;
     }
@@ -338,6 +343,31 @@ static void _code_gen(AstNode *node, FILE *fp)
         fprintf(fp, "mov $%d, &string%d\n", func_ctx->last_temp, node->context->sym_ref->variable_tac);
         fprintf(fp, "push $%d\n", func_ctx->last_temp);
         fprintf(fp, "// End String\n\n");
+        break;
+
+    case AST_EXPR_UNA_ARITH:
+        fprintf(fp, "// Unary Op\n");
+        _code_gen(FIRST_SON(node), fp);
+        fprintf(fp, "pop $%d\n", func_ctx->last_temp + 1);
+
+        switch (node->context->operation[0])
+        {
+        case '-':
+            fprintf(fp, "mov $%d, *$%d\n", func_ctx->last_temp, func_ctx->last_temp + 1);
+            fprintf(fp, "minus $%d, $%d\n", func_ctx->last_temp, func_ctx->last_temp);
+            write_var_declaration(node->context->dtype, func_ctx->last_temp + 2, fp);
+            fprintf(fp, "mov *$%d, $%d\n", func_ctx->last_temp + 2, func_ctx->last_temp);
+            fprintf(fp, "push $%d\n", func_ctx->last_temp + 2);
+            break;
+        case '+':
+            fprintf(fp, "push $%d\n", func_ctx->last_temp + 1);
+            break;
+        default:
+            break;
+        }
+
+        fprintf(fp, "// End Unary Op\n\n");
+
         break;
     default:
         printf(RED "Code gen: Tipo não implementado" RESET " AST_TYPE: %s\n", nome_tipos_ast[node->context->type]);

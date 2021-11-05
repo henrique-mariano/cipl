@@ -1,13 +1,21 @@
 int main() {
     float a;
     int b;
-    read(a);
+    int c;
+    a = 1.0;
     b = 2;
+    write("Escreva o valor de c: ");
+    read(c);
+    writeln(-(+5-2) * 2); // -6
+    writeln(-(1+2) + 5); // 2
     writeln(a + b * b); // 5
     writeln(a - 5); // -4
     writeln(1 + 2.3); // 3.3
     writeln(1.3 / 0.5); // 2.6
     writeln(1.5 * 1.5); // 2.25
     writeln((b * 5 / b - 5) + 3); // 3
+    write("O valor de c eh: ");
+    write(c);
+    writeln("");
     return 0;
 }
